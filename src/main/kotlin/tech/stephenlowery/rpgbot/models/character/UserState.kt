@@ -1,4 +1,4 @@
-package tech.stephenlowery.rpgbot.models
+package tech.stephenlowery.rpgbot.models.character
 
 enum class UserState {
     NONE,
@@ -7,5 +7,6 @@ enum class UserState {
     CHOOSING_ACTION,
     CHOOSING_TARGETS,
     WAITING,
+    INCAPACITATED,
     DEAD
 }

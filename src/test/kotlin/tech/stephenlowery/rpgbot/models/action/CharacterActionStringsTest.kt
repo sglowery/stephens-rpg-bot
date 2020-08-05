@@ -1,5 +1,7 @@
+package tech.stephenlowery.rpgbot.models.action
+
 import org.junit.Test
-import tech.stephenlowery.rpgbot.models.*
+import tech.stephenlowery.rpgbot.models.character.RPGCharacter
 import kotlin.test.assertEquals
 
 class CharacterActionStringsTest {
@@ -8,7 +10,7 @@ class CharacterActionStringsTest {
     fun `formatFromEffectResult() replaces text markers with information in an EffectResult`() {
         val source = RPGCharacter(1L, "Stephen")
         val target = RPGCharacter(2L, "Ashley")
-        val effectResult = EffectResult(source = source, target = target, value = 5, text = "an effect")
+        val effectResult = EffectResult(source = source, target = target, value = 5, other = "an effect")
         assertEquals(
             expected = "Stephen uses an effect on Ashley 5 times",
             actual = "{source} uses {other} on {target} {value} times".formatFromEffectResult(effectResult)

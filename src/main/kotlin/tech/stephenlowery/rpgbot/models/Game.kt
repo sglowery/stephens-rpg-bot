@@ -1,5 +1,9 @@
 package tech.stephenlowery.rpgbot.models
 
+import tech.stephenlowery.rpgbot.models.action.QueuedCharacterAction
+import tech.stephenlowery.rpgbot.models.character.RPGCharacter
+import tech.stephenlowery.rpgbot.models.character.UserState
+
 class Game(val id: Long, initiator: RPGCharacter) {
 
     val playerList = mutableListOf<RPGCharacter>()
@@ -13,46 +17,44 @@ class Game(val id: Long, initiator: RPGCharacter) {
     }
 
     fun queueActionFromCharacter(callbackData: String, userID: Long): UserState {
-        val character = getPlayerWithID(userID)
+        val character = playerList.find { it.userID == userID }!!
         val queuedAction = character.chooseAction(callbackData)
         actionQueue.add(queuedAction)
         return character.characterState
     }
 
-    fun addTargetToQueuedCharacterAction(from: Long, to: Long): UserState {
-        val fromCharacter = getPlayerWithID(from)
-        val toCharacter = getPlayerWithID(to)
-        val newCharacterState = fromCharacter.addTargetToAction(toCharacter)
-        return newCharacterState
+    fun addTargetToQueuedCharacterAction(from: Long, to: Long) {
+        val fromCharacter = getCharacterFromUserID(from)
+        val toCharacter = getCharacterFromUserID(to)
+        fromCharacter.addTargetToAction(toCharacter)
     }
 
-    fun getPlayerWithID(userID: Long): RPGCharacter = playerList.find { it.userID == userID }!!
+    fun getCharacterFromUserID(userID: Long): RPGCharacter = playerList.find { it.userID == userID }!!
 
     fun playerInGame(userID: Long): Boolean = playerList.any { it.userID == userID }
 
+    fun allPlayersWaiting(): Boolean = waitingOn().isEmpty()
+
+    fun waitingOn(): List<RPGCharacter> = livingPlayers().filter { it.characterState == UserState.CHOOSING_ACTION || it.characterState == UserState.CHOOSING_TARGETS }
+
     fun livingPlayers(): List<RPGCharacter> = playerList.filter { it.isAlive() }
 
-    fun waitingOn(): List<RPGCharacter> =
-        playerList.filter { it.characterState == UserState.CHOOSING_ACTION || it.characterState == UserState.CHOOSING_TARGETS }
-
-    fun allPlayersWaiting(): Boolean = waitingOn().isEmpty()
+    fun deadPlayers(): List<RPGCharacter> = playerList.filter { !it.isAlive() }
 
     fun resolveActions(): String {
         val results = actionQueue.map { it.cycleAndResolve() }.toMutableList()
         actionQueue.removeIf { it.isExpired() }
-        playerList.forEach {
-            if (it.getHealth() <= 0) {
-                results.add("${it.name} died! They will be removed from the game")
-                it.characterState = UserState.DEAD
-                actionQueue.forEach { action -> action.targets.removeIf { target -> target.userID == it.userID } }
+        playerList.forEach { player ->
+            if (player.getActualHealth() <= 0) {
+                results.add("${player.name} died! They will be removed from the game")
+                player.characterState = UserState.DEAD
             } else {
-                it.characterState = UserState.CHOOSING_ACTION
-                it.clearQueuedAction()
-                it.cycleAttributeModifiers()
-                it.cycleCooldowns()
+                player.characterState = UserState.CHOOSING_ACTION
+                player.clearQueuedAction()
+                player.cycleAttributeModifiers()
+                player.cycleCooldowns()
             }
         }
-//        playerList.removeIf { it.characterState == UserState.DEAD }
         turnCounter += 1
         return (listOf("*----Turn ${turnCounter} results----*", results.joinToString("\n\n"))).joinToString("\n\n")
     }
@@ -65,5 +67,4 @@ class Game(val id: Long, initiator: RPGCharacter) {
             }
         }
     }
-
 }

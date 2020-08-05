@@ -1,15 +1,15 @@
 package tech.stephenlowery.rpgbot
 
-import me.ivmg.telegram.Bot
-import me.ivmg.telegram.bot
-import me.ivmg.telegram.dispatch
-import me.ivmg.telegram.dispatcher.callbackQuery
-import me.ivmg.telegram.dispatcher.command
-import me.ivmg.telegram.entities.*
-import tech.stephenlowery.rpgbot.models.CharacterAction
+import com.github.kotlintelegrambot.Bot
+import com.github.kotlintelegrambot.bot
+import com.github.kotlintelegrambot.dispatch
+import com.github.kotlintelegrambot.dispatcher.callbackQuery
+import com.github.kotlintelegrambot.dispatcher.command
+import com.github.kotlintelegrambot.entities.*
 import tech.stephenlowery.rpgbot.models.Game
-import tech.stephenlowery.rpgbot.models.RPGCharacter
-import tech.stephenlowery.rpgbot.models.UserState
+import tech.stephenlowery.rpgbot.models.action.CharacterAction
+import tech.stephenlowery.rpgbot.models.character.RPGCharacter
+import tech.stephenlowery.rpgbot.models.character.UserState
 
 
 class RPGBot(val telegramBotToken: String) {
@@ -31,6 +31,7 @@ class RPGBot(val telegramBotToken: String) {
                 command("join", ::joinGameCommand)
                 command("start", ::startGameCommand)
                 command("stats", ::characterStatsCommand)
+                command("calltoarms", ::waitingOnCommand)
                 callbackQuery { bot: Bot, update: Update ->
                     val callbackType = update.callbackQuery!!.data.split("|")
                     when (callbackType[0]) {
@@ -50,14 +51,14 @@ class RPGBot(val telegramBotToken: String) {
         val from = message.from!!
         val userID = from.id
         var replyToMessageId: Long? = null
-        if (characters.containsKey(userID)) {
+        if (characterFromUserExists(userID)) {
             finalResponse = "You already have a character. Deal with it"
         } else if (message.chat.type == "private") {
             val newCharacter = RPGCharacter(userID, from.firstName)
             characters[userID] = newCharacter
-            finalResponse = "Here's your new character, take it or leave it lol:\n${newCharacter}"
+            finalResponse = "Here's your new character, take it or leave it lol:\n${newCharacter.getCharacterSummaryText()}"
         } else {
-            finalResponse = "Let's take this somewhere more private, sweatie (;"
+            finalResponse = "Let's take this somewhere more private, sweatie (; Use the command in a private chat between us"
             replyToMessageId = message.messageId
         }
         bot.sendMessage(chatID, finalResponse, replyToMessageId = replyToMessageId)
@@ -74,7 +75,7 @@ class RPGBot(val telegramBotToken: String) {
         if (message.chat.type == "private") {
             response = "You can't start a game in here silly goose"
         } else if (game != null) {
-            response = if (game.gameStarted) "The game's already started. You're too late" else "There's already a game created. Fucking chill"
+            response = if (game.gameStarted) "The game's already started. You're too late" else "There's already a game created. Chill"
         } else if (userCharacter == null) {
             replyToMessageId = message.messageId
             response = "You need to make a character first. Talk to me in a private chat and use /newcharacter"
@@ -94,8 +95,9 @@ class RPGBot(val telegramBotToken: String) {
         val game = games[chatID]
         if (message.chat.type == "private") {
             bot.sendMessage(chatID, "Ain't no game in here, kid", replyToMessageId = replyToMessageId)
-        } else if (!characters.containsKey(userID)) {
-            bot.sendMessage(chatID,
+        } else if (!characterFromUserExists(userID)) {
+            bot.sendMessage(
+                chatID,
                 "You need to make a character before you can join a game.\n\n" +
                         "Open a private chat with me and type /newcharacter",
                 replyToMessageId = replyToMessageId
@@ -122,24 +124,39 @@ class RPGBot(val telegramBotToken: String) {
         val game: Game? = games[chatID]
         val messageId = message.messageId
         if (message.chat.type == "private") {
-            bot.sendMessage(chatID, "You can't start a game in here. Really. You can't")
-        } else if (!characters.containsKey(userID)) {
-            bot.sendMessage(chatID,
+            bot.sendMessage(
+                chatID, """
+                **RPGBot Pre-pre-pre-alpha**
+                Source code available on GitHub: https://github.com/sglowery/stephens-rpg-bot
+                
+                /newcharacter -- Generates a new character, only usable in a private chat
+                /newgame -- Creates a new game for others to join
+                /join -- Joins a game that hasn't started yet
+                /stats -- Display your character's stats
+                /start -- In a private chat, display this text. In a group chat, initiates a game as long as it has at least two players
+            """.trimIndent(), parseMode = ParseMode.MARKDOWN
+            )
+        } else if (!characterFromUserExists(userID)) {
+            bot.sendMessage(
+                chatID,
                 "You need to make a character first. Talk to me in a private chat and use /newcharacter",
                 replyToMessageId = messageId
             )
         } else if (game == null) {
-            bot.sendMessage(chatID,
+            bot.sendMessage(
+                chatID,
                 "No one has started a game yet. Start one with /newgame",
                 replyToMessageId = messageId
             )
         } else if (!game.playerInGame(userID)) {
-            bot.sendMessage(chatID,
+            bot.sendMessage(
+                chatID,
                 "You need to join the game with /join",
                 replyToMessageId = messageId
             )
         } else if (game.playerList.size == 1) {
-            bot.sendMessage(chatID,
+            bot.sendMessage(
+                chatID,
                 "Do you really want to play with yourself in front of all your friends? Didn't think so. Unless...?",
                 replyToMessageId = messageId
             )
@@ -150,6 +167,8 @@ class RPGBot(val telegramBotToken: String) {
         }
     }
 
+    private fun characterFromUserExists(userID: Long) = characters.containsKey(userID)
+
     private fun characterStatsCommand(bot: Bot, update: Update) {
         val message = update.message!!
         bot.sendMessage(
@@ -159,12 +178,23 @@ class RPGBot(val telegramBotToken: String) {
         )
     }
 
+    private fun waitingOnCommand(bot: Bot, update: Update) {
+        val chatID = update.message!!.chat.id
+        val game = games[chatID]
+        if (update.message!!.chat.type == "group" && game != null) {
+            val waitingOn = game.waitingOn()
+            if (waitingOn.size > 0) {
+                val names = waitingOn.map { it.name }.joinToString(", ")
+                bot.sendMessage(chatID, "Waiting on the following player(s): ${names}")
+            }
+        }
+    }
+
     private fun sendPlayersInGameActions(bot: Bot, chatID: Long) {
         games[chatID]?.livingPlayers()?.forEach {
             val keyboard = makeKeyboardFromPlayerActions(it.getAvailableActions())
             val replyMarkup = InlineKeyboardMarkup(keyboard)
-            val characterStatus = it.getCharacterStatusText()
-            bot.sendMessage(it.userID, characterStatus + "\n\nPick an action", replyMarkup = replyMarkup)
+            bot.sendMessage(it.userID, it.getPreActionText() + "\n\nPick an action", replyMarkup = replyMarkup)
         }
     }
 
@@ -178,7 +208,8 @@ class RPGBot(val telegramBotToken: String) {
                 val callbackData = callbackQuery.data
                 val newCharacterState = game.queueActionFromCharacter(callbackData, userID)
                 if (newCharacterState == UserState.WAITING) {
-                    bot.editMessageText(userID,
+                    bot.editMessageText(
+                        userID,
                         callbackQuery.message!!.messageId,
                         null,
                         userCharacter.queuedAction!!.getQueuedText()
@@ -190,17 +221,24 @@ class RPGBot(val telegramBotToken: String) {
                 if (game.allPlayersWaiting()) {
                     resolveActionsInGame(bot, game)
                 }
-            } else {
+            }
+            else {
                 bot.sendMessage(userID, "Can you stop trying to break the game? Just press the button once. Thanks", replyMarkup = ReplyKeyboardRemove())
             }
+        } else {
+            bot.deleteMessage(
+                userID,
+                callbackQuery.message!!.messageId
+            )
         }
     }
 
     private fun sendTargetsToPlayer(bot: Bot, game: Game, character: RPGCharacter, previousMessageID: Long) {
-        bot.editMessageText(character.userID,
+        bot.editMessageText(
+            character.userID,
             previousMessageID,
             null,
-            "Choose a target",
+            character.getPreActionText() + "\n\nChoose a target",
             replyMarkup = InlineKeyboardMarkup(makeKeyboardFromPlayerNames(game.playerList.filter { it.userID != character.userID }))
         )
     }
@@ -210,55 +248,57 @@ class RPGBot(val telegramBotToken: String) {
         val userID = callbackQuery.from.id
         val game = games.findGameWithPlayer(userID)
         val fromCharacter = characters[userID]
-        if (game != null && fromCharacter != null) {
-            if (fromCharacter.characterState == UserState.CHOOSING_TARGETS) {
-                val target = callbackQuery.data.split("|")[1].toLong()
-                val resolvedCharacterState = game.addTargetToQueuedCharacterAction(userID, target)
-                if (resolvedCharacterState == UserState.WAITING) {
-                    bot.editMessageText(userID,
-                        callbackQuery.message!!.messageId,
-                        null,
-                        "When everyone is done, you'll use ${fromCharacter.queuedAction!!.action.displayName} " +
-                                "on ${fromCharacter.queuedAction!!.targets.map { it.name }.joinToString(", ")}"
-                    )
-                } else {
-                    sendTargetsToPlayer(bot, game, characters[userID]!!, callbackQuery.message!!.messageId)
-                }
-
-                if (game.allPlayersWaiting()) {
-                    resolveActionsInGame(bot, game)
-                }
-            } else {
-                bot.sendMessage(fromCharacter.userID, "Yes, you're very clever trying to mash the button. Stop.")
+        if (game != null && fromCharacter != null && fromCharacter.characterState == UserState.CHOOSING_TARGETS) {
+            val target = callbackQuery.data.split("|")[1].toLong()
+            game.addTargetToQueuedCharacterAction(userID, target)
+            bot.editMessageText(
+                userID,
+                callbackQuery.message!!.messageId,
+                null,
+                fromCharacter.queuedAction!!.getQueuedText()
+            )
+            if (game.allPlayersWaiting()) {
+                resolveActionsInGame(bot, game)
             }
         }
     }
 
     private fun resolveActionsInGame(bot: Bot, game: Game) {
         val resolvedActionsText = game.resolveActions()
-        game.playerList.forEach { player ->
-            bot.sendMessage(player.userID, resolvedActionsText, replyMarkup = ReplyKeyboardRemove(), parseMode = ParseMode.MARKDOWN)
+        bot.sendMessage(game.id, resolvedActionsText, replyMarkup = ReplyKeyboardRemove(), parseMode = ParseMode.MARKDOWN)
+        game.deadPlayers().forEach { player ->
             if (!player.isAlive()) {
-                bot.sendMessage(player.userID, "You died in the previous round and have been removed from the game. You must wait for it to finish to join")
+                bot.sendMessage(player.userID, "You died in the previous round and have been removed from the game.")
             }
         }
+        game.playerList.removeAll(game.deadPlayers())
         val livingPlayers = game.livingPlayers()
-        if (livingPlayers.size == 1) {
-            bot.sendMessage(game.id, "${livingPlayers.first().name} wins!")
-            games.remove(game.id)
-        } else if (livingPlayers.size > 1) {
+        if (livingPlayers.size > 1) {
             sendPlayersInGameActions(bot, game.id)
         } else {
-            bot.sendMessage(game.id, "Uh, well, I guess the remaining people died at the same time or something. Ok")
+            bot.sendMessage(
+                game.id,
+                getGameEndedText(game)
+            )
+            characters.minusAssign(game.playerList.map(RPGCharacter::userID))
             games.remove(game.id)
         }
     }
 
-    private fun makeKeyboardFromPlayerActions(actions: List<CharacterAction>): List<List<InlineKeyboardButton>> {
-        return actions.map { InlineKeyboardButton(it.displayName, callbackData = it.callbackText) }.chunked(2)
+    private fun getGameEndedText(game: Game): String {
+        val livingPlayers = game.livingPlayers()
+        return when (livingPlayers.size) {
+            1 -> "${livingPlayers.first().name} wins!"
+            0 -> "Uh, well, I guess the remaining people died at the same time or something. Ok"
+            else -> "Uh oh, this shouldn't happen"
+        }
     }
 
     private fun makeKeyboardFromPlayerNames(characters: List<RPGCharacter>): List<List<InlineKeyboardButton>> {
         return characters.map { InlineKeyboardButton(it.getNameAndHealthPercentLabel(), callbackData = "target|${it.userID}") }.chunked(2)
+    }
+
+    private fun makeKeyboardFromPlayerActions(actions: List<CharacterAction>): List<List<InlineKeyboardButton>> {
+        return actions.map { InlineKeyboardButton(it.displayName, callbackData = it.callbackText) }.chunked(2)
     }
 }
