@@ -65,13 +65,26 @@ class RPGCharacter(val userID: Long, val name: String) {
     fun getUnfilteredActions(): List<CharacterAction> {
         val actionList = mutableListOf<CharacterAction>()
         actionList.apply {
-            add(if (power.value() < 7) CharacterActionAssets.PatheticSlap else (if (power.value() < 14) CharacterActionAssets.GenericAttack else CharacterActionAssets.Punch))
-            add(CharacterActionAssets.GenericSelfDefend)
-            add(CharacterActionAssets.SelfHeal)
-            add(CharacterActionAssets.NoxiousFart)
-            if (health.base < 100) add(CharacterActionAssets.LifeSteal)
-            if (health.base > 150) add(CharacterActionAssets.LifeSwap)
-            if (defense.value() > 12 && power.value() < 8) add(CharacterActionAssets.SuperDefend)
+//            add(if (power.value() < 7) CharacterActionAssets.PatheticSlap else (if (power.value() < 12) CharacterActionAssets.GenericAttack else CharacterActionAssets.Punch))
+//            add(CharacterActionAssets.GenericSelfDefend)
+//            add(CharacterActionAssets.SelfHeal)
+//            add(CharacterActionAssets.NoxiousFart)
+            addAll(
+                listOf(
+                    CharacterActionAssets.GenericAttack,
+                    CharacterActionAssets.GenericSelfDefend,
+                    CharacterActionAssets.PatheticSlap,
+                    CharacterActionAssets.SelfHeal,
+                    CharacterActionAssets.Punch,
+                    CharacterActionAssets.SuperDefend,
+                    CharacterActionAssets.LifeSteal,
+                    CharacterActionAssets.LifeSwap,
+                    CharacterActionAssets.NoxiousFart
+                )
+            )
+//            if (health.base < 100) add(CharacterActionAssets.LifeSteal)
+//            if (health.base > 130) add(CharacterActionAssets.LifeSwap)
+//            if (defense.value() > 12 && power.value() < 8) add(CharacterActionAssets.SuperDefend)
         }
         return actionList
     }
@@ -86,7 +99,9 @@ class RPGCharacter(val userID: Long, val name: String) {
         if (newQueuedCharacterAction.action.targetingType == TargetingType.SELF) {
             newQueuedCharacterAction.target = this
         }
-        cooldowns[newQueuedCharacterAction.action.callbackText] = newQueuedCharacterAction.action.cooldown
+        if (newQueuedCharacterAction.action.cooldown > 0) {
+            cooldowns[newQueuedCharacterAction.action.callbackText] = newQueuedCharacterAction.action.cooldown
+        }
         characterState = if (newQueuedCharacterAction.action.targetingType != TargetingType.SELF) UserState.CHOOSING_TARGETS else UserState.WAITING
         return newQueuedCharacterAction
     }

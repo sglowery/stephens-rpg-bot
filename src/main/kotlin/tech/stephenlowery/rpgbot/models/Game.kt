@@ -45,7 +45,7 @@ class Game(val id: Long, initiator: RPGCharacter) {
         val results = actionQueue.map { it.cycleAndResolve() }.toMutableList()
         actionQueue.removeIf { it.isExpired() }
         playerList.forEach { player ->
-            if (player.getActualHealth() <= 0) {
+            if (player.getActualHealth() <= 0 && player.characterState != UserState.DEAD) {
                 results.add("${player.name} died! They will be removed from the game")
                 player.characterState = UserState.DEAD
             } else {

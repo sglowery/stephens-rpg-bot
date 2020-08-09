@@ -184,8 +184,8 @@ class RPGBot(val telegramBotToken: String) {
         if (update.message!!.chat.type == "group" && game != null) {
             val waitingOn = game.waitingOn()
             if (waitingOn.size > 0) {
-                val names = waitingOn.map { it.name }.joinToString(", ")
-                bot.sendMessage(chatID, "Waiting on the following player(s): ${names}")
+                val names = waitingOn.map { "[${it.name}](tg://user?id=${it.userID})" }.joinToString(", ")
+                bot.sendMessage(chatID, "Waiting on the following player(s): ${names}", parseMode = ParseMode.MARKDOWN)
             }
         }
     }
@@ -239,7 +239,7 @@ class RPGBot(val telegramBotToken: String) {
             previousMessageID,
             null,
             character.getPreActionText() + "\n\nChoose a target",
-            replyMarkup = InlineKeyboardMarkup(makeKeyboardFromPlayerNames(game.playerList.filter { it.userID != character.userID }))
+            replyMarkup = InlineKeyboardMarkup(makeKeyboardFromPlayerNames(game.livingPlayers().filter { it.userID != character.userID }))
         )
     }
 

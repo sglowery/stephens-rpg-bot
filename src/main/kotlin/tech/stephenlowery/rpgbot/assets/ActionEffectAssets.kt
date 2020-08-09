@@ -6,7 +6,7 @@ import tech.stephenlowery.rpgbot.models.GameConstants.Companion.BASE_HIT_CHANCE
 import tech.stephenlowery.rpgbot.models.GameConstants.Companion.CRIT_DAMAGE_PRECISION_SCALAR
 import tech.stephenlowery.rpgbot.models.GameConstants.Companion.DEFENSE_DAMAGE_REDUCTION_FACTOR
 import tech.stephenlowery.rpgbot.models.GameConstants.Companion.DEFENSE_HIT_CHANCE_REDUCTION_FACTOR
-import tech.stephenlowery.rpgbot.models.GameConstants.Companion.HEALING_VALUE_SCALING
+import tech.stephenlowery.rpgbot.models.GameConstants.Companion.HEALING_SCALING_FROM_POWER_DEFENSE_SCALAR
 import tech.stephenlowery.rpgbot.models.GameConstants.Companion.HIT_CHANCE_PRECISION_SCALING
 import tech.stephenlowery.rpgbot.models.GameConstants.Companion.POWER_SCALING
 import tech.stephenlowery.rpgbot.models.action.ActionEffect
@@ -50,7 +50,7 @@ class HealEffect(private val min: Int, private val max: Int) : ActionEffect() {
         val critChance = BASE_CRIT_CHANCE + from.precision.value()
         val critHealingMultiplier = BASE_CRIT_DAMAGE_MULTIPLIER + from.precision.value() * CRIT_DAMAGE_PRECISION_SCALAR
         val isCrit = Random.nextInt(100) < critChance
-        val baseHealing = Random.nextInt(min, max + 1) + (from.defense.value() + from.power.value()) / 2 * HEALING_VALUE_SCALING
+        val baseHealing = Random.nextInt(min, max + 1) + (from.defense.value() + from.power.value()) / 2 * HEALING_SCALING_FROM_POWER_DEFENSE_SCALAR
         val totalHealing = (baseHealing * (if (isCrit) critHealingMultiplier else 1.0)).toInt().also { healing -> to.damage.addAdditiveMod(-healing.toDouble()) }
         return listOf(
             EffectResult(

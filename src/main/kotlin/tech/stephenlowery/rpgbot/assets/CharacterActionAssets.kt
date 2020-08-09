@@ -16,7 +16,8 @@ class CharacterActionAssets {
                     queuedText = "You ready yourself for a generic attack",
                     actionText = "{source} generically attacks {target}!",
                     successText = "It connects and {target} generically receives {value} damage",
-                    missedText = "The attack misses in a pretty generic way"
+                    missedText = "The attack misses in a pretty generic way",
+                    critText = "The generic attack is somehow more generically powerful and does a YUGE {value} damage to {target}"
                 )
             )
 
@@ -101,7 +102,8 @@ class CharacterActionAssets {
                     queuedText = "You prepare to leech the life from {target}",
                     actionText = "A red glow surrounds {target} as {source} tries to sap the life out of them!",
                     missedText = "{target} breaks free from {source}'s grasp and their spell fails!",
-                    successText = "{target} is drained for {value} damage, and {source} feels refreshed, healing for {other}"
+                    successText = "{target} is drained for {value} damage, and {source} feels refreshed, healing for {other}",
+                    critText = "{target} is drained for {value} damage, and {source} feels refreshed, healing for {other}"
                 )
             )
 
