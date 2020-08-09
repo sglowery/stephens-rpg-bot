@@ -10,9 +10,9 @@ class QueuedCharacterAction(
 
     var target: RPGCharacter? = null
 
-    fun cycleAndResolve(): String = action.resolveEffects(from, target!!, cycle).also { cycle += 1 }
+    fun cycleAndResolve(): String? = action.resolveEffects(from, target!!, cycle).also { cycle += 1 }
 
-    fun isExpired(): Boolean = action.isExpired(cycle) || (action.lastActionResults?.get(0)?.miss ?: false)
+    fun isExpired(): Boolean = action.isExpired(cycle) || (action.lastActionResult?.miss ?: false)
 
     fun getQueuedText(): String {
         return action.strings.queuedText.formatFromEffectResult(EffectResult(source = from, target = target))

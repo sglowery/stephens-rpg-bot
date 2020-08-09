@@ -42,7 +42,7 @@ class Game(val id: Long, initiator: RPGCharacter) {
     fun deadPlayers(): List<RPGCharacter> = playerList.filter { !it.isAlive() }
 
     fun resolveActions(): String {
-        val results = actionQueue.map { it.cycleAndResolve() }.toMutableList()
+        val results = actionQueue.shuffled().map { it.cycleAndResolve() }.filterNotNull().toMutableList()
         actionQueue.removeIf { it.isExpired() }
         playerList.forEach { player ->
             if (player.getActualHealth() <= 0 && player.characterState != UserState.DEAD) {

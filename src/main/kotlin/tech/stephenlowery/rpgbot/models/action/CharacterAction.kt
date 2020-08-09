@@ -3,7 +3,7 @@ package tech.stephenlowery.rpgbot.models.action
 import tech.stephenlowery.rpgbot.models.character.RPGCharacter
 
 class CharacterAction(
-    val effects: List<ActionEffect>,
+    val effect: ActionEffect,
     val displayName: String,
     val callbackText: String,
     val description: String,
@@ -14,21 +14,14 @@ class CharacterAction(
     val duration: Int = 0
 ) {
 
-    var lastActionResults: List<EffectResult>? = null
+    var lastActionResult: EffectResult? = null
 
-    fun resolveEffects(from: RPGCharacter, target: RPGCharacter, cycle: Int): String {
-        return getUnexpiredEffects(cycle).map { effect ->
-            val results = effect.resolve(from, target, cycle)
-            lastActionResults = results
-            return results.map { result ->
-                return strings.getFormattedEffectResultString(result)
-            }.joinToString("\n")
-        }.joinToString("\n")
+    fun resolveEffects(from: RPGCharacter, target: RPGCharacter, cycle: Int): String? {
+        return effect.takeIf { !it.isExpired(cycle) }
+            ?.resolve(from, target, cycle)
+            ?.also { lastActionResult = it }
+            ?.let { strings.getFormattedEffectResultString(it) }
     }
 
-    fun isExpired(cycle: Int): Boolean = allEffectsExpired(cycle) && cycle >= duration
-
-    fun getUnexpiredEffects(cycle: Int): List<ActionEffect> = effects.filter { !it.isExpired(cycle) }
-
-    fun allEffectsExpired(cycle: Int): Boolean = getUnexpiredEffects(cycle).isEmpty()
+    fun isExpired(cycle: Int): Boolean = effect.isExpired(cycle) && cycle >= duration
 }

@@ -1,26 +1,22 @@
 package tech.stephenlowery.rpgbot.models.character
 
 import org.junit.Test
-import tech.stephenlowery.rpgbot.models.action.EffectResult
-import tech.stephenlowery.rpgbot.models.action.ActionEffect
-import tech.stephenlowery.rpgbot.models.action.CharacterAction
-import tech.stephenlowery.rpgbot.models.action.CharacterActionStrings
-import tech.stephenlowery.rpgbot.models.action.TargetingType
+import tech.stephenlowery.rpgbot.models.action.*
 import kotlin.test.assertEquals
 
 class RPGCharacterTest {
 
     class TestEffectNeverMisses : ActionEffect() {
-        override fun resolve(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
+        override fun resolve(from: RPGCharacter, to: RPGCharacter, cycle: Int): EffectResult {
             to.damage.additiveModifiers.add(AttributeModifier(value = 2.0, duration = -1))
-            return listOf(EffectResult(source = from, target = to, value = 2, miss = false))
+            return EffectResult(source = from, target = to, value = 2, miss = false)
         }
     }
 
     val character1 = RPGCharacter(1L, "Stephen").apply { power.base = 10.0 }
 
     val testActionWithCooldown = CharacterAction(
-        listOf(TestEffectNeverMisses()),
+        TestEffectNeverMisses(),
         "Always Crit",
         "action|alwayscrit",
         "",

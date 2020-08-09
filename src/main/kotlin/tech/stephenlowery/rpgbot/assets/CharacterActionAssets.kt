@@ -9,7 +9,7 @@ class CharacterActionAssets {
     companion object {
         val GenericAttack: CharacterAction
             get() = CharacterAction(
-                listOf(DamageHealthEffect(8, 17)), "Attack", "action|attack",
+                DamageHealthEffect(8, 17), "Attack", "action|attack",
                 "A generic attack that does a little damage because that's how I programmed it, bitch",
                 TargetingType.SINGLE,
                 CharacterActionStrings(
@@ -23,7 +23,7 @@ class CharacterActionAssets {
 
         val GenericSelfDefend: CharacterAction
             get() = CharacterAction(
-                listOf(DefendEffect(50)), "Defend", "action|defend",
+                DefendEffect(50), "Defend", "action|defend",
                 "Temporarily boost your defense for the duration of the round. Best used before you're attacked, obviously",
                 TargetingType.SELF,
                 CharacterActionStrings(
@@ -34,7 +34,7 @@ class CharacterActionAssets {
 
         val SuperDefend: CharacterAction
             get() = CharacterAction(
-                listOf(DefendEffect(80)), "Super Defend", "action|superdefend",
+                DefendEffect(80), "Super Defend", "action|superdefend",
                 "Temporarily gives a significant defensive boost with a long cooldown",
                 TargetingType.SELF,
                 CharacterActionStrings(
@@ -46,7 +46,7 @@ class CharacterActionAssets {
 
         val SelfHeal: CharacterAction
             get() = CharacterAction(
-                listOf(HealEffect(9, 23)), "Heal", "action|heal",
+                HealEffect(9, 23), "Heal", "action|heal",
                 "A weak spell that heals you for a little. Cooldown of three turns",
                 TargetingType.SELF,
                 CharacterActionStrings(
@@ -60,7 +60,7 @@ class CharacterActionAssets {
 
         val PatheticSlap: CharacterAction
             get() = CharacterAction(
-                listOf(DamageHealthEffect(5, 14)), "Pathetic Slap", "action|patheticslap",
+               DamageHealthEffect(5, 14), "Pathetic Slap", "action|patheticslap",
                 "A bitch-ass slap for a bitch-ass person",
                 TargetingType.SINGLE,
                 CharacterActionStrings(
@@ -74,7 +74,7 @@ class CharacterActionAssets {
 
         val NoxiousFart: CharacterAction
             get() = CharacterAction(
-                effects = listOf(DamageHealthEffect(8, 13)),
+                effect = DamageHealthEffect(8, 13),
                 displayName = "Noxious Fart",
                 callbackText = "action|fart",
                 description = "Releases a horrifying cloud of gas that deals damage over time",
@@ -92,7 +92,7 @@ class CharacterActionAssets {
 
         val LifeSteal: CharacterAction
             get() = CharacterAction(
-                effects = listOf(VampirismEffect(0.8, DamageHealthEffect(11, 25))),
+                effect = VampirismEffect(0.8, DamageHealthEffect(11, 25)),
                 displayName = "Life Steal",
                 callbackText = "action|lifesteal",
                 description = "You deal damage to a target and heal yourself for a proportion of the damage",
@@ -109,7 +109,7 @@ class CharacterActionAssets {
 
         val LifeSwap: CharacterAction
             get() = CharacterAction(
-                effects = listOf(SwapStatsEffect(1, RPGCharacter::health)),
+                effect = SwapStatsEffect(1, RPGCharacter::health),
                 displayName = "Life Swap",
                 targetingType = TargetingType.SINGLE,
                 cooldown = 6,
@@ -125,7 +125,7 @@ class CharacterActionAssets {
 
         val Punch: CharacterAction
             get() = CharacterAction(
-                effects = listOf(DamageHealthEffect(9, 19)),
+                effect = DamageHealthEffect(9, 19),
                 displayName = "Punch",
                 callbackText = "action|punch",
                 targetingType = TargetingType.SINGLE,
