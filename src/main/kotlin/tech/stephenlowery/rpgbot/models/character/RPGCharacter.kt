@@ -140,7 +140,7 @@ class RPGCharacter(val userID: Long, val name: String) {
                 getListOfAttributes().map { "${it.name}: ${it.value()}" }.joinToString("\n")
     }
 
-    fun getPreActionText(): String = getCharacterStatusText() + "\n\n" + getUnavailableAbilitiesText()
+    fun getPreActionText(): String = getCharacterStatusText() + (if (cooldowns.isNotEmpty()) "\n\n" + getUnavailableAbilitiesText() else "")
 
     fun getCharacterStatusText(): String {
         return "Your current stats:\n" +
@@ -152,7 +152,7 @@ class RPGCharacter(val userID: Long, val name: String) {
 
     fun getUnavailableAbilitiesText(): String {
         return "The following abilities are on cooldown:\n" + getAbilitiesOnCooldown().map { ability ->
-            return "${ability.displayName} (${cooldowns[ability.callbackText]} turn(s) remaining)"
+            "${ability.displayName} (${cooldowns[ability.callbackText]} turn(s) remaining)"
         }.joinToString("\n")
     }
 
