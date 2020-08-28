@@ -12,6 +12,3 @@ open class ActionEffect(open val duration: Int = 1) {
 
     fun isPermanent(): Boolean = duration == -1
 }
-
-fun Double.clampToPositive(): Double = this.coerceAtLeast(0.0)
-fun Int.clampToPositive(): Int = this.coerceAtLeast(0)

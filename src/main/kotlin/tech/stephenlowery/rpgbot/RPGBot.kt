@@ -174,7 +174,7 @@ class RPGBot(val telegramBotToken: String) {
         bot.sendMessage(
             chatId = message.chat.id,
             replyToMessageId = message.messageId,
-            text = characters.get(message.from!!.id)?.getCharacterStatusText() ?: "You don't have a character, silly goose. Open a private chat with me and use the /newcharacter command"
+            text = characters[message.from!!.id]?.getCharacterStatusText() ?: "You don't have a character, silly goose. Open a private chat with me and use the /newcharacter command"
         )
     }
 
@@ -183,9 +183,9 @@ class RPGBot(val telegramBotToken: String) {
         val game = games[chatID]
         if (update.message!!.chat.type == "group" && game != null) {
             val waitingOn = game.waitingOn()
-            if (waitingOn.size > 0) {
-                val names = waitingOn.map { "[${it.name}](tg://user?id=${it.userID})" }.joinToString(", ")
-                bot.sendMessage(chatID, "Waiting on the following player(s): ${names}", parseMode = ParseMode.MARKDOWN)
+            if (waitingOn.isNotEmpty()) {
+                val names = waitingOn.joinToString(", ") { "[${it.name}](tg://user?id=${it.userID})" }
+                bot.sendMessage(chatID, "Waiting on the following player(s): $names", parseMode = ParseMode.MARKDOWN)
             }
         }
     }

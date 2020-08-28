@@ -9,7 +9,6 @@ class CharacterAction(
     val description: String,
     val targetingType: TargetingType,
     val strings: CharacterActionStrings,
-    val maxTargets: Int = 1,
     val cooldown: Int = 0,
     val duration: Int = 0
 ) {

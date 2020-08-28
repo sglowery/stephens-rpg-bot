@@ -128,7 +128,7 @@ class RPGCharacter(val userID: Long, val name: String) {
         cooldowns.entries.removeIf { it.value <= 0 }
     }
 
-    fun getNameAndHealthPercentLabel(): String = "${name} (${getHealthPercent()}%)"
+    fun getNameAndHealthPercentLabel(): String = "$name (${getHealthPercent()}%)"
 
     fun getAbilitiesOnCooldown() = getUnfilteredActions().filter { cooldowns.containsKey(it.callbackText) }
 
@@ -137,7 +137,7 @@ class RPGCharacter(val userID: Long, val name: String) {
     override fun toString(): String {
         return "Name: ${name}\n" +
                 "User ID: ${userID}\n" +
-                getListOfAttributes().map { "${it.name}: ${it.value()}" }.joinToString("\n")
+                getListOfAttributes().joinToString("\n") { "${it.name}: ${it.value()}" }
     }
 
     fun getPreActionText(): String = getCharacterStatusText() + (if (cooldowns.isNotEmpty()) "\n\n" + getUnavailableAbilitiesText() else "")
@@ -151,14 +151,14 @@ class RPGCharacter(val userID: Long, val name: String) {
     }
 
     fun getUnavailableAbilitiesText(): String {
-        return "The following abilities are on cooldown:\n" + getAbilitiesOnCooldown().map { ability ->
+        return "The following abilities are on cooldown:\n" + getAbilitiesOnCooldown().joinToString("\n") { ability ->
             "${ability.displayName} (${cooldowns[ability.callbackText]} turn(s) remaining)"
-        }.joinToString("\n")
+        }
     }
 
     fun getCharacterSummaryText(): String {
         val baseText = """
-            Name: ${name}
+            Name: $name
             Health: ${getActualHealth()} / ${health.value()} (${getHealthPercent()}%)
             Power: ${power.value()}
             Precision: ${precision.value()}

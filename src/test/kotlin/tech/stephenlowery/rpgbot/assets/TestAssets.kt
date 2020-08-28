@@ -1,6 +1,5 @@
 package tech.stephenlowery.rpgbot.assets
 
-import tech.stephenlowery.rpgbot.RPGBot
 import tech.stephenlowery.rpgbot.models.character.RPGCharacter
 
 class TestCharacterFactory {
