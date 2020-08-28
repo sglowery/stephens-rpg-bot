@@ -12,8 +12,7 @@ import tech.stephenlowery.rpgbot.models.GameConstants.Companion.POWER_SCALING
 import tech.stephenlowery.rpgbot.models.action.ActionEffect
 import tech.stephenlowery.rpgbot.models.action.EffectResult
 import tech.stephenlowery.rpgbot.models.action.MetaActionEffect
-import tech.stephenlowery.rpgbot.models.action.clampToPositive
-import tech.stephenlowery.rpgbot.models.character.Attribute
+import tech.stephenlowery.rpgbot.models.character.AttributeModifierType
 import tech.stephenlowery.rpgbot.models.character.RPGCharacter
 import kotlin.random.Random
 
@@ -36,12 +35,9 @@ class DamageHealthEffect(private val min: Int, private val max: Int, duration: I
     }
 }
 
-class DefendEffect(private val amount: Int = 50) : ActionEffect() {
-    override fun resolve(from: RPGCharacter, to: RPGCharacter, cycle: Int): EffectResult {
-        to.defense.addAdditiveMod(amount.toDouble(), duration)
-        return EffectResult(value = amount, source = from, target = to)
-    }
-}
+class DefendEffect(
+    amount: Int = 50
+) : TemporaryStatModEffect(amount, duration = 1, attributeModifierType = AttributeModifierType.ADDITIVE, statGetter = RPGCharacter::defense)
 
 class HealEffect(private val min: Int, private val max: Int) : ActionEffect() {
     override fun resolve(from: RPGCharacter, to: RPGCharacter, cycle: Int): EffectResult {
@@ -105,6 +101,23 @@ class VampirismEffect(private val proportion: Double = 1.0, effect: ActionEffect
             crit = wrappedEffectResult.crit,
             other = healing.toInt().toString()
         )
+    }
+}
+
+open class TemporaryStatModEffect(
+    val min: Int,
+    val max: Int? = null,
+    duration: Int,
+    val statGetter: StatGetterFn,
+    val attributeModifierType: AttributeModifierType
+) : ActionEffect(duration) {
+    override fun resolve(from: RPGCharacter, to: RPGCharacter, cycle: Int): EffectResult {
+        val value = max?.let { Random.nextInt(min, max + 1) } ?: min
+        when (attributeModifierType) {
+            AttributeModifierType.ADDITIVE -> statGetter(to).addAdditiveMod(value.toDouble(), duration)
+            AttributeModifierType.MULTIPLICATIVE -> statGetter(to).addMultiplicativeMod(value.toDouble(), duration)
+        }
+        return EffectResult(source = from, target = to, value = value)
     }
 }
 
