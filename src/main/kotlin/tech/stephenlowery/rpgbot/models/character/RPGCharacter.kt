@@ -120,7 +120,7 @@ class RPGCharacter(val userID: Long, val name: String) {
     }
 
     fun cycleAttributeModifiers() {
-        getListOfAttributes().forEach(Attribute::cycleModifiers)
+        getListOfAttributes().forEach(Attribute::cycleClearAndConsolidateModifiers)
     }
 
     fun cycleCooldowns() {
@@ -165,8 +165,8 @@ class RPGCharacter(val userID: Long, val name: String) {
             Defense: ${defense.value()}
         """.trimIndent()
         return baseText + when (specialMessages.isNotEmpty()) {
-            true -> "\n\nAdditionally, your stats grant you the following properties:\n\n" + specialMessages.map { "- " + it }.joinToString("\n\n")
-            else -> ""
+            true -> "\n\nAdditionally, your stats grant you the following properties:\n\n" + specialMessages.joinToString("\n\n") { "- $it" }
+            false -> ""
         }
     }
 
