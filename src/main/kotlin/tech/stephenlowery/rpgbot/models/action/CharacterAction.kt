@@ -16,7 +16,7 @@ class CharacterAction(
     var lastActionResult: EffectResult? = null
 
     fun resolveEffects(from: RPGCharacter, target: RPGCharacter, cycle: Int): String? {
-        return effect.takeIf { !it.isExpired(cycle) }
+        return effect.takeUnless { it.isExpired(cycle) }
             ?.resolve(from, target, cycle)
             ?.also { lastActionResult = it }
             ?.let { strings.getFormattedEffectResultString(it) }

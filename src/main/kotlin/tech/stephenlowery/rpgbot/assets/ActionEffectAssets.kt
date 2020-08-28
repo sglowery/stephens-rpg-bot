@@ -1,5 +1,7 @@
 package tech.stephenlowery.rpgbot.assets
 
+import tech.stephenlowery.rpgbot.StatGetterFn
+import tech.stephenlowery.rpgbot.ValueFromCharacterFn
 import tech.stephenlowery.rpgbot.models.GameConstants.Companion.BASE_CRIT_CHANCE
 import tech.stephenlowery.rpgbot.models.GameConstants.Companion.BASE_CRIT_DAMAGE_MULTIPLIER
 import tech.stephenlowery.rpgbot.models.GameConstants.Companion.BASE_HIT_CHANCE
@@ -69,13 +71,14 @@ class ExhaustEffect(val amount: Int, duration: Int) : ActionEffect(duration) {
     }
 }
 
-class SwapStatsEffect(duration: Int, val statGetter: (RPGCharacter) -> Attribute) : ActionEffect(duration) {
+class SwapStatsEffect(duration: Int, val statGetterFn: StatGetterFn, val swapValueFn: ValueFromCharacterFn<Int>? = null) : ActionEffect(duration) {
     override fun resolve(from: RPGCharacter, to: RPGCharacter, cycle: Int): EffectResult {
-        val fromStat = statGetter(from)
-        val toStat = statGetter(to)
-        val difference = (toStat.value() - fromStat.value())
+        val fromValue = swapValueFn?.let { it(from) } ?: statGetterFn(from).value()
+        val toValue = swapValueFn?.let { it(to) } ?: statGetterFn(to).value()
+        val difference = fromValue - toValue
+        val fromStat = statGetterFn(from)
         fromStat.addAdditiveMod(difference.toDouble(), duration)
-        toStat.addAdditiveMod(-difference.toDouble(), duration)
+        statGetterFn(to).addAdditiveMod(-difference.toDouble(), duration)
         return EffectResult(
             source = from,
             target = to,
@@ -90,7 +93,7 @@ class SwapStatsEffect(duration: Int, val statGetter: (RPGCharacter) -> Attribute
 class VampirismEffect(private val proportion: Double = 1.0, effect: ActionEffect) : MetaActionEffect(effect) {
     override fun resolve(from: RPGCharacter, to: RPGCharacter, cycle: Int): EffectResult {
         val wrappedEffectResult = effect.resolve(from, to, cycle)
-        val damageDone = wrappedEffectResult.takeIf { !it.miss }?.value ?: 0
+        val damageDone = wrappedEffectResult.takeUnless { it.miss }?.value ?: 0
         val healing = damageDone.toDouble() * proportion
         from.damage.addAdditiveMod(-healing)
         return EffectResult(

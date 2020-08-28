@@ -109,7 +109,7 @@ class CharacterActionAssets {
 
         val LifeSwap: CharacterAction
             get() = CharacterAction(
-                effect = SwapStatsEffect(1, RPGCharacter::health),
+                effect = SwapStatsEffect(1, RPGCharacter::health, RPGCharacter::getActualHealth),
                 displayName = "Life Swap",
                 targetingType = TargetingType.SINGLE,
                 cooldown = 6,
