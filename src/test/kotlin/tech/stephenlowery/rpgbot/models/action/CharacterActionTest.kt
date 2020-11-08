@@ -1,6 +1,7 @@
 package tech.stephenlowery.rpgbot.models.action
 
 import org.junit.Test
+import tech.stephenlowery.rpgbot.models.action.action_effect.ActionEffect
 import tech.stephenlowery.rpgbot.models.character.AttributeModifier
 import tech.stephenlowery.rpgbot.models.character.RPGCharacter
 import kotlin.test.assertEquals

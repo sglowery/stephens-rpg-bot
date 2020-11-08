@@ -2,6 +2,7 @@ package tech.stephenlowery.rpgbot.models.character
 
 import org.junit.Test
 import tech.stephenlowery.rpgbot.models.action.*
+import tech.stephenlowery.rpgbot.models.action.action_effect.ActionEffect
 import kotlin.test.assertEquals
 
 class RPGCharacterTest {

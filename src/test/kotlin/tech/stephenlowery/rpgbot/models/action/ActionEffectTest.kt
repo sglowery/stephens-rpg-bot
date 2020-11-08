@@ -1,6 +1,7 @@
 package tech.stephenlowery.rpgbot.models.action
 
 import org.junit.Test
+import tech.stephenlowery.rpgbot.models.action.action_effect.ActionEffect
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 

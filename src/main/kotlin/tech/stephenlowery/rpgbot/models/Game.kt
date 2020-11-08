@@ -29,8 +29,6 @@ class Game(val id: Long, initiator: RPGCharacter) {
         fromCharacter.addTargetToAction(toCharacter)
     }
 
-    fun getCharacterFromUserID(userID: Long): RPGCharacter = playerList.find { it.userID == userID }!!
-
     fun playerInGame(userID: Long): Boolean = playerList.any { it.userID == userID }
 
     fun allPlayersWaiting(): Boolean = waitingOn().isEmpty()
@@ -67,4 +65,12 @@ class Game(val id: Long, initiator: RPGCharacter) {
             }
         }
     }
+
+    fun getGameEndedText(): String = when (livingPlayers().size) {
+        1 -> "${livingPlayers().first().name} wins!"
+        0 -> "Uh, well, I guess the remaining people died at the same time or something. Ok"
+        else -> "Uh oh, this shouldn't happen"
+    }
+
+    private fun getCharacterFromUserID(userID: Long): RPGCharacter = playerList.find { it.userID == userID }!!
 }

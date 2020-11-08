@@ -12,7 +12,6 @@ repositories {
 }
 
 dependencies {
-    compile "org.codehaus.groovy:groovy-all:2.3.11"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "io.github.kotlin-telegram-bot.kotlin-telegram-bot:telegram:5.0.0"
     implementation "org.jetbrains.kotlin:kotlin-reflect"

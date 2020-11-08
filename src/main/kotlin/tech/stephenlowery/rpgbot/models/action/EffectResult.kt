@@ -30,5 +30,7 @@ class EffectResult(
                 )
             }
         }
+
+        fun merge(results: List<EffectResult>) = merge(*results.toTypedArray())
     }
 }

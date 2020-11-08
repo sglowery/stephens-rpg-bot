@@ -3,6 +3,11 @@ package tech.stephenlowery.rpgbot.assets
 import tech.stephenlowery.rpgbot.models.action.CharacterAction
 import tech.stephenlowery.rpgbot.models.action.CharacterActionStrings
 import tech.stephenlowery.rpgbot.models.action.TargetingType
+import tech.stephenlowery.rpgbot.models.action.action_effect.impl.DamageHealthEffect
+import tech.stephenlowery.rpgbot.models.action.action_effect.impl.DefendEffect
+import tech.stephenlowery.rpgbot.models.action.action_effect.impl.HealEffect
+import tech.stephenlowery.rpgbot.models.action.action_effect.impl.SwapStatsEffect
+import tech.stephenlowery.rpgbot.models.action.action_effect.impl.meta.VampirismEffect
 import tech.stephenlowery.rpgbot.models.character.RPGCharacter
 
 class CharacterActionAssets {
@@ -60,7 +65,7 @@ class CharacterActionAssets {
 
         val PatheticSlap: CharacterAction
             get() = CharacterAction(
-               DamageHealthEffect(5, 14), "Pathetic Slap", "action|patheticslap",
+                DamageHealthEffect(5, 14), "Pathetic Slap", "action|patheticslap",
                 "A bitch-ass slap for a bitch-ass person",
                 TargetingType.SINGLE,
                 CharacterActionStrings(
@@ -74,7 +79,7 @@ class CharacterActionAssets {
 
         val NoxiousFart: CharacterAction
             get() = CharacterAction(
-                effect = DamageHealthEffect(8, 13),
+                effect = DamageHealthEffect(8, 18),
                 displayName = "Noxious Fart",
                 callbackText = "action|fart",
                 description = "Releases a horrifying cloud of gas that deals damage over time",

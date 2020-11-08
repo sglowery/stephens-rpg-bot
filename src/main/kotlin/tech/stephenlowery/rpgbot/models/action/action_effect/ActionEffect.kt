@@ -1,5 +1,6 @@
-package tech.stephenlowery.rpgbot.models.action
+package tech.stephenlowery.rpgbot.models.action.action_effect
 
+import tech.stephenlowery.rpgbot.models.action.EffectResult
 import tech.stephenlowery.rpgbot.models.character.RPGCharacter
 
 open class ActionEffect(open val duration: Int = 1) {

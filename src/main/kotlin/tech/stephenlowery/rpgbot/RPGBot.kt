@@ -167,7 +167,7 @@ class RPGBot(val telegramBotToken: String) {
         }
     }
 
-    private fun characterFromUserExists(userID: Long) = characters.containsKey(userID)
+    private fun characterFromUserExists(userID: Long): Boolean = characters.containsKey(userID)
 
     private fun characterStatsCommand(bot: Bot, update: Update) {
         val message = update.message!!
@@ -221,8 +221,7 @@ class RPGBot(val telegramBotToken: String) {
                 if (game.allPlayersWaiting()) {
                     resolveActionsInGame(bot, game)
                 }
-            }
-            else {
+            } else {
                 bot.sendMessage(userID, "Can you stop trying to break the game? Just press the button once. Thanks", replyMarkup = ReplyKeyboardRemove())
             }
         } else {
@@ -278,22 +277,13 @@ class RPGBot(val telegramBotToken: String) {
         } else {
             bot.sendMessage(
                 game.id,
-                getGameEndedText(game)
+                game.getGameEndedText()
             )
             characters.minusAssign(game.playerList.map(RPGCharacter::userID))
             games.remove(game.id)
         }
     }
-
-    private fun getGameEndedText(game: Game): String {
-        val livingPlayers = game.livingPlayers()
-        return when (livingPlayers.size) {
-            1 -> "${livingPlayers.first().name} wins!"
-            0 -> "Uh, well, I guess the remaining people died at the same time or something. Ok"
-            else -> "Uh oh, this shouldn't happen"
-        }
-    }
-
+    
     private fun makeKeyboardFromPlayerNames(characters: List<RPGCharacter>): List<List<InlineKeyboardButton>> {
         return characters.map { InlineKeyboardButton(it.getNameAndHealthPercentLabel(), callbackData = "target|${it.userID}") }.chunked(2)
     }

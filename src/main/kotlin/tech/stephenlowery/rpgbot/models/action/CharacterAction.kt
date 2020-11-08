@@ -1,5 +1,6 @@
 package tech.stephenlowery.rpgbot.models.action
 
+import tech.stephenlowery.rpgbot.models.action.action_effect.ActionEffect
 import tech.stephenlowery.rpgbot.models.character.RPGCharacter
 
 class CharacterAction(
