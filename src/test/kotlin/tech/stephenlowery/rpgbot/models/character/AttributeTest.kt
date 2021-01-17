@@ -37,7 +37,7 @@ class AttributeTest {
     }
 
     @Test
-    fun `bringPermanentModifiersWithinBounds will cap "overflow" modifiers and allow new modifiers to have an effect`() {
+    fun `bringPermanentModifiersWithinBounds will cap 'overflow' modifiers and allow new modifiers to have an effect`() {
         val min = 0
         val max = 100
         val base = 50.0

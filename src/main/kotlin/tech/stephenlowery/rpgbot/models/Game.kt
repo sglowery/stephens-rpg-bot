@@ -44,7 +44,7 @@ class Game(val id: Long, initiator: RPGCharacter) {
         actionQueue.removeIf { it.isExpired() }
         playerList.forEach { player ->
             if (player.getActualHealth() <= 0 && player.characterState != UserState.DEAD) {
-                results.add("${player.name} died! They will be removed from the game")
+                results.add("${player.name} died! They will be removed from the game.")
                 player.characterState = UserState.DEAD
             } else {
                 player.characterState = UserState.CHOOSING_ACTION
@@ -68,8 +68,14 @@ class Game(val id: Long, initiator: RPGCharacter) {
 
     fun getGameEndedText(): String = when (livingPlayers().size) {
         1 -> "${livingPlayers().first().name} wins!"
-        0 -> "Uh, well, I guess the remaining people died at the same time or something. Ok"
-        else -> "Uh oh, this shouldn't happen"
+        0 -> "Uh, well, I guess the remaining people died at the same time or something. Ok."
+        else -> "Uh oh, this shouldn't happen."
+    }
+
+    fun cancel() {
+        playerList.forEach(RPGCharacter::resetCharacter)
+        playerList.clear()
+        actionQueue.clear()
     }
 
     private fun getCharacterFromUserID(userID: Long): RPGCharacter = playerList.find { it.userID == userID }!!

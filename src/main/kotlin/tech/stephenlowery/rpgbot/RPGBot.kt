@@ -81,16 +81,16 @@ class RPGBot(val telegramBotToken: String) {
         val response: String
         var replyToMessageId: Long? = null
         if (message.chat.type == "private") {
-            response = "You can't start a game in here silly goose"
+            response = "You can't start a game in here silly goose!"
         } else if (game != null) {
-            response = if (game.gameStarted) "The game's already started. You're too late" else "There's already a game created. Chill"
+            response = if (game.gameStarted) "The game's already started. You're too late." else "There's already a game created. Chill."
         } else if (userCharacter == null) {
             replyToMessageId = message.messageId
-            response = "You need to make a character first. Talk to me in a private chat and use /newcharacter"
+            response = "You need to make a character first. Talk to me in a private chat and use /newcharacter."
         } else {
             val newGame = Game(chatID, userCharacter)
             games[chatID] = newGame
-            response = "Game created. /join to join, /start to start"
+            response = "Game created. /join to join, /start to start."
         }
         bot.sendMessage(chatID, response, replyToMessageId = replyToMessageId)
     }
@@ -102,20 +102,20 @@ class RPGBot(val telegramBotToken: String) {
         val replyToMessageId = message.messageId
         val game = games[chatID]
         if (message.chat.type == "private") {
-            bot.sendMessage(chatID, "Ain't no game in here, kid", replyToMessageId = replyToMessageId)
+            bot.sendMessage(chatID, "Ain't no game in here, kid.", replyToMessageId = replyToMessageId)
         } else if (!characterFromUserExists(userID)) {
             bot.sendMessage(
                 chatID,
                 "You need to make a character before you can join a game.\n\n" +
-                        "Open a private chat with me and type /newcharacter",
+                        "Open a private chat with me and type /newcharacter.",
                 replyToMessageId = replyToMessageId
             )
         } else if (game == null) {
-            bot.sendMessage(chatID, "There isn't a game started. Type /newgame to make one", replyToMessageId = replyToMessageId)
+            bot.sendMessage(chatID, "There isn't a game started. Type /newgame to make one.", replyToMessageId = replyToMessageId)
         } else if (game.playerInGame(userID)) {
-            bot.sendMessage(chatID, "You're already in the game, silly", replyToMessageId = message.messageId)
+            bot.sendMessage(chatID, "You're already in the game, silly.", replyToMessageId = message.messageId)
         } else if (game.gameStarted) {
-            bot.sendMessage(chatID, "Game's already started. Too late bub", replyToMessageId = replyToMessageId)
+            bot.sendMessage(chatID, "Game's already started. Too late bub.", replyToMessageId = replyToMessageId)
         } else {
             val userCharacter = characters[userID]!!
             userCharacter.characterState = UserState.IN_LOBBY
@@ -147,19 +147,19 @@ class RPGBot(val telegramBotToken: String) {
         } else if (!characterFromUserExists(userID)) {
             bot.sendMessage(
                 chatID,
-                "You need to make a character first. Talk to me in a private chat and use /newcharacter",
+                "You need to make a character first. Talk to me in a private chat and use /newcharacter.",
                 replyToMessageId = messageId
             )
         } else if (game == null) {
             bot.sendMessage(
                 chatID,
-                "No one has started a game yet. Start one with /newgame",
+                "No one has started a game yet. Start one with /newgame.",
                 replyToMessageId = messageId
             )
         } else if (!game.playerInGame(userID)) {
             bot.sendMessage(
                 chatID,
-                "You need to join the game with /join",
+                "You need to join the game with /join.",
                 replyToMessageId = messageId
             )
         } else if (game.playerList.size == 1) {
@@ -169,7 +169,7 @@ class RPGBot(val telegramBotToken: String) {
                 replyToMessageId = messageId
             )
         } else {
-            bot.sendMessage(chatID, "Game is starting with ${game.playerList.size} player(s)")
+            bot.sendMessage(chatID, "Game is starting with ${game.playerList.size} player(s).")
             game.startGame()
             sendPlayersInGameActions(bot, chatID)
         }
@@ -182,7 +182,7 @@ class RPGBot(val telegramBotToken: String) {
         bot.sendMessage(
             chatId = message.chat.id,
             replyToMessageId = message.messageId,
-            text = characters[message.from!!.id]?.getCharacterStatusText() ?: "You don't have a character, silly goose. Open a private chat with me and use the /newcharacter command"
+            text = characters[message.from!!.id]?.getCharacterStatusText() ?: "You don't have a character, silly goose. Open a private chat with me and use the /newcharacter command."
         )
     }
 
@@ -193,7 +193,7 @@ class RPGBot(val telegramBotToken: String) {
             val waitingOn = game.waitingOn()
             if (waitingOn.isNotEmpty()) {
                 val names = waitingOn.joinToString(", ") { "[${it.name}](tg://user?id=${it.userID})" }
-                bot.sendMessage(chatID, "Waiting on the following player(s): $names", parseMode = ParseMode.MARKDOWN)
+                bot.sendMessage(chatID, "Waiting on the following player(s): $names.", parseMode = ParseMode.MARKDOWN)
             }
         }
     }
@@ -202,7 +202,7 @@ class RPGBot(val telegramBotToken: String) {
         games[chatID]?.livingPlayers()?.forEach {
             val keyboard = makeKeyboardFromPlayerActions(it.getAvailableActions())
             val replyMarkup = InlineKeyboardMarkup(keyboard)
-            bot.sendMessage(it.userID, it.getPreActionText() + "\n\nPick an action", replyMarkup = replyMarkup)
+            bot.sendMessage(it.userID, it.getPreActionText() + "\n\nPick an action.", replyMarkup = replyMarkup)
         }
     }
 
@@ -230,7 +230,7 @@ class RPGBot(val telegramBotToken: String) {
                     resolveActionsInGame(bot, game)
                 }
             } else {
-                bot.sendMessage(userID, "Can you stop trying to break the game? Just press the button once. Thanks", replyMarkup = ReplyKeyboardRemove())
+                bot.sendMessage(userID, "Can you stop trying to break the game? Just press the button once. Thanks.", replyMarkup = ReplyKeyboardRemove())
             }
         } else {
             bot.deleteMessage(
@@ -245,7 +245,7 @@ class RPGBot(val telegramBotToken: String) {
             character.userID,
             previousMessageID,
             null,
-            character.getPreActionText() + "\n\nChoose a target",
+            character.getPreActionText() + "\n\nChoose a target.",
             replyMarkup = InlineKeyboardMarkup(makeKeyboardFromPlayerNames(game.livingPlayers().filter { it.userID != character.userID }))
         )
     }

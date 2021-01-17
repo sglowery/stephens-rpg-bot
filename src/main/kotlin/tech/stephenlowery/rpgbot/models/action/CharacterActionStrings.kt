@@ -20,7 +20,7 @@ fun CharacterActionStrings.getFormattedEffectResultString(effectResult: EffectRe
         effectResult.continued && effectResult.expired -> this.effectOverText
         effectResult.chained && !effectResult.miss -> this.effectChainedText
         !effectResult.crit && !effectResult.miss -> this.successText
-        else -> "Error formatting effect result"
+        else -> "Error formatting effect result."
     }.formatWithActionText(effectResult, actionText).formatFromEffectResult(effectResult)
 }
 
