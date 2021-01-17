@@ -16,7 +16,7 @@ class RPGBot(val telegramBotToken: String) {
 
     private val games = mutableMapOf<Long, Game>()
 
-    fun MutableMap<Long, Game>.findGameWithPlayer(userID: Long): Game? {
+    private fun MutableMap<Long, Game>.findGameWithPlayer(userID: Long): Game? {
         return this.values.find { game -> game.playerInGame(userID) }
     }
 
@@ -47,19 +47,27 @@ class RPGBot(val telegramBotToken: String) {
     private fun newCharacterCommand(bot: Bot, update: Update) {
         val message = update.message!!
         val chatID = message.chat.id
-        val finalResponse: String
         val from = message.from!!
         val userID = from.id
         var replyToMessageId: Long? = null
+        val newCharacter = RPGCharacter(userID, from.firstName)
+        val characterCreatedResponse = "Here's your new character, take it or leave it lol:\n${newCharacter.getCharacterSummaryText()}"
+
+        val finalResponse: String
         if (characterFromUserExists(userID)) {
-            finalResponse = "You already have a character. Deal with it"
+            finalResponse = "You already have a character. Deal with it."
         } else if (message.chat.type == "private") {
-            val newCharacter = RPGCharacter(userID, from.firstName)
             characters[userID] = newCharacter
-            finalResponse = "Here's your new character, take it or leave it lol:\n${newCharacter.getCharacterSummaryText()}"
+            finalResponse = characterCreatedResponse
         } else {
-            finalResponse = "Let's take this somewhere more private, sweatie (; Use the command in a private chat between us"
+            val response = bot.sendMessage(chatID, characterCreatedResponse)
             replyToMessageId = message.messageId
+            if (response.first?.isSuccessful == true) {
+                characters[userID] = newCharacter
+                finalResponse = "Your character has been made -- see our private chat for details."
+            } else {
+                finalResponse = "You need to open a private chat with me first before using /newcharacter in this group."
+            }
         }
         bot.sendMessage(chatID, finalResponse, replyToMessageId = replyToMessageId)
     }
@@ -266,9 +274,7 @@ class RPGBot(val telegramBotToken: String) {
         val resolvedActionsText = game.resolveActions()
         bot.sendMessage(game.id, resolvedActionsText, replyMarkup = ReplyKeyboardRemove(), parseMode = ParseMode.MARKDOWN)
         game.deadPlayers().forEach { player ->
-            if (!player.isAlive()) {
-                bot.sendMessage(player.userID, "You died in the previous round and have been removed from the game.")
-            }
+            bot.sendMessage(player.userID, "You died in the previous round and have been removed from the game.")
         }
         game.playerList.removeAll(game.deadPlayers())
         val livingPlayers = game.livingPlayers()
@@ -283,7 +289,7 @@ class RPGBot(val telegramBotToken: String) {
             games.remove(game.id)
         }
     }
-    
+
     private fun makeKeyboardFromPlayerNames(characters: List<RPGCharacter>): List<List<InlineKeyboardButton>> {
         return characters.map { InlineKeyboardButton(it.getNameAndHealthPercentLabel(), callbackData = "target|${it.userID}") }.chunked(2)
     }
