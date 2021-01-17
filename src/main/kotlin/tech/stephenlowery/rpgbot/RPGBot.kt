@@ -12,7 +12,7 @@ import tech.stephenlowery.rpgbot.models.character.RPGCharacter
 import tech.stephenlowery.rpgbot.models.character.UserState
 
 
-class RPGBot(val telegramBotToken: String) {
+class RPGBot(private val telegramBotToken: String) {
 
     private val games = mutableMapOf<Long, Game>()
 
@@ -32,11 +32,13 @@ class RPGBot(val telegramBotToken: String) {
                 command("start", ::startGameCommand)
                 command("stats", ::characterStatsCommand)
                 command("calltoarms", ::waitingOnCommand)
+                command("cancelgame", ::cancelGameCommandConfirm)
                 callbackQuery { bot: Bot, update: Update ->
-                    val callbackType = update.callbackQuery!!.data.split("|")
-                    when (callbackType[0]) {
+                    val callbackDataSplit = update.callbackQuery!!.data.split("|")
+                    when (callbackDataSplit[0]) {
                         "action" -> actionChosen(bot, update)
                         "target" -> targetChosen(bot, update)
+                        "cancel" -> cancelGameChoiceHandler(callbackDataSplit, bot, update)
                     }
                 }
             }
@@ -137,11 +139,13 @@ class RPGBot(val telegramBotToken: String) {
                 **RPGBot Pre-pre-pre-alpha**
                 Source code available on GitHub: https://github.com/sglowery/stephens-rpg-bot
                 
-                /newcharacter -- Generates a new character, only usable in a private chat
+                /newcharacter -- Generates a new character
                 /newgame -- Creates a new game for others to join
                 /join -- Joins a game that hasn't started yet
                 /stats -- Display your character's stats
                 /start -- In a private chat, display this text. In a group chat, initiates a game as long as it has at least two players
+                /calltoarms -- Call out and tag players who haven't finished picking their action for the round
+                /cancelgame -- Cancels a game (will ask you to confirm)
             """.trimIndent(), parseMode = ParseMode.MARKDOWN
             )
         } else if (!characterFromUserExists(userID)) {
@@ -196,6 +200,41 @@ class RPGBot(val telegramBotToken: String) {
                 bot.sendMessage(chatID, "Waiting on the following player(s): $names.", parseMode = ParseMode.MARKDOWN)
             }
         }
+    }
+
+    private fun cancelGameCommandConfirm(bot: Bot, update: Update) {
+        val chatID = update.message!!.chat.id
+        val userID = update.message!!.from!!.id
+        val choices = listOf(InlineKeyboardButton("Yes", callbackData = "cancel|yes"), InlineKeyboardButton("No", "cancel|no"))
+        val markup = InlineKeyboardMarkup(listOf(choices))
+        val game = games[chatID]
+        if (game == null) {
+            bot.sendMessage(chatID, "There isn't a game running in this chat, yo.", replyToMessageId = userID)
+            bot.sendMessage(chatID, "Are you sure you want to cancel the game?", replyToMessageId = userID, replyMarkup = markup)
+        } else if (userID != game.initiator.userID) {
+            bot.sendMessage(chatID, "Only the initiator of the game can cancel it.")
+        }
+    }
+
+    private fun cancelGameChoiceHandler(callbackDataSplit: List<String>, bot: Bot, update: Update) {
+        if (callbackDataSplit[1] == "yes") {
+            cancelGameYes(bot, update)
+        } else if (callbackDataSplit[1] == "no") {
+            cancelGameNo(bot, update)
+        }
+    }
+
+    private fun cancelGameYes(bot: Bot, update: Update) {
+        val chatID = update.message!!.chat.id
+        val game = games[chatID]!!
+        game.cancel()
+        games.remove(chatID)
+        bot.sendMessage(chatID, "Game cancelled. Hope you're happy. Your characters are fine.")
+    }
+
+    private fun cancelGameNo(bot: Bot, update: Update) {
+        val chatID = update.message!!.chat.id
+        bot.sendMessage(chatID,"K")
     }
 
     private fun sendPlayersInGameActions(bot: Bot, chatID: Long) {

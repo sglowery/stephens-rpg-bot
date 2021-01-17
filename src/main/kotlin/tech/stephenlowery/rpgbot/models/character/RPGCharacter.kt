@@ -31,35 +31,8 @@ class RPGCharacter(val userID: Long, val name: String) {
     val specialMessages = mutableListOf<String>()
 
     init {
-        repeat(STAT_POINTS_TO_DISTRIBUTE) {
-            when (Random.nextInt(4)) {
-                0 -> health.base += 10
-                1 -> power.base += 1
-                2 -> precision.base += 1
-                3 -> defense.base += 1
-            }
-        }
-        if (power.value() > 10 && precision.value() < 7) {
-            specialMessages.add("You are powerful but imprecise; your reckless nature means you do more damage but are more vulnerable to it too")
-            damageGiven.additiveModifiers.add(AttributeModifier(20.0))
-            damageTaken.additiveModifiers.add(AttributeModifier(20.0))
-        }
-        if (health.base < 100) {
-            specialMessages.add("Your frail nature has forced you to find other means to sustain yourself. You have access to the Life Steal ability and damage taken is slightly reduced")
-            damageTaken.additiveModifiers.add(AttributeModifier(-10.0))
-        }
-        if (precision.value() > 12) {
-            specialMessages.add("Your deadly precision taught you how to deliver devastating blows, significantly increasing your chance to deal critical hits and increasing the damage they do")
-            criticalChance.additiveModifiers.add(AttributeModifier(30.0))
-            criticalDamage.additiveModifiers.add(AttributeModifier(50.0))
-        }
-        if (defense.value() > 12 && power.value() < 8) {
-            specialMessages.add("'Sometimes the best offense is a good defense.' You benefit twice as much from defense and you have an extra powerful defend ability")
-            defense.multiplyModifiers.add(AttributeModifier(1.0))
-        }
-        if (health.base > 150) {
-            specialMessages.add("Manipulating the essence of life is trivial to you due to your vitality; you gain access to the Life Swap ability")
-        }
+        giveRandomStats()
+        giveTraitsFromStats()
     }
 
     fun getUnfilteredActions(): List<CharacterAction> {
@@ -134,12 +107,6 @@ class RPGCharacter(val userID: Long, val name: String) {
 
     fun getHealthPercent(): Int = (100.0 * getActualHealth() / health.value()).toInt()
 
-    override fun toString(): String {
-        return "Name: ${name}\n" +
-                "User ID: ${userID}\n" +
-                getListOfAttributes().joinToString("\n") { "${it.name}: ${it.value()}" }
-    }
-
     fun getPreActionText(): String = getCharacterStatusText() + (if (cooldowns.isNotEmpty()) "\n\n" + getUnavailableAbilitiesText() else "")
 
     fun getCharacterStatusText(): String {
@@ -167,6 +134,57 @@ class RPGCharacter(val userID: Long, val name: String) {
         return baseText + when (specialMessages.isNotEmpty()) {
             true -> "\n\nAdditionally, your stats grant you the following properties:\n\n" + specialMessages.joinToString("\n\n") { "- $it" }
             false -> ""
+        }
+    }
+
+    fun resetCharacter() {
+        listOf(health, damage, power, precision, defense, damageTaken, damageGiven, criticalDamage, criticalChance)
+            .forEach(Attribute::reset)
+        queuedAction = null
+        characterState = UserState.NONE
+        cooldowns.clear()
+        specialMessages.clear()
+        giveTraitsFromStats()
+    }
+
+    override fun toString(): String {
+        return "Name: ${name}\n" +
+                "User ID: ${userID}\n" +
+                getListOfAttributes().joinToString("\n") { "${it.name}: ${it.value()}" }
+    }
+
+    private fun giveTraitsFromStats() {
+        if (power.value() > 10 && precision.value() < 7) {
+            specialMessages.add("You are powerful but imprecise; your reckless nature means you do more damage but are more vulnerable to it too.")
+            damageGiven.additiveModifiers.add(AttributeModifier(20.0))
+            damageTaken.additiveModifiers.add(AttributeModifier(20.0))
+        }
+        if (health.base < 100) {
+            specialMessages.add("Your frail nature has forced you to find other means to sustain yourself. You have access to the Life Steal ability and damage taken is slightly reduced.")
+            damageTaken.additiveModifiers.add(AttributeModifier(-10.0))
+        }
+        if (precision.value() > 12) {
+            specialMessages.add("Your deadly precision taught you how to deliver devastating blows, significantly increasing your chance to deal critical hits and increasing the damage they do.")
+            criticalChance.additiveModifiers.add(AttributeModifier(30.0))
+            criticalDamage.additiveModifiers.add(AttributeModifier(50.0))
+        }
+        if (defense.value() > 12 && power.value() < 8) {
+            specialMessages.add("'Sometimes the best offense is a good defense.' You benefit twice as much from defense and you have an extra powerful defend ability.")
+            defense.multiplyModifiers.add(AttributeModifier(1.0))
+        }
+        if (health.base > 150) {
+            specialMessages.add("Manipulating the essence of life is trivial to you due to your vitality; you gain access to the Life Swap ability.")
+        }
+    }
+
+    private fun giveRandomStats() {
+        repeat(STAT_POINTS_TO_DISTRIBUTE) {
+            when (Random.nextInt(4)) {
+                0 -> health.base += 10
+                1 -> power.base += 1
+                2 -> precision.base += 1
+                3 -> defense.base += 1
+            }
         }
     }
 

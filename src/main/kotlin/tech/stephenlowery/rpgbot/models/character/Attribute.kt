@@ -1,6 +1,11 @@
 package tech.stephenlowery.rpgbot.models.character
 
-class Attribute(val name: String, var base: Double, val min: Int? = null, val max: Int? = null, val displayValueFn: (Int) -> String = Int::toString) {
+class Attribute(
+    val name: String,
+    var base: Double,
+    val min: Int? = null,
+    val max: Int? = null,
+    val displayValueFn: (Int) -> String = Int::toString) {
 
     var additiveModifiers = mutableListOf<AttributeModifier>()
     var multiplyModifiers = mutableListOf(AttributeModifier(1.0, -1))
@@ -25,10 +30,9 @@ class Attribute(val name: String, var base: Double, val min: Int? = null, val ma
 
     fun displayValue(): String = displayValueFn(value())
 
-    private fun cycleModifiers() {
-        listOf(additiveModifiers, multiplyModifiers).forEach { modifierSet ->
-            modifierSet.forEach { it.cycle() }
-        }
+    fun reset() {
+        additiveModifiers = mutableListOf()
+        multiplyModifiers = mutableListOf(AttributeModifier(1.0, -1))
     }
 
     internal fun consolidateModifiers() {
@@ -38,6 +42,12 @@ class Attribute(val name: String, var base: Double, val min: Int? = null, val ma
     internal fun clearExpiredModifiers() {
         additiveModifiers.removeIf { it.isExpired() }
         multiplyModifiers.removeIf { it.isExpired() }
+    }
+
+    private fun cycleModifiers() {
+        listOf(additiveModifiers, multiplyModifiers).forEach { modifierSet ->
+            modifierSet.forEach { it.cycle() }
+        }
     }
 
     private fun consolidateModifierSet(modifierSet: MutableList<AttributeModifier>): MutableList<AttributeModifier> {

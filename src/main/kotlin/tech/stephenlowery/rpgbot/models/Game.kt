@@ -4,7 +4,7 @@ import tech.stephenlowery.rpgbot.models.action.QueuedCharacterAction
 import tech.stephenlowery.rpgbot.models.character.RPGCharacter
 import tech.stephenlowery.rpgbot.models.character.UserState
 
-class Game(val id: Long, initiator: RPGCharacter) {
+class Game(val id: Long, val initiator: RPGCharacter) {
 
     val playerList = mutableListOf<RPGCharacter>()
     var gameStarted = false
@@ -40,7 +40,7 @@ class Game(val id: Long, initiator: RPGCharacter) {
     fun deadPlayers(): List<RPGCharacter> = playerList.filter { !it.isAlive() }
 
     fun resolveActions(): String {
-        val results = actionQueue.shuffled().mapNotNull { it.cycleAndResolve() }.toMutableList()
+        val results = actionQueue.shuffled().mapNotNull(QueuedCharacterAction::cycleAndResolve).toMutableList()
         actionQueue.removeIf { it.isExpired() }
         playerList.forEach { player ->
             if (player.getActualHealth() <= 0 && player.characterState != UserState.DEAD) {
