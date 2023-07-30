@@ -13,24 +13,32 @@ class CharacterAction(
     val actionType: CharacterActionType,
     val targetingType: TargetingType,
     val strings: CharacterActionStrings,
-    val triggers: (CharacterActionTriggers.Builder.() -> Unit)? = null
+    triggers: (CharacterActionTriggers.Builder.() -> Unit) = { },
 ) {
 
-    var lastActionResult: EffectResult? = null
+    private val triggers: CharacterActionTriggers
 
-    fun applyEffect(source: RPGCharacter, target: RPGCharacter, cycle: Int): List<EffectResult>? {
-        return effect.takeUnless { it.isExpired(cycle) }
-            ?.applyEffect(source, target, cycle)
-            ?.let { mutableListOf(it) }
-            ?.apply { triggers?.let {
-                addAll(CharacterActionTriggers.Builder().apply(it).build().getTriggeredEffectsFromEffectResult(this.first(), source, target, cycle))
-            } }
-            ?.also { lastActionResult = it.first() }
+    init {
+        this.triggers = CharacterActionTriggers.Builder().apply(triggers).build()
     }
 
+    fun applyEffect(source: RPGCharacter, target: RPGCharacter, cycle: Int): List<EffectResult> {
+        return effect.takeUnless { it.isExpired(cycle) }
+            ?.applyEffect(source, target, cycle)
+            ?.first()
+            ?.getTriggeredEffects(source, target, cycle)
+            ?: emptyList()
+    }
+    
     fun isExpired(cycle: Int): Boolean = cycle > duration && !isPermanent()
-
-    fun isPermanent() = duration == -1
+    
+    private fun isPermanent() = duration == -1
+    
+    private fun EffectResult.getTriggeredEffects(
+        source: RPGCharacter,
+        target: RPGCharacter,
+        cycle: Int,
+    ): List<EffectResult> = listOf(this) + triggers.getTriggeredEffectsFromEffectResult(this, source, target, cycle)
 }
 
 class CharacterActionTriggers private constructor(
@@ -38,35 +46,36 @@ class CharacterActionTriggers private constructor(
     private val onMiss: ActionEffect? = null,
     private val onCritical: ActionEffect? = null,
 ) {
+    
     fun getTriggeredEffectsFromEffectResult(effectResult: EffectResult, source: RPGCharacter, target: RPGCharacter, cycle: Int): List<EffectResult> {
         effectResult.run {
             return listOfNotNull(
-                        if (isSuccessfulNormalHit()) onSuccess else null,
-                        if (isNormalAttackMiss()) onMiss else null,
-                        if (isNormalAttackCritical()) onCritical else null
-                    ).map { it.applyEffect(source, target, cycle) }
+                if (isSuccessfulNormalHit()) onSuccess else null,
+                if (isNormalAttackMiss()) onMiss else null,
+                if (isNormalAttackCritical()) onCritical else null
+            ).flatMap { it.applyEffect(source, target, cycle) }
         }
     }
-
+    
     class Builder {
-
+        
         private var onSuccess: ActionEffect? = null
         private var onMiss: ActionEffect? = null
         private var onCrit: ActionEffect? = null
-
+        
         fun onSuccess(body: () -> ActionEffect) {
             onSuccess = body()
         }
-
+        
         fun onMiss(body: () -> ActionEffect) {
             onMiss = body()
         }
-
+        
         fun onCrit(body: () -> ActionEffect) {
             onCrit = body()
         }
-
+        
         fun build() = CharacterActionTriggers(onSuccess, onMiss, onCrit)
-
+        
     }
 }

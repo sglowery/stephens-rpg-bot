@@ -1,6 +1,5 @@
-import tech.stephenlowery.rpgbot.RPGBot
+import tech.stephenlowery.rpgbot.telegram.RPGBot
 
 fun main() {
-    val rpgBot = RPGBot(System.getenv("token"))
-    rpgBot.start()
+    RPGBot.start(System.getenv("token"))
 }

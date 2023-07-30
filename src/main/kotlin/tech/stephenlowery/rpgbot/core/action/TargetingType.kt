@@ -2,5 +2,6 @@ package tech.stephenlowery.rpgbot.core.action
 
 enum class TargetingType {
     SELF,
-    SINGLE,
+    SINGLE_TARGET,
+    MULTI_TARGET
 }

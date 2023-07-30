@@ -11,8 +11,9 @@ data class CharacterActionStrings(
     private val effectOverText: String = "",
     private val critText: String = "",
     private val effectContinuedText: String = "",
-    private val effectChainedText: String = ""
+    private val effectChainedText: String = "",
 ) {
+
     fun getFormattedEffectResultString(effectResult: EffectResult): String {
         return when {
             effectResult.miss                              -> this.missedText
@@ -21,21 +22,32 @@ data class CharacterActionStrings(
             effectResult.continued && !effectResult.miss   -> this.effectContinuedText
             effectResult.chained && !effectResult.miss     -> this.effectChainedText
             !effectResult.crit && !effectResult.miss       -> this.successText
-            else                                           -> throw UnresolvableEffectResultParameterException("Effect result has unresolvable parameters: ${effectResult}")
-        }.formatWithActionText(effectResult, actionText).formatFromEffectResult(effectResult)
+            else                                           -> throwUnresolvableEffectResultException(effectResult)
+        }.formatWithActionText(effectResult, actionText)
+            .formatFromEffectResult(effectResult)
     }
 
     fun getFormattedQueuedText(from: RPGCharacter, to: RPGCharacter?) = queuedText.formatFromEffectResult(EffectResult(source = from, target = to))
 
     private fun String.formatWithActionText(effectResult: EffectResult, actionText: String): String {
-        return (if (!effectResult.continued && !effectResult.expired && !effectResult.chained && actionText.isNotEmpty()) actionText + "\n" else "") + this
+        return getActionText(effectResult, actionText) + this
     }
+
+    private fun getActionText(effectResult: EffectResult, actionText: String): String =
+        if (effectResult.continued || effectResult.expired || effectResult.chained || actionText.isEmpty())
+            ""
+        else
+            actionText + "\n"
 
     private fun String.formatFromEffectResult(effectResult: EffectResult): String {
         return this.replace("{target}", effectResult.target?.name ?: "")
             .replace("{value}", effectResult.value.toString())
             .replace("{source}", effectResult.source?.name ?: "")
             .replace("{other}", effectResult.other ?: "")
+    }
+
+    private fun throwUnresolvableEffectResultException(effectResult: EffectResult): Nothing {
+        throw UnresolvableEffectResultParameterException("Effect result has unresolvable parameters: $effectResult")
     }
 }
 

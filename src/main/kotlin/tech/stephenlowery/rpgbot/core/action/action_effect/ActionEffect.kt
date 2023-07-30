@@ -3,13 +3,11 @@ package tech.stephenlowery.rpgbot.core.action.action_effect
 import tech.stephenlowery.rpgbot.core.action.EffectResult
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 
-open class ActionEffect(val duration: Int = 1) {
+abstract class ActionEffect(val duration: Int = 1) {
 
-    open fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): EffectResult {
-        return EffectResult.EMPTY
-    }
+    abstract fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult>
 
-    fun isExpired(cycle: Int): Boolean = cycle >= duration && !isPermanent()
+    fun isExpired(cycle: Int): Boolean = !isPermanent() && cycle >= duration
 
     fun isPermanent(): Boolean = duration == -1
 }

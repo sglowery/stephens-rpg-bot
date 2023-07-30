@@ -10,7 +10,7 @@ object CharacterTraits {
     fun getQualifiedCharacterTraitsFor(character: RPGCharacter) = allTraits.filter { character qualifiesFor it }
 
     private val allTraits
-        get() = listOf(reckless, lifestealer, precise, brutish, bloodBender)
+        get() = listOf(reckless, lifestealer, precise, brutish)
 
     private val reckless: CharacterTrait
         get() = CharacterTrait(
@@ -37,7 +37,7 @@ object CharacterTraits {
                 damageTaken.additiveModifiers.add(AttributeModifier(-10.0, name = "lifestealer"))
             }
 
-            givesAbility { CharacterActionAssets.LifeSteal }
+            // givesAbility { CharacterActionAssets.LifeSteal }
 
         }
 
@@ -67,15 +67,15 @@ object CharacterTraits {
             givesAbility { CharacterActionAssets.SuperDefend }
         }
 
-    private val bloodBender
-        get() = CharacterTrait(
-            name = "Blood Bender",
-            description = "Manipulating the essence of life is trivial to you due to your vitality; you gain access to the Life Swap ability.",
-            technicalDescription = "Nothing yet, sorry",
-            criteria = { health.base > 150 }
-        ) {
-            givesAbility { CharacterActionAssets.LifeSwap }
-        }
+    // private val bloodBender
+    //     get() = CharacterTrait(
+    //         name = "Blood Bender",
+    //         description = "Manipulating the essence of life is trivial to you due to your vitality; you gain access to the Life Swap ability.",
+    //         technicalDescription = "Nothing yet, sorry",
+    //         criteria = { health.base > 150 }
+    //     ) {
+    //         givesAbility { CharacterActionAssets.LifeSwap }
+    //     }
 }
 
 private infix fun RPGCharacter.qualifiesFor(trait: CharacterTrait): Boolean = trait.criteria(this)

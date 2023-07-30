@@ -14,13 +14,13 @@ fun Bot.sendMessage(
     replyToMessageId: Long? = null,
     replyMarkup: ReplyMarkup? = null
 ) = sendMessage(
-    ChatId.fromId(chatId),
-    text,
-    parseMode,
-    disableWebPagePreview,
-    disableNotification,
-    replyToMessageId,
-    replyMarkup,
+    chatId = ChatId.fromId(chatId),
+    text = text,
+    parseMode = parseMode,
+    disableWebPagePreview = disableWebPagePreview,
+    disableNotification = disableNotification,
+    replyToMessageId = replyToMessageId,
+    replyMarkup = replyMarkup,
 )
 
 fun Bot.editMessageText(
@@ -32,13 +32,13 @@ fun Bot.editMessageText(
     disableWebPagePreview: Boolean? = null,
     replyMarkup: ReplyMarkup? = null
 ) = editMessageText(
-    ChatId.fromId(chatId),
-    messageId,
-    inlineMessageId,
-    text,
-    parseMode,
-    disableWebPagePreview,
-    replyMarkup,
+    chatId = ChatId.fromId(chatId),
+    messageId = messageId,
+    inlineMessageId = inlineMessageId,
+    text = text,
+    parseMode = parseMode,
+    disableWebPagePreview = disableWebPagePreview,
+    replyMarkup = replyMarkup,
 )
 
-fun Bot.deleteMessage(chatId: Long, messageId: Long) = deleteMessage(ChatId.fromId(chatId), messageId)
+fun Bot.deleteMessage(chatId: Long, messageId: Long) = deleteMessage(chatId = ChatId.fromId(chatId), messageId = messageId)

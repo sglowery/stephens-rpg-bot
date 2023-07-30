@@ -6,17 +6,21 @@ class QueuedCharacterAction(
     val action: CharacterAction,
     val source: RPGCharacter
 ) {
-    private var cycle = 0
 
     var target: RPGCharacter? = null
 
-    fun cycleAndResolve(): QueuedCharacterActionResolvedResults? {
-        val results = action.applyEffect(source, target!!, cycle)?.let { QueuedCharacterActionResolvedResults(action, it) }
+    private var cycle = 0
+
+    private var lastActionResult: EffectResult? = null
+
+    fun cycleAndResolve(): QueuedCharacterActionResolvedResults {
+        val results = action.applyEffect(source, target!!, cycle)
+        lastActionResult = results.first()
         cycle++
-        return results
+        return QueuedCharacterActionResolvedResults(action, results)
     }
 
-    fun isExpired(): Boolean = action.isExpired(cycle) || (action.lastActionResult?.miss ?: false)
+    fun isExpired(): Boolean = action.isExpired(cycle) || lastActionResult?.miss == true
 
     fun isUnresolved(): Boolean = cycle == 0
 
@@ -26,10 +30,14 @@ class QueuedCharacterAction(
 }
 
 class QueuedCharacterActionResolvedResults(
-    val action: CharacterAction,
-    val effectResults: List<EffectResult>,
-    private val effectResultSeparator: String = "\n\n"
+    private val action: CharacterAction,
+    private val effectResults: List<EffectResult>,
+    private val effectResultSeparator: String = "\n\n",
+    private val stringResultOverride: String? = null
 ) {
+
+    var actionResultedInDeath = false
+
     val stringResult: String
-        get() = effectResults.joinToString(effectResultSeparator) { action.strings.getFormattedEffectResultString(it) }
+        get() = stringResultOverride ?: effectResults.joinToString(effectResultSeparator, transform = action.strings::getFormattedEffectResultString)
 }
