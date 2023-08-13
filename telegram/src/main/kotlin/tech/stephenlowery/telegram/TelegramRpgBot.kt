@@ -27,7 +27,7 @@ import tech.stephenlowery.telegram.handlers.startgame.PrivateChat
 import tech.stephenlowery.telegram.handlers.startgame.StartGameCommandHandler
 
 object TelegramRpgBot {
-    
+
     fun start(telegramBotToken: String) {
         val rpgBot = bot {
             logLevel = LogLevel.Error
@@ -43,9 +43,9 @@ object TelegramRpgBot {
                     val callbackDataSplit = update.callbackQuery!!.data.split("|", limit = 2)
                     val message = update.callbackQuery!!.message!!
                     when (callbackDataSplit[0]) {
-                        "action"    -> actionChosen(bot, update, message)
-                        "target"    -> targetChosen(bot, update, message)
-                        "cancel"    -> cancelGameChoiceHandler(callbackDataSplit.drop(1), bot, update)
+                        "action" -> actionChosen(bot, update, message)
+                        "target" -> targetChosen(bot, update, message)
+                        "cancel" -> cancelGameChoiceHandler(callbackDataSplit.drop(1), bot, update)
                     }
                 }
             }
@@ -53,18 +53,18 @@ object TelegramRpgBot {
         println("bot running")
         rpgBot.startPolling()
     }
-    
+
     private fun newGameCommand(bot: Bot, update: Update, message: Message) {
         val result = NewGameCommandHandler.execute(message)
         bot.sendMessage(message.chat.id, result.message)
     }
-    
+
     private fun joinGameCommand(bot: Bot, update: Update, message: Message) {
         val result = JoinGameCommandHandler.execute(message)
         val replyToMessageId = if (result is JoinedGame) null else message.messageId
         bot.sendMessage(message.chat.id, result.message, replyToMessageId = replyToMessageId)
     }
-    
+
     private fun startGameCommand(bot: Bot, update: Update, message: Message) {
         val chatID = message.chat.id
         val game = GameManager.findGame(chatID)
@@ -82,10 +82,10 @@ object TelegramRpgBot {
             }
             // determine roles, let players pick archetypes and skills
             // should probably just happen in the game class
-             sendPlayersInGameActions(bot, chatID)
+            sendPlayersInGameActions(bot, chatID)
         }
     }
-    
+
     private fun sendPlayerSkillList(bot: Bot, player: PlayerCharacter, skills: Collection<CharacterAction>) {
         val userId = player.id
         val keyboard = skills.map { InlineKeyboardButton.CallbackData(it.displayName, "pickSkill|${it.identifier}") }.chunked(2)
@@ -93,7 +93,7 @@ object TelegramRpgBot {
         bot.sendMessage(userId, "Pick a skill", replyMarkup = replyMarkup)
         // TODO implement players choosing skills instead of always having them randomly assigned
     }
-    
+
     private fun characterStatsCommand(bot: Bot, update: Update, message: Message) {
         val response = message.from?.let { GameManager.findCharacter(it.id)?.getCharacterStatusText() } ?: return
         bot.sendMessage(
@@ -102,7 +102,7 @@ object TelegramRpgBot {
             text = response
         )
     }
-    
+
     private fun waitingOnCommand(bot: Bot, update: Update, message: Message) {
         val chatID = message.chat.id
         val game = GameManager.findGame(chatID)
@@ -116,7 +116,7 @@ object TelegramRpgBot {
         val names = waitingOn.joinToString(separator = ", ", transform = ::formatTelegramUserLink)
         bot.sendMessage(chatID, "Waiting on the following player(s): $names.", parseMode = ParseMode.MARKDOWN)
     }
-    
+
     private fun cancelGameCommandConfirm(bot: Bot, update: Update, message: Message) {
         val chatID = message.chat.id
         val result = CancelGameConfirmCommandHandler.execute(message)
@@ -130,23 +130,23 @@ object TelegramRpgBot {
         }
         bot.sendMessage(chatID, result.message, replyToMessageId = message.messageId, replyMarkup = replyMarkup)
     }
-    
+
     private fun cancelGameChoiceHandler(callbackDataSplit: List<String>, bot: Bot, update: Update) = when (callbackDataSplit[1].lowercase()) {
         "yes" -> TelegramRpgBot::cancelGameYes
         else  -> TelegramRpgBot::cancelGameNo
     }.invoke(bot, update.message!!)
-    
+
     private fun cancelGameYes(bot: Bot, message: Message) {
         bot.sendMessage(message.chat.id, CancelGameConfirmCommandHandler.getGameCanceledMessage(message.from!!.firstName))
     }
-    
+
     private fun cancelGameNo(bot: Bot, message: Message) {
         bot.sendMessage(message.chat.id, "K")
     }
-    
-    private fun sendPlayersInGameActions(bot: Bot, chatID: Long)  {
+
+    private fun sendPlayersInGameActions(bot: Bot, chatID: Long) {
         val game = GameManager.findGame(chatID)!!
-        game.getHumanPlayers().values.living().forEach {
+        game.getHumanPlayers().values.living().filter { it.characterState == UserState.WAITING }.forEach {
             val keyboard = makeKeyboardFromPlayerActions(it.getAvailableActions())
             val replyMarkup = InlineKeyboardMarkup.create(keyboard)
             bot.sendMessage(it.id, it.getPreActionText() + "\n\nPick an action.", replyMarkup = replyMarkup)
@@ -158,6 +158,7 @@ object TelegramRpgBot {
         val callbackQuery = update.callbackQuery!!
         val userID = callbackQuery.from.id
         val actionName = callbackQuery.data
+        val callbackQueryMessageId = message.messageId
         val newCharacterState: UserState
         val queuedText: String
         try {
@@ -169,12 +170,10 @@ object TelegramRpgBot {
             // TODO
             //  if deleting the message do i need to remove the keyboard?
             //  bot.editMessageReplyMarkup(ChatId.fromId(userID), update.message!!.messageId, replyMarkup = ReplyKeyboardRemove())
-            bot.deleteMessage(ChatId.fromId(userID), callbackQuery.message!!.messageId)
+            bot.deleteMessage(ChatId.fromId(userID), callbackQueryMessageId)
             return
         }
         val chatId = message.chat.id
-        val game = GameManager.findGameContainingCharacter(userID)!!
-        val callbackQueryMessageId = callbackQuery.message!!.messageId
         if (newCharacterState == UserState.WAITING) {
             bot.editMessageText(
                 chatId = userID,
@@ -183,14 +182,17 @@ object TelegramRpgBot {
                 text = queuedText
             )
         } else if (newCharacterState == UserState.CHOOSING_TARGETS) {
-            sendTargetsToPlayer(bot, game, GameManager.findCharacter(userID)!!, callbackQueryMessageId)
+            sendTargetsToPlayer(bot, userID, callbackQueryMessageId)
         }
+        val game = GameManager.findGameContainingCharacter(userID)!!
         if (game.allPlayersAreWaiting()) {
             resolveActionsInGame(bot, game)
         }
     }
-    
-    private fun sendTargetsToPlayer(bot: Bot, game: Game, character: PlayerCharacter, messageId: Long) {
+
+    private fun sendTargetsToPlayer(bot: Bot, playerId: Long, messageId: Long) {
+        val game = GameManager.findGameContainingCharacter(playerId)!!
+        val character = GameManager.findCharacter(playerId)!!
         val targets = game.getTargetsForCharacter(character)
         bot.editMessageText(
             chatId = character.id,
@@ -210,7 +212,12 @@ object TelegramRpgBot {
         if (game != null && fromCharacter != null && fromCharacter.characterState == UserState.CHOOSING_TARGETS) {
             val target = callbackQuery.data.split("|")[1].toLong()
             game.addTargetToQueuedCharacterAction(userId, target)
-            bot.editMessageText(chatId = userId, messageId = callbackQuery.message!!.messageId, inlineMessageId = null, text = fromCharacter.queuedAction!!.getQueuedText())
+            bot.editMessageText(
+                chatId = userId,
+                messageId = callbackQuery.message!!.messageId,
+                inlineMessageId = null,
+                text = fromCharacter.queuedAction!!.getQueuedText()
+            )
             if (game.allPlayersAreWaiting()) {
                 resolveActionsInGame(bot, game)
             }
@@ -233,15 +240,15 @@ object TelegramRpgBot {
             sendPlayersInGameActions(bot, game.id)
         }
     }
-    
+
     private fun makeKeyboardFromPlayerNames(characters: Collection<RPGCharacter>): List<List<InlineKeyboardButton>> {
         return characters.map { InlineKeyboardButton.CallbackData(text = it.getNameAndHealthPercentLabel(), callbackData = "target|${it.id}") }.chunked(2)
     }
-    
+
     private fun makeKeyboardFromPlayerActions(actions: Collection<CharacterAction>): List<List<InlineKeyboardButton>> {
         return actions.map { InlineKeyboardButton.CallbackData(text = it.displayName, callbackData = it.identifier) }.chunked(2)
     }
-    
+
     private fun <T : RPGCharacter> Collection<T>.living() = this.filter { it.isAlive() }
     private fun <T : RPGCharacter> Collection<T>.dead() = this.filter { it.isDead() }
 }
