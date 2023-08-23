@@ -3,7 +3,7 @@ package tech.stephenlowery.rpgbot.core.character
 import tech.stephenlowery.rpgbot.core.action.QueuedCharacterAction
 import tech.stephenlowery.rpgbot.core.action.TargetingType
 
-class PlayerCharacter(userID: Long, name: String) : RPGCharacter(name, userID) {
+class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
 
     var queuedAction: QueuedCharacterAction? = null
 
@@ -58,12 +58,6 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(name, userID) {
         super.resetForNextTurnAfterAction()
     }
 
-    override fun toString(): String {
-        return "Name: ${name}\n" +
-                "User ID: ${id}\n" +
-                getAttributes().joinToString("\n") { "${it.name}: ${it.value()}" }
-    }
-
     override fun resetCharacter() {
         clearQueuedAction()
         super.resetCharacter()
@@ -84,6 +78,10 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(name, userID) {
 
     override fun hashCode(): Int {
         return id.toInt().hashCode()
+    }
+
+    override fun toString(): String {
+        return "PlayerCharacter(id=$id, name=$name)"
     }
 
 }

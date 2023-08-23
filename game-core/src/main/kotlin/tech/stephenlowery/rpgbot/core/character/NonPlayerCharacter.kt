@@ -12,7 +12,7 @@ class NonPlayerCharacter(
     defenseValue: Int? = null,
     precisionValue: Int? = null,
     private val actionDecidingBehavior: (NonPlayerCharacter.(Game) -> QueuedCharacterAction)? = null,
-) : RPGCharacter(name, id) {
+) : RPGCharacter(id, name) {
 
     init {
         giveRandomStats()
@@ -29,5 +29,9 @@ class NonPlayerCharacter(
 
     private fun initAttributes(vararg valueAttributePairs: Pair<Int?, Attribute>) {
         valueAttributePairs.filter { it.first != null }.forEach { it.second.base = it.first!!.toDouble() }
+    }
+
+    override fun toString(): String {
+        return "NonPlayerCharacter(id=$id, name=$name)"
     }
 }

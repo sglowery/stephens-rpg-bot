@@ -11,7 +11,7 @@ import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFAULT_BASE_PRIMARY_AT
 import tech.stephenlowery.rpgbot.core.game.GameConstants.STAT_POINTS_TO_DISTRIBUTE
 import kotlin.random.Random
 
-open class RPGCharacter(val name: String, val id: Long) {
+open class RPGCharacter(val id: Long, val name: String) {
 
     val health = Attribute("Health", DEFAULT_BASE_HEALTH)
     val damage = Attribute("Damage", 0.0, min = 0)
@@ -119,6 +119,10 @@ open class RPGCharacter(val name: String, val id: Long) {
         var result = name.hashCode()
         result = 31 * result + id.hashCode()
         return result
+    }
+
+    override fun toString(): String {
+        return "RPGCharacter(id=$id, name=$name)"
     }
 
 }
