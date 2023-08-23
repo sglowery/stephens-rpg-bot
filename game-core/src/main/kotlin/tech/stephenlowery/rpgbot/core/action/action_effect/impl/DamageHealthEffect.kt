@@ -19,7 +19,7 @@ class DamageHealthEffect(private val min: Int, private val max: Int, duration: I
         val baseDamage = (Random.nextInt(min, max + 1) + from.power.value() * POWER_SCALING).coerceAtLeast(0.0)
         val doesHit = Random.nextInt(100) < ((BASE_HIT_CHANCE + from.precision.value() * HIT_CHANCE_PRECISION_SCALING) - to.defense.value() * DEFENSE_HIT_CHANCE_REDUCTION_FACTOR)
         val isCrit = doesHit && Random.nextInt(100) < critChance
-        val totalDamage = (baseDamage * (from.damageGiven.value() * to.damageTaken.value() / 1e4) * (if (isCrit) critDamageMultiplier else 1.0) - to.defense.value()).coerceAtLeast(0.0)
+        val totalDamage = (baseDamage * (from.damageGivenScalar.value() * to.damageTakenScalar.value() / 1e4) * (if (isCrit) critDamageMultiplier else 1.0) - to.defense.value()).coerceAtLeast(0.0)
         if (doesHit) to.damage.addAdditiveMod(totalDamage, -1)
         return EffectResult.singleResult(
             source = from,

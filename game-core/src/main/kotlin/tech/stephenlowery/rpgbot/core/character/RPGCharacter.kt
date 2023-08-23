@@ -19,11 +19,11 @@ open class RPGCharacter(val id: Long, val name: String) {
     val precision = Attribute("Precision", DEFAULT_BASE_PRIMARY_ATTRIBUTE)
     val defense = Attribute("Defense", DEFAULT_BASE_PRIMARY_ATTRIBUTE)
 
-    val damageTaken = Attribute("Damage taken", 100.0)
-    val damageGiven = Attribute("Damage given", 100.0)
+    val damageTakenScalar = Attribute("Damage taken", 100.0)
+    val damageGivenScalar = Attribute("Damage given", 100.0)
 
-    val healingTaken = Attribute("Damage taken", 100.0)
-    val healingGiven = Attribute("Damage given", 100.0)
+    val healingTakenScalar = Attribute("Healing taken", 100.0)
+    val healingGivenScalar = Attribute("Healing given", 100.0)
 
     val criticalDamage = Attribute("Critical Damage", BASE_CRIT_EFFECT_MULTIPLIER * 100)
     val criticalChance = Attribute("Critical Hit Chance", BASE_CRIT_CHANCE)
@@ -92,7 +92,12 @@ open class RPGCharacter(val id: Long, val name: String) {
         health.max = health.value()
     }
 
-    private fun getSecondaryAttributes() = listOf(criticalChance, criticalDamage, damageGiven, damageTaken)
+    private fun getSecondaryAttributes() = listOf(criticalChance,
+                                                  criticalDamage,
+                                                  damageGivenScalar,
+                                                  damageTakenScalar,
+                                                  healingGivenScalar,
+                                                  healingTakenScalar)
 
     private fun cycleAttributeModifiers() {
         getAllAttributes().forEach(Attribute::cycleClearAndConsolidateModifiers)

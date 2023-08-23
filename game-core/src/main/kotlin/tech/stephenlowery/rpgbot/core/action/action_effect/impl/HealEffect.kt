@@ -20,7 +20,7 @@ class HealEffect(
         val critHealingMultiplier = from.criticalDamage.value() + from.precision.value() * CRIT_EFFECT_PRECISION_SCALAR
         val isCrit = Random.nextInt(100) < critChance && canCrit
         val baseHealing = Random.nextInt(min, max + 1) + (from.defense.value() + from.power.value()) / 2 * HEALING_SCALING_FROM_POWER_DEFENSE_SCALAR
-        val totalHealing = (baseHealing * (from.healingGiven.value() * to.healingTaken.value() / 1e4) * (if (isCrit) critHealingMultiplier else 1.0))
+        val totalHealing = (baseHealing * (from.healingGivenScalar.value() * to.healingTakenScalar.value() / 1e4) * (if (isCrit) critHealingMultiplier else 1.0))
         val succeeds = !canFail || succeedsByChance(from.precision.value())
         if (succeeds) {
             to.damage.addAdditiveMod(-totalHealing)
