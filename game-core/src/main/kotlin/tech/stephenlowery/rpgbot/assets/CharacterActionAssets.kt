@@ -7,6 +7,7 @@ import tech.stephenlowery.rpgbot.core.action.TargetingType
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.DamageHealthEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.DefendEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.HealEffect
+import tech.stephenlowery.rpgbot.core.action.action_effect.meta.DelayedEffect
 
 object CharacterActionAssets {
     
@@ -16,6 +17,8 @@ object CharacterActionAssets {
             GenericSelfDefend,
             SuperDefend,
             SelfHeal,
+            WindupAttack,
+            LongChargeUpAttack
         )
     
     val GenericAttack: CharacterAction
@@ -80,7 +83,53 @@ object CharacterActionAssets {
             ),
             cooldown = 3,
         )
-    
+
+    val WindupAttack: CharacterAction
+        get() = CharacterAction(
+            effect = DelayedEffect(
+                delayedActionEffect = DamageHealthEffect(20, 50),
+                occupySource = true,
+                delay = 2
+            ),
+            displayName = "Wind-up Attack",
+            description = "Gather energy for a turn before attacking.",
+            identifier = "action|windup",
+            cooldown = 4,
+            actionType = CharacterActionType.DAMAGE,
+            targetingType = TargetingType.SINGLE_TARGET,
+            strings = CharacterActionStrings(
+                queuedText = "You wind up a big attack",
+                actionText = "{source} winds up for a big attack.",
+                effectContinuedText = "{source} is still winding up their attack.",
+                successText = "They hit {target} for {value} damage.",
+                missedText = "But they missed. What a waste.",
+                critText = "{source} do a big ouchie on {target} for {value}.",
+            ),
+        )
+
+    val LongChargeUpAttack: CharacterAction
+        get() = CharacterAction(
+            effect = DelayedEffect(
+                delay = 3,
+                delayedActionEffect = DamageHealthEffect(50, 60),
+                occupySource = true
+            ),
+            displayName = "Charge-Up Attack",
+            description = "Take a couple turns to charge up a big attack",
+            identifier = "action|chargeup",
+            cooldown = 6,
+            targetingType = TargetingType.SINGLE_TARGET,
+            actionType = CharacterActionType.DAMAGE,
+            strings = CharacterActionStrings(
+                queuedText = "You start gathering energy for a big attack.",
+                actionText = "{source} begins gathering energy for a devastating attack!",
+                successText = "{source} blasts {target} for {value} damage.",
+                missedText = "{source} wastes 2 turns of waiting and misses their blast on {target}.",
+                effectContinuedText = "{source} is still gathering energy!",
+                critText = "{source}'s time spent gathering energy results in a devastating blast, hitting {target} for {value}."
+            )
+        )
+
     val BBEGGenericAttack: CharacterAction
         get() = CharacterAction(
             effect = DamageHealthEffect(13, 30),

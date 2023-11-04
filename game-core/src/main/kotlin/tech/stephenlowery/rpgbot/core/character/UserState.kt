@@ -8,5 +8,8 @@ enum class UserState {
     CHOOSING_ACTION,
     CHOOSING_TARGETS,
     WAITING,
+    OCCUPIED,
     DEAD
 }
+
+// TODO come up with a better name than "occupied"

@@ -67,7 +67,9 @@ open class RPGCharacter(val id: Long, val name: String) {
     }
 
     open fun resetForNextTurnAfterAction() {
-        characterState = UserState.CHOOSING_ACTION
+        if (characterState == UserState.WAITING) {
+            characterState = UserState.CHOOSING_ACTION
+        }
         cycleAttributeModifiers()
         cycleCooldowns()
     }
