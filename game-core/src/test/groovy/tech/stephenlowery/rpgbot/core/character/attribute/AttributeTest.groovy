@@ -1,4 +1,4 @@
-package tech.stephenlowery.rpgbot.core.character
+package tech.stephenlowery.rpgbot.core.character.attribute
 
 import spock.lang.Specification
 import tech.stephenlowery.rpgbot.utils.TestUtils

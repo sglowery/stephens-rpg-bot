@@ -8,8 +8,8 @@ class Attribute(
     val displayValueFn: (Int) -> String = Int::toString,
 ) {
     
-    var additiveModifiers = mutableListOf<AttributeModifier>()
-    var multiplyModifiers = mutableListOf(AttributeModifier(1.0, -1))
+    private var additiveModifiers = mutableListOf<AttributeModifier>()
+    private var multiplyModifiers = mutableListOf(AttributeModifier(1.0, -1))
     
     fun cycleClearAndConsolidateModifiers() {
         cycleModifiers()
@@ -65,7 +65,8 @@ class Attribute(
         val irreconcilable = temporaryAndUnique.sumOf { it.value }
         val bottomBound = min?.minus(irreconcilable + base)
         val topBound = max?.minus(irreconcilable + base)
-        return mutableListOf(AttributeModifier(value = permanent.value.coerceIn(bottomBound, topBound))).apply { addAll(temporaryAndUnique) }
+        val value = permanent.value.coerceIn(bottomBound, topBound)
+        return mutableListOf(AttributeModifier(value = value)).apply { addAll(temporaryAndUnique) }
     }
 }
 
