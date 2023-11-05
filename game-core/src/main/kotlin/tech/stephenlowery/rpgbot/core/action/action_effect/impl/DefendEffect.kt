@@ -5,10 +5,12 @@ import tech.stephenlowery.rpgbot.core.character.attribute.AttributeModifierType
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 
 class DefendEffect(
-    amount: Int = 50
+    value: Int = 50,
+    modDuration: Int = 1
 ) : StatModEffect(
-    min = amount.toDouble(),
+    value = value,
     duration = 1,
+    modDuration = modDuration,
     attributeModifierType = AttributeModifierType.ADDITIVE,
     statGetter = RPGCharacter::defense
 )

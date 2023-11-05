@@ -1,7 +1,7 @@
 package tech.stephenlowery.rpgbot.core.action.action_effect.impl
 
 import tech.stephenlowery.rpgbot.core.action.EffectResult
-import tech.stephenlowery.rpgbot.core.action.action_effect.ActionEffect
+import tech.stephenlowery.rpgbot.core.action.action_effect.meta.StatModEffect
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import tech.stephenlowery.rpgbot.core.game.GameConstants.BASE_CRIT_CHANCE
 import tech.stephenlowery.rpgbot.core.game.GameConstants.CRIT_EFFECT_PRECISION_SCALAR
@@ -11,10 +11,17 @@ import kotlin.random.Random
 class HealEffect(
     private val min: Int,
     private val max: Int,
+    modDuration: Int = -1,
+    duration: Int = 1,
     private val canFail: Boolean = false,
     private val canCrit: Boolean = true,
-) : ActionEffect() {
-    
+) : StatModEffect(
+    modDuration = modDuration,
+    duration = duration,
+    statGetter = RPGCharacter::damage,
+    attributeModifierType = AttributeModifierType.ADDITIVE
+) {
+
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
         val critChance = BASE_CRIT_CHANCE + from.precision.value()
         val critHealingMultiplier = from.criticalDamage.value() + from.precision.value() * CRIT_EFFECT_PRECISION_SCALAR

@@ -11,7 +11,26 @@ import tech.stephenlowery.rpgbot.core.game.GameConstants.HIT_CHANCE_PRECISION_SC
 import tech.stephenlowery.rpgbot.core.game.GameConstants.POWER_SCALING
 import kotlin.random.Random
 
-class DamageHealthEffect(private val min: Int, private val max: Int, duration: Int = 1) : ActionEffect(duration) {
+class DamageHealthEffect(
+    private val min: Int,
+    private val max: Int,
+    duration: Int = 1,
+    modDuration: Int = -1,
+    private val canMiss: Boolean = true,
+    private val canCrit: Boolean = true,
+    private val alwaysCrits: Boolean = false,
+) : StatModEffect(
+    modDuration = modDuration,
+    duration = duration,
+    statGetter = RPGCharacter::damage,
+    attributeModifierType = AttributeModifierType.ADDITIVE
+) {
+
+    init {
+        if (!canCrit && alwaysCrits) {
+            throw IllegalArgumentException("DamageHealthEffect initialized as always critting but being unable to.")
+        }
+    }
 
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
         val critChance = (from.criticalChance.value() + from.precision.value() - to.defense.value().toDouble() * DEFENSE_CRIT_CHANCE_REDUCTION_FACTOR).coerceAtLeast(0.0)
