@@ -32,8 +32,7 @@ open class RPGCharacter(val id: Long, val name: String) {
 
     var cooldowns = mutableMapOf<String, Int>()
 
-    val specialMessages
-        get() = CharacterTraits.getQualifiedCharacterTraitsFor(this).map { it.description }
+    fun getSpecialMessages(): List<String> = CharacterTraits.getQualifiedCharacterTraitsFor(this).map { it.description }
 
     fun getUnfilteredActions(): List<CharacterAction> = CharacterActionAssets.allActions
 
@@ -42,7 +41,7 @@ open class RPGCharacter(val id: Long, val name: String) {
     }
 
     fun isAlive(): Boolean = getActualHealth() > 0 && characterState != UserState.DEAD
-    
+
     fun isDead(): Boolean = !isAlive()
 
     fun getActualHealth(): Int = health.value() - damage.value()
@@ -93,25 +92,27 @@ open class RPGCharacter(val id: Long, val name: String) {
         }
     }
 
-    protected fun getAttributes() = listOf(health, power, precision, defense)
-
     protected fun setHealthBounds() {
         health.min = 0
         health.max = health.value()
     }
 
-    private fun getSecondaryAttributes() = listOf(criticalChance,
-                                                  criticalDamage,
-                                                  damageGivenScalar,
-                                                  damageTakenScalar,
-                                                  healingGivenScalar,
-                                                  healingTakenScalar)
+    private fun getPrimaryAttributes() = listOf(health, power, precision, defense)
+
+    private fun getSecondaryAttributes() = listOf(
+        criticalChance,
+        criticalDamage,
+        damageGivenScalar,
+        damageTakenScalar,
+        healingGivenScalar,
+        healingTakenScalar
+    )
 
     private fun cycleAttributeModifiers() {
         getAllAttributes().forEach(Attribute::cycleClearAndConsolidateModifiers)
     }
 
-    private fun getAllAttributes() = getAttributes() + getSecondaryAttributes()
+    private fun getAllAttributes() = getPrimaryAttributes() + getSecondaryAttributes()
 
     private fun cycleCooldowns() {
         cooldowns.replaceAll { _, turnsLeft -> turnsLeft - 1 }

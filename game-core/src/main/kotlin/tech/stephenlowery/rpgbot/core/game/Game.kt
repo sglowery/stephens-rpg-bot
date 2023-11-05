@@ -1,7 +1,6 @@
 package tech.stephenlowery.rpgbot.core.game
 
 import tech.stephenlowery.rpgbot.core.action.CharacterActionType
-import tech.stephenlowery.rpgbot.core.action.EffectResult
 import tech.stephenlowery.rpgbot.core.action.QueuedCharacterAction
 import tech.stephenlowery.rpgbot.core.action.QueuedCharacterActionResolvedResults
 import tech.stephenlowery.rpgbot.core.character.NonPlayerCharacter
@@ -67,7 +66,7 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
 
     fun containsPlayerWithID(userID: Long): Boolean = players.containsKey(userID)
 
-    fun allPlayersAreWaiting(): Boolean = waitingOn().isEmpty()
+    fun allPlayersReadyForTurnToResolve(): Boolean = waitingOn().isEmpty()
 
     fun waitingOn(): Collection<PlayerCharacter> = livingPlayers<PlayerCharacter>().filter {
         it.characterState in PLAYER_NOT_READY_STATES
@@ -83,8 +82,8 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
     open fun resolveActionsAndGetResults(): String {
         val npcActions = livingPlayers<NonPlayerCharacter>().mapNotNull { it.queueAction(this) }
         val queuedActions = listOf(actionQueue, npcActions).flatMap(::partitionAndShuffleActionQueue).toMutableList()
-        val results = resolveActions(queuedActions)
-        val stringResults = results.map(QueuedCharacterActionResolvedResults::stringResult).toMutableList()
+        val results: MutableCollection<QueuedCharacterActionResolvedResults> = resolveActions(queuedActions)
+        val stringResults: MutableList<String> = results.map { it.stringResult }.toMutableList()
         queuedActions.removeIf { it.isExpired() }
         actionQueue = queuedActions
         players.values.forEach { player ->

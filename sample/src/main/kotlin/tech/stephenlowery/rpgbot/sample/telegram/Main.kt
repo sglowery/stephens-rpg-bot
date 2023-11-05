@@ -1,4 +1,4 @@
-package tech.stephenlowery.rpgbot.sample
+package tech.stephenlowery.rpgbot.sample.telegram
 
 import tech.stephenlowery.telegram.TelegramRpgBot
 

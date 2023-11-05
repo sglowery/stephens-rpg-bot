@@ -3,8 +3,8 @@ package tech.stephenlowery.rpgbot.core.action.action_effect.impl
 import tech.stephenlowery.rpgbot.core.action.EffectResult
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.StatModEffect
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
-import tech.stephenlowery.rpgbot.core.game.GameConstants.BASE_CRIT_CHANCE
-import tech.stephenlowery.rpgbot.core.game.GameConstants.CRIT_EFFECT_PRECISION_SCALAR
+import tech.stephenlowery.rpgbot.core.character.attribute.AttributeModifierType
+import tech.stephenlowery.rpgbot.core.game.GameConstants.CRIT_DAMAGE_PRECISION_SCALAR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.HEALING_SCALING_FROM_POWER_DEFENSE_SCALAR
 import kotlin.random.Random
 
@@ -23,14 +23,10 @@ class HealEffect(
 ) {
 
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
-        val critChance = BASE_CRIT_CHANCE + from.precision.value()
-        val critHealingMultiplier = from.criticalDamage.value() + from.precision.value() * CRIT_EFFECT_PRECISION_SCALAR
-        val isCrit = Random.nextInt(100) < critChance && canCrit
-        val baseHealing = Random.nextInt(min, max + 1) + (from.defense.value() + from.power.value()) / 2 * HEALING_SCALING_FROM_POWER_DEFENSE_SCALAR
-        val totalHealing = (baseHealing * (from.healingGivenScalar.value() * to.healingTakenScalar.value() / 1e4) * (if (isCrit) critHealingMultiplier else 1.0))
-        val succeeds = !canFail || succeedsByChance(from.precision.value())
+        val (totalHealing, isCrit) = calculateHealing(from, to)
+        val succeeds = isSuccessful(from)
         if (succeeds) {
-            to.damage.addAdditiveMod(-totalHealing)
+            super.applyEffect(from, to, cycle, -totalHealing.toInt())
         }
         return EffectResult.singleResult(
             source = from,
@@ -40,6 +36,29 @@ class HealEffect(
             crit = isCrit && succeeds
         )
     }
-    
+
+    private fun calculateHealing(from: RPGCharacter, to: RPGCharacter): Pair<Double, Boolean> {
+        val critChance = from.criticalChance.value() + from.precision.value()
+        val isCrit = Random.nextInt(100) < critChance && canCrit
+        val totalHealing = baseHealing(from) * healingScalar(from, to) * critHealingMultiplierIfCrit(from, isCrit)
+        return Pair(totalHealing, isCrit)
+    }
+
+    private fun critHealingMultiplierIfCrit(from: RPGCharacter, isCrit: Boolean) = if (isCrit) critHealingMultiplier(from) else 1.0
+
+    private fun baseHealing(from: RPGCharacter): Double {
+        return (Random.nextInt(min, max + 1) + (from.defense.value() + from.power.value()) / 2 * HEALING_SCALING_FROM_POWER_DEFENSE_SCALAR).coerceAtLeast(0.0)
+    }
+
+    private fun healingScalar(from: RPGCharacter, to: RPGCharacter): Double {
+        return from.healingGivenScalar.value() * to.healingTakenScalar.value() / 1e4
+    }
+
+    private fun critHealingMultiplier(from: RPGCharacter): Double {
+        return from.criticalDamage.value() + from.precision.value() * CRIT_DAMAGE_PRECISION_SCALAR
+    }
+
+    private fun isSuccessful(from: RPGCharacter): Boolean = !canFail || succeedsByChance(from.precision.value())
+
     private fun succeedsByChance(fromPrecision: Int) = (Math.random() * 100) > (50 - fromPrecision * 3)
 }

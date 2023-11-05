@@ -72,4 +72,4 @@ class Attribute(
 
 private fun MutableList<AttributeModifier>.sum(): Double = this.getValuesOfActiveModifiers().sum()
 
-private fun MutableList<AttributeModifier>.getValuesOfActiveModifiers(): List<Double> = this.filter { !it.isExpired() }.map { it.value }
+private fun MutableList<AttributeModifier>.getValuesOfActiveModifiers(): List<Double> = this.filterNot { it.isExpired() }.map { it.value }

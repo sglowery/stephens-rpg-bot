@@ -10,7 +10,7 @@ import tech.stephenlowery.rpgbot.core.action.action_effect.impl.HealEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.DelayedEffect
 
 object CharacterActionAssets {
-    
+
     val allActions
         get() = listOf(
             GenericAttack,
@@ -20,7 +20,7 @@ object CharacterActionAssets {
             WindupAttack,
             LongChargeUpAttack
         )
-    
+
     val GenericAttack: CharacterAction
         get() = CharacterAction(
             effect = DamageHealthEffect(8, 17),
@@ -37,7 +37,7 @@ object CharacterActionAssets {
                 critText = "The generic attack is somehow more generically powerful and does a YUGE {value} damage to {target}!"
             )
         )
-    
+
     val GenericSelfDefend: CharacterAction
         get() = CharacterAction(
             effect = DefendEffect(75),
@@ -51,7 +51,7 @@ object CharacterActionAssets {
                 actionText = "{source} assumes a defensive stance."
             )
         )
-    
+
     val SuperDefend: CharacterAction
         get() = CharacterAction(
             effect = DefendEffect(80),
@@ -146,7 +146,7 @@ object CharacterActionAssets {
                 critText = "BBEGGenericAttack crit",
             )
         )
-    
+
     val BBEGGenericHeal: CharacterAction
         get() = CharacterAction(
             effect = HealEffect(24, 30),

@@ -176,7 +176,6 @@ object TelegramRpgBot {
             bot.deleteMessage(ChatId.fromId(userID), callbackQueryMessageId)
             return
         }
-        val chatId = message.chat.id
         if (newCharacterState == UserState.WAITING) {
             bot.editMessageText(
                 chatId = userID,

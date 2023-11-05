@@ -14,19 +14,19 @@ class EffectResult(
     var chained: Boolean = false,
     var other: String? = null,
 ) {
-    
+
     fun isNormalAttack(): Boolean = !continued && !expired && !chained
-    
+
     fun isSuccessfulNormalHit(): Boolean = !miss && !crit && isNormalAttack()
-    
+
     fun isNormalAttackMiss(): Boolean = miss && isNormalAttack()
-    
+
     fun isNormalAttackCritical(): Boolean = crit && !miss && isNormalAttack()
-    
+
     companion object {
-        
+
         val EMPTY get() = EffectResult()
-        
+
         fun singleResult(
             source: RPGCharacter? = null,
             target: RPGCharacter? = null,
@@ -50,19 +50,25 @@ class EffectResult(
                 other,
             )
         )
-        
+
         fun merge(results: Collection<EffectResult>) = merge(*results.toTypedArray())
-        
-        fun merge(vararg results: EffectResult): EffectResult = merge(allMustMiss = false, allMustCrit = false, results = results)
-        
-        private fun merge(allMustMiss: Boolean = false, allMustCrit: Boolean = false, vararg results: EffectResult): EffectResult {
-            return when (results.size) {
-                0    -> EMPTY
-                1    -> results.first()
-                else -> mergeMultipleResults(allMustMiss, allMustCrit, results)
-            }
+
+        private fun merge(vararg results: EffectResult): EffectResult = merge(
+            allMustMiss = false,
+            allMustCrit = false,
+            results = results
+        )
+
+        private fun merge(
+            allMustMiss: Boolean = false,
+            allMustCrit: Boolean = false,
+            vararg results: EffectResult,
+        ): EffectResult = when (results.size) {
+            0    -> EMPTY
+            1    -> results.first()
+            else -> mergeMultipleResults(allMustMiss, allMustCrit, results)
         }
-        
+
         private fun mergeMultipleResults(allMustMiss: Boolean, allMustCrit: Boolean, results: Array<out EffectResult>): EffectResult {
             return EffectResult(
                 source = results[0].source,
@@ -78,6 +84,6 @@ class EffectResult(
                 }
             )
         }
-        
+
     }
 }

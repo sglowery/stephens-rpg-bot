@@ -1,14 +1,18 @@
 package tech.stephenlowery.rpgbot.core.action.action_effect.impl
 
 import tech.stephenlowery.rpgbot.core.action.EffectResult
-import tech.stephenlowery.rpgbot.core.action.action_effect.ActionEffect
+import tech.stephenlowery.rpgbot.core.action.action_effect.meta.StatModEffect
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
+import tech.stephenlowery.rpgbot.core.character.attribute.AttributeModifierType
 import tech.stephenlowery.rpgbot.core.game.GameConstants.BASE_HIT_CHANCE
-import tech.stephenlowery.rpgbot.core.game.GameConstants.CRIT_EFFECT_PRECISION_SCALAR
+import tech.stephenlowery.rpgbot.core.game.GameConstants.CRIT_CHANCE_PRECISION_SCALAR
+import tech.stephenlowery.rpgbot.core.game.GameConstants.CRIT_DAMAGE_POWER_SCALAR
+import tech.stephenlowery.rpgbot.core.game.GameConstants.CRIT_DAMAGE_PRECISION_SCALAR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFENSE_CRIT_CHANCE_REDUCTION_FACTOR
+import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFENSE_DAMAGE_REDUCTION_FACTOR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFENSE_HIT_CHANCE_REDUCTION_FACTOR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.HIT_CHANCE_PRECISION_SCALING
-import tech.stephenlowery.rpgbot.core.game.GameConstants.POWER_SCALING
+import tech.stephenlowery.rpgbot.core.game.GameConstants.POWER_DAMAGE_SCALAR
 import kotlin.random.Random
 
 class DamageHealthEffect(
@@ -33,13 +37,11 @@ class DamageHealthEffect(
     }
 
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
-        val critChance = (from.criticalChance.value() + from.precision.value() - to.defense.value().toDouble() * DEFENSE_CRIT_CHANCE_REDUCTION_FACTOR).coerceAtLeast(0.0)
-        val critDamageMultiplier = ((from.criticalDamage.value() / 100.0) + CRIT_EFFECT_PRECISION_SCALAR * (from.precision.value() - to.precision.value())).coerceAtLeast(1.0)
-        val baseDamage = (Random.nextInt(min, max + 1) + from.power.value() * POWER_SCALING).coerceAtLeast(0.0)
-        val doesHit = Random.nextInt(100) < ((BASE_HIT_CHANCE + from.precision.value() * HIT_CHANCE_PRECISION_SCALING) - to.defense.value() * DEFENSE_HIT_CHANCE_REDUCTION_FACTOR)
-        val isCrit = doesHit && Random.nextInt(100) < critChance
-        val totalDamage = (baseDamage * (from.damageGivenScalar.value() * to.damageTakenScalar.value() / 1e4) * (if (isCrit) critDamageMultiplier else 1.0) - to.defense.value()).coerceAtLeast(0.0)
-        if (doesHit) to.damage.addAdditiveMod(totalDamage, -1)
+        val (totalDamage, isCrit) = calculateDamage(from, to)
+        val doesHit = isSuccessful(from, to)
+        if (doesHit) {
+            super.applyEffect(from, to, cycle, totalDamage.toInt())
+        }
         return EffectResult.singleResult(
             source = from,
             target = to,
@@ -47,6 +49,66 @@ class DamageHealthEffect(
             miss = !doesHit,
             crit = isCrit
         )
+    }
+
+    private fun calculateDamage(from: RPGCharacter, to: RPGCharacter): Pair<Double, Boolean> {
+        val isCrit = alwaysCrits || (canCrit && Random.nextInt(100) < critChance(from, to))
+        val totalDamage = totalBaseDamage(from, to) * damageScalar(from, to) * critDamageMultiplierIfCrit(from, isCrit)
+        return Pair(totalDamage.coerceAtLeast(0.0), isCrit)
+    }
+
+    private fun totalBaseDamage(from: RPGCharacter, to: RPGCharacter): Double {
+        return (baseDamage(from) - targetDamageReduction(to)).coerceAtLeast(0.0)
+    }
+
+    private fun baseDamage(from: RPGCharacter): Double {
+        return Random.nextInt(min, max + 1) + from.power.value() * POWER_DAMAGE_SCALAR
+    }
+
+    private fun targetDamageReduction(to: RPGCharacter): Double {
+        return to.defense.value().toDouble() * DEFENSE_DAMAGE_REDUCTION_FACTOR
+    }
+
+    private fun damageScalar(from: RPGCharacter, to: RPGCharacter): Double {
+        return from.damageGivenScalar.value() * to.damageTakenScalar.value() / 1e4
+    }
+
+    private fun critDamageMultiplierIfCrit(from: RPGCharacter, isCrit: Boolean): Double {
+        return if (isCrit) critDamageMultiplier(from) else 1.0
+    }
+
+    private fun critDamageMultiplier(from: RPGCharacter): Double {
+        return from.criticalDamage.value() +
+                (from.precision.value() * CRIT_DAMAGE_PRECISION_SCALAR) +
+                (from.power.value() * CRIT_DAMAGE_POWER_SCALAR)
+    }
+
+    private fun critChance(from: RPGCharacter, to: RPGCharacter): Double {
+        return (sourceCritChance(from) - targetCritChanceReduction(to)).coerceAtLeast(0.0)
+    }
+
+    private fun sourceCritChance(from: RPGCharacter): Double {
+        return from.criticalChance.value() + from.precision.value() * CRIT_CHANCE_PRECISION_SCALAR
+    }
+
+    private fun targetCritChanceReduction(to: RPGCharacter): Double {
+        return to.defense.value() * DEFENSE_CRIT_CHANCE_REDUCTION_FACTOR
+    }
+
+    private fun isSuccessful(from: RPGCharacter, to: RPGCharacter): Boolean {
+        return !canMiss || succeedsByChance(from, to)
+    }
+
+    private fun succeedsByChance(from: RPGCharacter, to: RPGCharacter): Boolean {
+        return Random.nextInt(100) < (sourceHitChance(from) - targetHitChanceReduction(to))
+    }
+
+    private fun sourceHitChance(from: RPGCharacter): Double {
+        return BASE_HIT_CHANCE + from.precision.value() * HIT_CHANCE_PRECISION_SCALING
+    }
+
+    private fun targetHitChanceReduction(to: RPGCharacter): Double {
+        return to.defense.value() * DEFENSE_HIT_CHANCE_REDUCTION_FACTOR
     }
 
 }
