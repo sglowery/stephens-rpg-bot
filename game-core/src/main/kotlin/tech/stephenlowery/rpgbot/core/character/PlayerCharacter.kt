@@ -50,7 +50,8 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         if (newQueuedCharacterAction.action.targetingType == TargetingType.SELF) {
             newQueuedCharacterAction.target = this
         }
-        characterState = if (newQueuedCharacterAction.action.targetingType != TargetingType.SELF) UserState.CHOOSING_TARGETS else UserState.WAITING
+        characterState = if (action.targetingType.requiresChoosingTarget()) UserState.CHOOSING_TARGETS else UserState.WAITING
+        setCooldownForAction(action)
         return newQueuedCharacterAction
     }
 

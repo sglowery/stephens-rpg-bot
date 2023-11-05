@@ -59,6 +59,12 @@ open class RPGCharacter(val id: Long, val name: String) {
         }
     }
 
+    fun setCooldownForAction(action: CharacterAction) {
+        if (action.cooldown > 0) {
+            cooldowns[action.identifier] = action.cooldown
+        }
+    }
+
     open fun resetCharacter() {
         getAllAttributes().forEach(Attribute::reset)
         characterState = UserState.NONE
