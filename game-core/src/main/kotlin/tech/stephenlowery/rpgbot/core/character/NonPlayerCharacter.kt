@@ -1,6 +1,7 @@
 package tech.stephenlowery.rpgbot.core.character
 
 import tech.stephenlowery.rpgbot.core.action.QueuedCharacterAction
+import tech.stephenlowery.rpgbot.core.action.TargetingType
 import tech.stephenlowery.rpgbot.core.character.attribute.Attribute
 import tech.stephenlowery.rpgbot.core.game.Game
 
@@ -25,7 +26,22 @@ class NonPlayerCharacter(
         setHealthBounds()
     }
 
-    fun getQueuedAction(game: Game): QueuedCharacterAction? = actionDecidingBehavior?.invoke(this, game)
+    fun queueAction(game: Game): QueuedCharacterAction? {
+        return getQueuedAction(game).also { setTargetForAction(it) }
+    }
+
+    private fun getQueuedAction(game: Game): QueuedCharacterAction? = actionDecidingBehavior?.invoke(this, game)
+
+    private fun setTargetForAction(action: QueuedCharacterAction?) {
+        if (action?.target != null) {
+            return
+        }
+        action?.target = when(action?.action?.targetingType) {
+            null -> null
+            TargetingType.SELF -> this
+            else -> action.target
+        }
+    }
 
     private fun initAttributes(vararg valueAttributePairs: Pair<Int?, Attribute>) {
         valueAttributePairs.filter { it.first != null }.forEach { it.second.base = it.first!!.toDouble() }
