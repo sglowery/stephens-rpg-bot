@@ -126,7 +126,7 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
         System.gc()
     }
 
-    open fun numberOfPlayersIsInvalid() = numberOfPlayers() < 2
+    open fun numberOfPlayersIsValid() = numberOfPlayers() >= 2
 
     protected fun startGameStateAndPrepCharacters() {
         hasStarted = true

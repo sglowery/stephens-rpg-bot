@@ -14,8 +14,6 @@ import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import tech.stephenlowery.rpgbot.core.character.UserState
 import tech.stephenlowery.rpgbot.core.game.Game
 import tech.stephenlowery.rpgbot.core.game.GameManager
-import tech.stephenlowery.telegram.extensions.editMessageText
-import tech.stephenlowery.telegram.extensions.sendMessage
 import tech.stephenlowery.telegram.formatters.formatTelegramUserLink
 import tech.stephenlowery.telegram.handlers.cancelgame.CancelGameConfirmCommandHandler
 import tech.stephenlowery.telegram.handlers.cancelgame.GameCanBeCanceled
@@ -56,13 +54,13 @@ object TelegramRpgBot {
 
     private fun newGameCommand(bot: Bot, update: Update, message: Message) {
         val result = NewGameCommandHandler.execute(message)
-        bot.sendMessage(message.chat.id, result.message)
+        bot.sendMessage(ChatId.fromId(message.chat.id), result.message)
     }
 
     private fun joinGameCommand(bot: Bot, update: Update, message: Message) {
         val result = JoinGameCommandHandler.execute(message)
         val replyToMessageId = if (result is JoinedGame) null else message.messageId
-        bot.sendMessage(message.chat.id, result.message, replyToMessageId = replyToMessageId)
+        bot.sendMessage(ChatId.fromId(message.chat.id), result.message, replyToMessageId = replyToMessageId)
     }
 
     private fun startGameCommand(bot: Bot, update: Update, message: Message) {
@@ -75,10 +73,10 @@ object TelegramRpgBot {
             parseMode = ParseMode.MARKDOWN
             replyToMessageID = null
         }
-        bot.sendMessage(chatID, result.message, parseMode = parseMode, replyToMessageId = replyToMessageID)
+        bot.sendMessage(ChatId.fromId(chatID), result.message, parseMode = parseMode, replyToMessageId = replyToMessageID)
         if (game?.hasStarted == true && result is GameStarting) {
             result.messages.forEach { (playerId, message) ->
-                bot.sendMessage(playerId, message)
+                bot.sendMessage(ChatId.fromId(playerId), message)
             }
             // determine roles, let players pick archetypes and skills
             // should probably just happen in the game class
@@ -90,14 +88,14 @@ object TelegramRpgBot {
         val userId = player.id
         val keyboard = skills.map { InlineKeyboardButton.CallbackData(it.displayName, "pickSkill|${it.identifier}") }.chunked(2)
         val replyMarkup = InlineKeyboardMarkup.create(keyboard)
-        bot.sendMessage(userId, "Pick a skill", replyMarkup = replyMarkup)
+        bot.sendMessage(ChatId.fromId(userId), "Pick a skill", replyMarkup = replyMarkup)
         // TODO implement players choosing skills instead of always having them randomly assigned
     }
 
     private fun characterStatsCommand(bot: Bot, update: Update, message: Message) {
         val response = message.from?.let { GameManager.findCharacter(it.id)?.getCharacterStatusText() } ?: return
         bot.sendMessage(
-            chatId = message.chat.id,
+            chatId = ChatId.fromId(message.chat.id),
             replyToMessageId = message.messageId,
             text = response
         )
@@ -114,7 +112,7 @@ object TelegramRpgBot {
             return
         }
         val names = waitingOn.joinToString(separator = ", ", transform = ::formatTelegramUserLink)
-        bot.sendMessage(chatID, "Waiting on the following player(s): $names.", parseMode = ParseMode.MARKDOWN)
+        bot.sendMessage(ChatId.fromId(chatID), "Waiting on the following player(s): $names.", parseMode = ParseMode.MARKDOWN)
     }
 
     private fun cancelGameCommandConfirm(bot: Bot, update: Update, message: Message) {
@@ -128,7 +126,7 @@ object TelegramRpgBot {
             )
             replyMarkup = InlineKeyboardMarkup.createSingleRowKeyboard(choices)
         }
-        bot.sendMessage(chatID, result.message, replyToMessageId = message.messageId, replyMarkup = replyMarkup)
+        bot.sendMessage(ChatId.fromId(chatID), result.message, replyToMessageId = message.messageId, replyMarkup = replyMarkup)
     }
 
     private fun cancelGameChoiceHandler(callbackDataSplit: List<String>, bot: Bot, update: Update) = when (callbackDataSplit[1].lowercase()) {
@@ -137,11 +135,11 @@ object TelegramRpgBot {
     }.invoke(bot, update.message!!)
 
     private fun cancelGameYes(bot: Bot, message: Message) {
-        bot.sendMessage(message.chat.id, CancelGameConfirmCommandHandler.getGameCanceledMessage(message.from!!.firstName))
+        bot.sendMessage(ChatId.fromId(message.chat.id), CancelGameConfirmCommandHandler.getGameCanceledMessage(message.from!!.firstName))
     }
 
     private fun cancelGameNo(bot: Bot, message: Message) {
-        bot.sendMessage(message.chat.id, "K")
+        bot.sendMessage(ChatId.fromId(message.chat.id), "K")
     }
 
     private fun sendPlayersInGameActions(bot: Bot, chatID: Long) {
@@ -149,10 +147,10 @@ object TelegramRpgBot {
         game.getHumanPlayers().values.living().filter { it.characterState == UserState.CHOOSING_ACTION }.forEach {
             val keyboard = makeKeyboardFromPlayerActions(it.getAvailableActions())
             val replyMarkup = InlineKeyboardMarkup.create(keyboard)
-            bot.sendMessage(it.id, it.getPreActionText() + "\n\nPick an action.", replyMarkup = replyMarkup)
+            bot.sendMessage(ChatId.fromId(it.id), it.getPreActionText() + "\n\nPick an action.", replyMarkup = replyMarkup)
         }
         game.getHumanPlayers().values.living().filter { it.characterState == UserState.OCCUPIED }.forEach {
-            bot.sendMessage(it.id, "You are occupied this turn and can't choose an action.")
+            bot.sendMessage(ChatId.fromId(it.id), "You are occupied this turn and can't choose an action.")
         }
     }
 
@@ -178,7 +176,7 @@ object TelegramRpgBot {
         }
         if (newCharacterState == UserState.WAITING) {
             bot.editMessageText(
-                chatId = userID,
+                chatId = ChatId.fromId(userID),
                 messageId = callbackQueryMessageId,
                 inlineMessageId = null,
                 text = queuedText
@@ -197,7 +195,7 @@ object TelegramRpgBot {
         val character = GameManager.findCharacter(playerId)!!
         val targets = game.getTargetsForCharacter(character)
         bot.editMessageText(
-            chatId = character.id,
+            chatId = ChatId.fromId(character.id),
             messageId = messageId,
             inlineMessageId = null,
             text = character.getPreActionText() + "\n\nChoose a target.",
@@ -215,7 +213,7 @@ object TelegramRpgBot {
             val target = callbackQuery.data.split("|")[1].toLong()
             game.addTargetToQueuedCharacterAction(userId, target)
             bot.editMessageText(
-                chatId = userId,
+                chatId = ChatId.fromId(userId),
                 messageId = callbackQuery.message!!.messageId,
                 inlineMessageId = null,
                 text = fromCharacter.queuedAction!!.getQueuedText()
@@ -229,14 +227,14 @@ object TelegramRpgBot {
     // TODO maybe move this code to a handler?
     private fun resolveActionsInGame(bot: Bot, game: Game) {
         val resolvedActionsText = game.resolveActionsAndGetResults()
-        bot.sendMessage(game.id, resolvedActionsText, replyMarkup = ReplyKeyboardRemove(), parseMode = ParseMode.MARKDOWN)
+        bot.sendMessage(ChatId.fromId(game.id), resolvedActionsText, replyMarkup = ReplyKeyboardRemove(), parseMode = ParseMode.MARKDOWN)
         val deadPlayers = game.getHumanPlayers().values.dead()
         deadPlayers.forEach { player ->
-            bot.sendMessage(player.id, "You died in the previous round and have been removed from the game.")
+            bot.sendMessage(ChatId.fromId(player.id), "You died in the previous round and have been removed from the game.")
         }
         game.removeCharacters(deadPlayers)
         if (game.isOver()) {
-            bot.sendMessage(game.id, game.getGameEndedText())
+            bot.sendMessage(ChatId.fromId(game.id), game.getGameEndedText())
             GameManager.cancelGame(game.id)
         } else {
             if (game.allPlayersReadyForTurnToResolve()) {

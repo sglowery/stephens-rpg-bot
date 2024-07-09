@@ -15,7 +15,7 @@ object StartGameCommandHandler : TelegramCommandHandler<StartGameResult> {
             userId == null                     -> UserIdNull
             game == null                       -> NoGameExists
             !game.containsPlayerWithID(userId) -> UserNotInGame
-            game.numberOfPlayersIsInvalid()    -> IllegalNumberOfUsers
+            !game.numberOfPlayersIsValid()     -> IllegalNumberOfUsers
             userId != game.initiatorId         -> UserNotInitiator
             else                               -> startGame(game)
         }

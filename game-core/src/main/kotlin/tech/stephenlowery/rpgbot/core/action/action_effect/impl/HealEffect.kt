@@ -33,7 +33,7 @@ class HealEffect(
             target = to,
             miss = !succeeds,
             value = totalHealing.toInt(),
-            crit = isCrit && succeeds
+            crit = isCrit
         )
     }
 
@@ -55,7 +55,7 @@ class HealEffect(
     }
 
     private fun critHealingMultiplier(from: RPGCharacter): Double {
-        return from.criticalDamage.value() + from.precision.value() * CRIT_DAMAGE_PRECISION_SCALAR
+        return from.criticalEffectScalar.value() + from.precision.value() * CRIT_DAMAGE_PRECISION_SCALAR
     }
 
     private fun isSuccessful(from: RPGCharacter): Boolean = !canFail || succeedsByChance(from.precision.value())

@@ -37,24 +37,29 @@ class DamageHealthEffect(
     }
 
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
-        val (totalDamage, isCrit) = calculateDamage(from, to)
+        val isCrit = isCrit(from, to)
         val doesHit = isSuccessful(from, to)
+        var totalDamage = 0
         if (doesHit) {
-            super.applyEffect(from, to, cycle, totalDamage.toInt())
+            totalDamage = calculateDamage(from, to, isCrit).toInt()
+            super.applyEffect(from, to, cycle, totalDamage)
         }
         return EffectResult.singleResult(
             source = from,
             target = to,
-            value = totalDamage.toInt(),
+            value = totalDamage,
             miss = !doesHit,
             crit = isCrit
         )
     }
 
-    private fun calculateDamage(from: RPGCharacter, to: RPGCharacter): Pair<Double, Boolean> {
-        val isCrit = alwaysCrits || (canCrit && Random.nextInt(100) < critChance(from, to))
+    private fun isCrit(from: RPGCharacter, to: RPGCharacter): Boolean {
+        return alwaysCrits || (canCrit && Random.nextInt(100) < critChance(from, to))
+    }
+
+    private fun calculateDamage(from: RPGCharacter, to: RPGCharacter, isCrit: Boolean): Double {
         val totalDamage = totalBaseDamage(from, to) * damageScalar(from, to) * critDamageMultiplierIfCrit(from, isCrit)
-        return Pair(totalDamage.coerceAtLeast(0.0), isCrit)
+        return totalDamage.coerceAtLeast(0.0)
     }
 
     private fun totalBaseDamage(from: RPGCharacter, to: RPGCharacter): Double {
@@ -74,11 +79,11 @@ class DamageHealthEffect(
     }
 
     private fun critDamageMultiplierIfCrit(from: RPGCharacter, isCrit: Boolean): Double {
-        return if (isCrit) critDamageMultiplier(from) else 1.0
+        return if (isCrit) critDamageMultiplier(from) / 100.0 else 1.0
     }
 
     private fun critDamageMultiplier(from: RPGCharacter): Double {
-        return from.criticalDamage.value() +
+        return from.criticalEffectScalar.value() +
                 (from.precision.value() * CRIT_DAMAGE_PRECISION_SCALAR) +
                 (from.power.value() * CRIT_DAMAGE_POWER_SCALAR)
     }

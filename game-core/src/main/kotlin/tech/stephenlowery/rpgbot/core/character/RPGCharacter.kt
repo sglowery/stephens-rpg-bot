@@ -25,7 +25,7 @@ open class RPGCharacter(val id: Long, val name: String) {
     val healingTakenScalar = Attribute("Healing taken", 100.0)
     val healingGivenScalar = Attribute("Healing given", 100.0)
 
-    val criticalDamage = Attribute("Critical Damage", BASE_CRIT_EFFECT_MULTIPLIER * 100)
+    val criticalEffectScalar = Attribute("Critical Effect", BASE_CRIT_EFFECT_MULTIPLIER * 100)
     val criticalChance = Attribute("Critical Hit Chance", BASE_CRIT_CHANCE)
 
     var characterState: UserState = UserState.NONE
@@ -101,7 +101,7 @@ open class RPGCharacter(val id: Long, val name: String) {
 
     private fun getSecondaryAttributes() = listOf(
         criticalChance,
-        criticalDamage,
+        criticalEffectScalar,
         damageGivenScalar,
         damageTakenScalar,
         healingGivenScalar,

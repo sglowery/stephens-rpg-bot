@@ -16,11 +16,7 @@ class CharacterAction(
     triggers: (CharacterActionTriggers.Builder.() -> Unit) = { },
 ) {
 
-    private val triggers: CharacterActionTriggers
-
-    init {
-        this.triggers = CharacterActionTriggers.Builder().apply(triggers).build()
-    }
+    private val triggers: CharacterActionTriggers = CharacterActionTriggers.Builder().apply(triggers).build()
 
     fun applyEffect(source: RPGCharacter, target: RPGCharacter, cycle: Int): List<EffectResult> {
         return effect.applyEffect(source, target, cycle).getTriggeredEffects(source, target, cycle)

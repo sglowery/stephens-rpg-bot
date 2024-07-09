@@ -15,8 +15,8 @@ class AsymmetricTeamFight(id: Long, initiatorId: Long, initiatorName: String) : 
         assignPlayersToTeams()
         return teamPlayerMap.flatMap { (team, playerIds) ->
             val message = when (team) {
-                Team.A -> "You're on Team A. You're not evil."
-                Team.B -> "You're on Team B. You're evil."
+                Team.A -> "You're on Team A."
+                Team.B -> "You're on Team B."
             }
             return@flatMap playerIds.map { playerId -> playerId to message }
         }

@@ -47,7 +47,7 @@ object CharacterTraits {
         ) {
             withEffects {
                 criticalChance.addAdditiveMod(30.0, name = "precise")
-                criticalDamage.addAdditiveMod(50.0, name = "precise")
+                criticalEffectScalar.addAdditiveMod(50.0, name = "precise")
             }
         }
 
