@@ -1,13 +1,15 @@
 package tech.stephenlowery.rpgbot.assets
 
-import tech.stephenlowery.rpgbot.core.action.CharacterAction
-import tech.stephenlowery.rpgbot.core.action.CharacterActionStrings
-import tech.stephenlowery.rpgbot.core.action.CharacterActionType
-import tech.stephenlowery.rpgbot.core.action.TargetingType
+import tech.stephenlowery.rpgbot.core.action.*
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.DamageHealthEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.DefendEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.HealEffect
+import tech.stephenlowery.rpgbot.core.action.action_effect.meta.ComposeEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.DelayedEffect
+import tech.stephenlowery.rpgbot.core.action.action_effect.meta.StatModEffect
+import tech.stephenlowery.rpgbot.core.action.action_effect.impl.VampirismEffect
+import tech.stephenlowery.rpgbot.core.character.RPGCharacter
+import tech.stephenlowery.rpgbot.core.character.attribute.AttributeModifierType
 
 object CharacterActionAssets {
 
@@ -18,7 +20,9 @@ object CharacterActionAssets {
             SuperDefend,
             SelfHeal,
             WindupAttack,
-            LongChargeUpAttack
+            LongChargeUpAttack,
+            LifeSteal,
+            AmpUp,
         )
 
     val GenericAttack: CharacterAction
@@ -66,7 +70,7 @@ object CharacterActionAssets {
             ),
             cooldown = 3
         )
-    
+
     val SelfHeal: CharacterAction
         get() = CharacterAction(
             effect = HealEffect(9, 23),
@@ -110,7 +114,7 @@ object CharacterActionAssets {
     val LongChargeUpAttack: CharacterAction
         get() = CharacterAction(
             effect = DelayedEffect(
-                delay = 3,
+                delay = 2,
                 delayedActionEffect = DamageHealthEffect(50, 60),
                 occupySource = true
             ),
@@ -127,6 +131,62 @@ object CharacterActionAssets {
                 missedText = "{source} wastes 2 turns of waiting and misses their blast on {target}.",
                 effectContinuedText = "{source} is still gathering energy!",
                 critText = "{source}'s time spent gathering energy results in a devastating blast, hitting {target} for {value}."
+            )
+        )
+
+    val LifeSteal: CharacterAction
+        get() = CharacterAction(
+            effect = VampirismEffect(
+                proportion = 0.5,
+                min = 15,
+                max = 25,
+                canMiss = false
+            ),
+            displayName = "Life Steal",
+            description = "Life steal your blast life.",
+            identifier = "action|lifesteal",
+            cooldown = 4,
+            actionType = CharacterActionType.DAMAGE,
+            targetingType = TargetingType.SINGLE_TARGET,
+            strings = CharacterActionStrings(
+                queuedText = "You get ready to steal some life.",
+                actionText = "{source} steals {target}'s life!",
+                successText = "They do {value} damage and heal themself for {other}.",
+                critText = "They do {value} damage and heal themself for {other}."
+            )
+        )
+
+    val AmpUp: CharacterAction
+        get() = CharacterAction(
+            effect = ComposeEffect(
+                inner = DamageHealthEffect(min = 15, max = 25),
+                outer = StatModEffect(statGetter = RPGCharacter::power, modDuration = 5, attributeModifierType = AttributeModifierType.ADDITIVE),
+                compose = { from, to, cycle, outer, innerResults ->
+                    val damageDone = innerResults.filter { !it.miss && it.target == to }.sumOf { it.value }
+                    val powerIncrease = (damageDone * 0.75).toInt()
+                    outer.applyEffect(from, from, cycle, powerIncrease)
+                    EffectResult.singleResult(
+                        source = from,
+                        target = to,
+                        value = damageDone,
+                        miss = innerResults.first().miss,
+                        crit = innerResults.first().crit,
+                        other = powerIncrease.toString()
+                    )
+                }
+            ),
+            displayName = "Amp Up",
+            description = "Amp up your blast life.",
+            identifier = "action|amp",
+            cooldown = 4,
+            actionType = CharacterActionType.DAMAGE,
+            targetingType = TargetingType.SINGLE_TARGET,
+            strings = CharacterActionStrings(
+                queuedText = "You start amping yourself up",
+                actionText = "{source} is amping up!",
+                successText = "They hurt {target} for {value} and temporarily increases their power by {other}!",
+                critText = "They hurt {target} for {value} and temporarily increases their power by {other}!",
+                missedText = "Unfortunately, they fizzle out."
             )
         )
 
