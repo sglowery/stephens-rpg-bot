@@ -28,7 +28,7 @@ class DelayedEffect(
 
     private fun handleFirstApplication(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
         occupyUserIfApplicable(from)
-        return EffectResult.singleResult(source = from, target = to, value = 0)
+        return EffectResult.singleResult(source = from, target = to, occupied = occupySource, value = 0)
     }
 
 
@@ -40,12 +40,24 @@ class DelayedEffect(
 
     private fun shouldBeApplied(cycle: Int): Boolean = durationIsMet(cycle) && !applied
 
-    private fun durationIsMet(cycle: Int): Boolean = cycle >= delay
+    private fun durationIsMet(cycle: Int): Boolean = cycle == delay
 
     private fun applyDelayedEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
         unoccupyUserIfApplicable(from)
         applied = true
-        return delayedActionEffect.applyEffect(from, to, cycle)
+        val delayedActionEffectResult = delayedActionEffect.applyEffect(from, to, cycle)
+        return EffectResult.singleResult(
+            source = from,
+            target = to,
+            value = delayedActionEffectResult.first().value,
+            crit = delayedActionEffectResult.first().crit,
+            miss = delayedActionEffectResult.first().miss,
+            expired = delayedActionEffectResult.first().expired,
+            chained = delayedActionEffectResult.first().chained,
+            occupied = false,
+            continued = true,
+            other = delayedActionEffectResult.first().other,
+        )
     }
 
     private fun unoccupyUserIfApplicable(from: RPGCharacter) {

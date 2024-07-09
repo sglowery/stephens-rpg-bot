@@ -12,6 +12,7 @@ class EffectResult(
     var continued: Boolean = false,
     var expired: Boolean = false,
     var chained: Boolean = false,
+    var occupied: Boolean = false,
     var other: String? = null,
 ) {
 
@@ -34,6 +35,7 @@ class EffectResult(
             continued: Boolean = false,
             expired: Boolean = false,
             chained: Boolean = false,
+            occupied: Boolean = false,
             other: String? = null,
         ): List<EffectResult> = singletonList(
             EffectResult(
@@ -45,6 +47,7 @@ class EffectResult(
                 continued,
                 expired,
                 chained,
+                occupied,
                 other,
             )
         )

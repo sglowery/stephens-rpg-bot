@@ -16,6 +16,7 @@ data class CharacterActionStrings(
 
     fun getFormattedEffectResultString(effectResult: EffectResult): String {
         return when {
+            effectResult.occupied                          -> ""
             effectResult.miss                              -> this.missedText
             effectResult.crit && !effectResult.miss        -> this.critText
             effectResult.continued && effectResult.expired -> this.effectOverText
@@ -36,8 +37,10 @@ data class CharacterActionStrings(
     private fun getActionText(effectResult: EffectResult, actionText: String): String =
         if (effectResult.continued || effectResult.expired || effectResult.chained || actionText.isEmpty())
             ""
-        else
+        else if (!effectResult.occupied)
             actionText + "\n"
+        else
+            actionText
 
     private fun String.formatFromEffectResult(effectResult: EffectResult): String {
         return this.replace("{target}", effectResult.target?.name ?: "")

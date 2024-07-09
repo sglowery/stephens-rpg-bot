@@ -9,22 +9,26 @@ import tech.stephenlowery.rpgbot.core.game.StatGetterFn
 open class StatModEffect(
     protected var value: Int? = null,
     protected val modDuration: Int = -1,
-    duration: Int,
+    duration: Int = 1,
     protected val statGetter: StatGetterFn,
     protected val attributeModifierType: AttributeModifierType,
 ) : ActionEffect(duration) {
 
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
+        return addModifier(from, to)
+    }
+
+    fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int, value: Int): List<EffectResult> {
+        this.value = value
+        return this.addModifier(from, to)
+    }
+
+    private fun addModifier(from: RPGCharacter, to: RPGCharacter): List<EffectResult> {
         when (attributeModifierType) {
             AttributeModifierType.ADDITIVE       -> statGetter(to).addAdditiveMod(value!!.toDouble(), modDuration)
             AttributeModifierType.MULTIPLICATIVE -> statGetter(to).addMultiplicativeMod(value!!.toDouble(), modDuration)
         }
         return EffectResult.singleResult(source = from, target = to, value = value!!)
-    }
-
-    fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int, value: Int): List<EffectResult> {
-        this.value = value
-        return applyEffect(from, to, cycle)
     }
 
 }
