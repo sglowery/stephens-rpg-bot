@@ -45,18 +45,18 @@ class DelayedEffect(
     private fun applyDelayedEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
         unoccupyUserIfApplicable(from)
         applied = true
-        val delayedActionEffectResult = delayedActionEffect.applyEffect(from, to, cycle)
+        val delayedActionEffectResult = delayedActionEffect.applyEffect(from, to, cycle).first()
         return EffectResult.singleResult(
             source = from,
             target = to,
-            value = delayedActionEffectResult.first().value,
-            crit = delayedActionEffectResult.first().crit,
-            miss = delayedActionEffectResult.first().miss,
-            expired = delayedActionEffectResult.first().expired,
-            chained = delayedActionEffectResult.first().chained,
+            value = delayedActionEffectResult.value,
+            crit = delayedActionEffectResult.crit,
+            miss = delayedActionEffectResult.miss,
+            expired = true,
+            chained = delayedActionEffectResult.chained,
             occupied = false,
-            continued = true,
-            other = delayedActionEffectResult.first().other,
+            continued = false,
+            other = delayedActionEffectResult.other,
         )
     }
 
@@ -65,23 +65,5 @@ class DelayedEffect(
             from.characterState = UserState.WAITING
         }
     }
-
-    //    override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
-//    val result = applyIfDurationMet(from, to, cycle)
-//    if (result != null) {
-//        applied = true
-//        return result
-//    }
-//
-//    if (shouldOccupyUser(from)) {
-//        from.characterState = UserState.OCCUPIED
-//    }
-//    return EffectResult.singleResult(
-//        source = from,
-//        target = to,
-//        value = 0,
-//        continued = true
-//    )
-//    }
 
 }

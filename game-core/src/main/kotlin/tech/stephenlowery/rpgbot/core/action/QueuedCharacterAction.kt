@@ -4,10 +4,9 @@ import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 
 class QueuedCharacterAction(
     val action: CharacterAction,
-    val source: RPGCharacter
-) {
-
+    val source: RPGCharacter,
     var target: RPGCharacter? = null
+) {
 
     private var cycle = 0
 
