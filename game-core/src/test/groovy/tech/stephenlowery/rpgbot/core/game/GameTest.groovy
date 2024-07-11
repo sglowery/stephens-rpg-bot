@@ -112,9 +112,9 @@ class GameTest extends Specification {
     def "getSortedActionsToResolve returns a list of queued character actions where defensive actions come first"() {
         given:
         def offensiveAction = TestUtils.getTestCharacterAction(CharacterActionType.DAMAGE)
-        def offensiveQueuedAction = new QueuedCharacterAction(offensiveAction, Mock(RPGCharacter))
+        def offensiveQueuedAction = new QueuedCharacterAction(offensiveAction, Mock(RPGCharacter), null)
         def defensiveAction = TestUtils.getTestCharacterAction(CharacterActionType.DEFENSIVE)
-        def defensiveQueuedAction = new QueuedCharacterAction(defensiveAction, Mock(RPGCharacter))
+        def defensiveQueuedAction = new QueuedCharacterAction(defensiveAction, Mock(RPGCharacter), null)
         def actionsList = [offensiveQueuedAction, offensiveQueuedAction, offensiveQueuedAction, defensiveQueuedAction, offensiveQueuedAction, defensiveQueuedAction]
         def game = new Game(1L, 1L, 'name').tap { actionQueue.addAll(actionsList) }
 
