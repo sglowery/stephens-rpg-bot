@@ -1,14 +1,20 @@
 package tech.stephenlowery.rpgbot.core.game.impl
 
 import tech.stephenlowery.rpgbot.core.action.*
+import tech.stephenlowery.rpgbot.core.action.action_effect.impl.DamageHealthEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.HealEffect
 import tech.stephenlowery.rpgbot.core.character.NonPlayerCharacter
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
 import tech.stephenlowery.rpgbot.core.game.Game
+import kotlin.random.Random
 
 private const val DUMMY_ID = 1L
 
 private const val GAME_STARTED_MESSAGE = "You're in a Debug Dummy game. Have fun testing this."
+
+private const val CHANCE_TO_BONK = 20
+
+private const val DUMMY_HEALTH = 1000
 
 private val dummyHealStrings = CharacterActionStrings(
     queuedText = "",
@@ -26,21 +32,45 @@ private val dummyHeal = CharacterAction(
     strings = dummyHealStrings
 )
 
+private val dummyBonkStrings = CharacterActionStrings(
+    queuedText = "",
+    actionText = "The dummy wobbles menacingly at {target}...",
+    successText = "It gives a solid bonk for {value} damage!",
+    critText = "The gods channel their energy and help the dummy deliver a particularly brutal bonk, for {value} damage!",
+    missedText = "The dummy falls over harmlessly."
+)
+
+private val dummyBonk = CharacterAction(
+    effect = DamageHealthEffect(min = 12, max = 30),
+    displayName = "Debug Dummy Bonk",
+    description = "Sometimes the dummy strikes back.",
+    identifier = "dummybonk",
+    actionType = CharacterActionType.DAMAGE,
+    targetingType = TargetingType.SINGLE_TARGET,
+    strings = dummyBonkStrings,
+)
+
 class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Game(id, initiatorId, initiatorName) {
 
-    private val dummy = NonPlayerCharacter("Debug Dummy", 1, healthValue = 1000) {
-        QueuedCharacterAction(dummyHeal, this)
+    private val dummy = NonPlayerCharacter("Debug Dummy", 1, healthValue = DUMMY_HEALTH) {
+        if(shouldBonk()) {
+            QueuedCharacterAction(dummyBonk, this, livingPlayers<PlayerCharacter>().random())
+        } else {
+            QueuedCharacterAction(dummyHeal, this, this)
+        }
     }
 
-    override fun numberOfPlayersIsInvalid(): Boolean = players.isEmpty()
+    private fun shouldBonk(): Boolean = dummy.getActualHealth() == DUMMY_HEALTH || Random.nextInt(100) < CHANCE_TO_BONK
+
+    override fun numberOfPlayersIsValid(): Boolean = !players.isEmpty()
 
     override fun isOver(): Boolean {
         return livingPlayers<PlayerCharacter>().isEmpty() || dummy.isDead()
     }
 
     override fun getGameEndedText(): String = when {
-        livingPlayers<PlayerCharacter>().isEmpty() -> "The dummy wins?"
-        else                                       -> "Congrats on killing a helpless, inanimate object. You win."
+        livingPlayers<PlayerCharacter>().isEmpty() -> "The dummy wins lol. SAD!!"
+        else                                       -> "Congrats on killing a (mostly) helpless, inanimate object. You win."
     }
 
     override fun startGame(): Collection<Pair<Long, String>> {
