@@ -43,10 +43,6 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
 
     fun removeCharacters(characters: Collection<PlayerCharacter>) = removeCharactersByUserIDs(characters.map { it.id })
 
-    private fun removeCharactersByUserIDs(userIDs: Collection<Long>) {
-        userIDs.forEach(players::remove)
-    }
-
     fun addTargetToQueuedCharacterAction(from: Long, to: Long) {
         val fromCharacter = findPlayerCharacterFromID(from)
         val toCharacter = getCharacterFromId(to)
@@ -72,8 +68,6 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
         it.characterState in PLAYER_NOT_READY_STATES
     }
 
-    protected inline fun <reified T : RPGCharacter> livingPlayers(): Collection<T> = players.values.filterIsInstance<T>().filter { it.isAlive() }
-
     @JvmName("livingPlayers1")
     fun livingPlayers(): Collection<RPGCharacter> = players.values.filter { it.isAlive() }
 
@@ -81,7 +75,9 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
 
     open fun resolveActionsAndGetResults(): String {
         val npcActions = livingPlayers<NonPlayerCharacter>().mapNotNull { it.queueAction(this) }
-        val queuedActions = listOf(actionQueue, npcActions).flatMap(::partitionAndShuffleActionQueue).toMutableList()
+        val queuedActions = listOf(actionQueue, npcActions)
+            .flatMap(::partitionAndShuffleActionQueue)
+            .toMutableList()
         val results: MutableCollection<QueuedCharacterActionResolvedResults> = resolveActions(queuedActions)
         val stringResults: MutableList<String> = results.map { it.stringResult }.toMutableList()
         queuedActions.removeIf { it.isExpired() }
@@ -133,6 +129,12 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
         players.values.forEach {
             it.characterState = UserState.CHOOSING_ACTION
         }
+    }
+
+    protected inline fun <reified T : RPGCharacter> livingPlayers(): Collection<T> = players.values.filterIsInstance<T>().filter { it.isAlive() }
+
+    private fun removeCharactersByUserIDs(userIDs: Collection<Long>) {
+        userIDs.forEach(players::remove)
     }
 
     private fun charactersBesidesSelf(character: PlayerCharacter): Collection<RPGCharacter> {

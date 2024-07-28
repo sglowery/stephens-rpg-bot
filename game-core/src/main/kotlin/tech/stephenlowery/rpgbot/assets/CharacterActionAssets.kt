@@ -93,7 +93,7 @@ object CharacterActionAssets {
             effect = DelayedEffect(
                 delayedActionEffect = DamageHealthEffect(20, 50),
                 occupySource = true,
-                delay = 2
+                delay = 1
             ),
             displayName = "Wind-up Attack",
             description = "Gather energy for a turn before attacking.",
@@ -105,9 +105,9 @@ object CharacterActionAssets {
                 queuedText = "You wind up a big attack",
                 actionText = "{source} winds up for a big attack.",
                 effectContinuedText = "{source} is still winding up their attack.",
-                successText = "They hit {target} for {value} damage.",
-                missedText = "But they missed. What a waste.",
-                critText = "{source} do a big ouchie on {target} for {value}.",
+                successText = "{source} unleashes their wind-up attack on {target} for {value} damage.",
+                missedText = "{source} misses their wind-up attack. What a waste.",
+                critText = "{source} do an big ouchie on {target} for {value}.",
             ),
         )
 
@@ -127,9 +127,9 @@ object CharacterActionAssets {
             strings = CharacterActionStrings(
                 queuedText = "You start gathering energy for a big attack.",
                 actionText = "{source} begins gathering energy for a devastating attack!",
+                effectContinuedText = "{source} is still gathering energy!",
                 successText = "{source} blasts {target} for {value} damage.",
                 missedText = "{source} wastes 2 turns of waiting and misses their blast on {target}.",
-                effectContinuedText = "{source} is still gathering energy!",
                 critText = "{source}'s time spent gathering energy results in a devastating blast, hitting {target} for {value}."
             )
         )
@@ -160,7 +160,10 @@ object CharacterActionAssets {
         get() = CharacterAction(
             effect = ComposeEffect(
                 inner = DamageHealthEffect(min = 15, max = 25),
-                outer = StatModEffect(statGetter = RPGCharacter::power, modDuration = 5, attributeModifierType = AttributeModifierType.ADDITIVE),
+                outer = StatModEffect(statGetter = RPGCharacter::power,
+                                      modDuration = 5,
+                                      attributeModifierType = AttributeModifierType.ADDITIVE,
+                                      modifierName = "Amped Up"),
                 compose = { from, to, cycle, outer, innerResults ->
                     val damageDone = innerResults.filter { !it.miss && it.target == to }.sumOf { it.value }
                     val powerIncrease = (damageDone * 0.75).toInt()

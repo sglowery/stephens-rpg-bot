@@ -12,7 +12,7 @@ class NonPlayerCharacter(
     powerValue: Int? = null,
     defenseValue: Int? = null,
     precisionValue: Int? = null,
-    private val actionDecidingBehavior: (NonPlayerCharacter.(Game) -> QueuedCharacterAction)? = null,
+    private val actionDecidingBehavior: (NonPlayerCharacter.(Game) -> QueuedCharacterAction?)? = null,
 ) : RPGCharacter(id, name) {
 
     init {
@@ -32,19 +32,19 @@ class NonPlayerCharacter(
 
     private fun getQueuedAction(game: Game): QueuedCharacterAction? = actionDecidingBehavior?.invoke(this, game)
 
-    private fun setTargetForAction(action: QueuedCharacterAction?) {
-        if (action?.target != null) {
+    private fun setTargetForAction(queuedAction: QueuedCharacterAction?) {
+        if (queuedAction?.target != null) {
             return
         }
-        action?.target = when(action?.action?.targetingType) {
+        queuedAction?.target = when(queuedAction?.action?.targetingType) {
             null -> null
             TargetingType.SELF -> this
-            else -> action.target
+            else -> queuedAction.target
         }
     }
 
     private fun initAttributes(vararg valueAttributePairs: Pair<Int?, Attribute>) {
-        valueAttributePairs.filter { it.first != null }.forEach { it.second.base = it.first!!.toDouble() }
+        valueAttributePairs.forEach { it.second.base = it.first?.toDouble() ?: 1.0 }
     }
 
     override fun toString(): String {

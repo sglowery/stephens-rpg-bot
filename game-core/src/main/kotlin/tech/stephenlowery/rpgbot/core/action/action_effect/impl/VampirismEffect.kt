@@ -13,18 +13,18 @@ class VampirismEffect(
     canMiss: Boolean = true,
     canCrit: Boolean = true,
 ) : ComposeEffect<StatModEffect>(
-    outer = StatModEffect(duration = 1, statGetter = RPGCharacter::health, attributeModifierType = AttributeModifierType.ADDITIVE),
+    outer = HealEffect(min = min, max = max, duration = 1),
     inner = DamageHealthEffect(min, max, canMiss = canMiss, canCrit = canCrit),
     compose = { from, to, cycle, outer, effects ->
         val damageDone = effects.filter { !it.miss && it.target == to }.sumOf { it.value }
         val healing = damageDone.toDouble() * proportion
-        from.damage.addAdditiveMod(-healing)
+        val healingResults = outer.applyEffect(from, from, cycle, healing.toInt())
         EffectResult.singleResult(
             source = from,
             target = to,
             value = damageDone,
             miss = damageDone == 0,
-            other = healing.toInt().toString()
+            other = healingResults.first().value.toString()
         )
     }
 )

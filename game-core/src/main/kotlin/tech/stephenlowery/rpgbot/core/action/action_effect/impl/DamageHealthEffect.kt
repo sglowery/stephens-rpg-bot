@@ -53,6 +53,11 @@ class DamageHealthEffect(
         )
     }
 
+    override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int, value: Int): List<EffectResult> {
+        val damage = value * damageScalar(from, to)
+        return super.applyEffect(from, to, cycle, damage.toInt())
+    }
+
     private fun isCrit(from: RPGCharacter, to: RPGCharacter): Boolean {
         return alwaysCrits || (canCrit && Random.nextInt(100) < critChance(from, to))
     }

@@ -34,7 +34,7 @@ class CharacterActionStringsTest extends Specification {
         new EffectResult(charOne, charTwo, 1, false, false, true, false, false, false, "")  | "action"   || "continued"
         new EffectResult(charOne, charTwo, 1, false, false, true, true, false, false, "")   | "action"   || "effectOver"
         new EffectResult(charOne, charTwo, 1, false, false, false, false, true, false, "")  | "action"   || "chained"
-        new EffectResult(charOne, charTwo, 1, false, false, false, false, false, true, "")  | "action"   || "action\n"
+        new EffectResult(charOne, charTwo, 1, false, false, false, false, false, true, "")  | "action"   || "action"
     }
 
     def "formatFromEffectResult replaces text markers with information in EffectResult"() {

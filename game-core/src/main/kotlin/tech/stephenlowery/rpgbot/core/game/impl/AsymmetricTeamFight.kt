@@ -43,7 +43,7 @@ class AsymmetricTeamFight(id: Long, initiatorId: Long, initiatorName: String) : 
     override fun getTargetsForCharacter(character: PlayerCharacter): Collection<RPGCharacter> {
         val livingCharacters = super.getTargetsForCharacter(character)
         val characterTeam = teamPlayerMap.filterValues { characterIds -> character.id in characterIds }.entries.first().key
-        return when (character.queuedAction!!.action.actionType) {
+        return when (character.queuedAction?.action?.actionType) {
             BUFF, HEALING, DEFENSIVE -> getCharactersOnTeam(livingCharacters, characterTeam)
             DAMAGE                   -> getCharactersNotOnTeam(livingCharacters, characterTeam)
             else                     -> livingCharacters

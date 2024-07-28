@@ -1,7 +1,6 @@
 package tech.stephenlowery.rpgbot.core.action.action_effect.meta
 
 import tech.stephenlowery.rpgbot.core.action.EffectResult
-import tech.stephenlowery.rpgbot.core.action.MetaActionEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.ActionEffect
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import tech.stephenlowery.rpgbot.core.character.UserState

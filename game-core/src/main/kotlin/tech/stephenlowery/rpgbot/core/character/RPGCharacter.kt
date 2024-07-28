@@ -48,7 +48,7 @@ open class RPGCharacter(val id: Long, val name: String) {
 
     fun getNameAndHealthPercentLabel(): String = "$name (${getHealthPercent()}%)"
 
-    fun getAbilitiesOnCooldown() = getUnfilteredActions().filter { cooldowns.containsKey(it.identifier) }
+    fun getAbilitiesOnCooldown() = getUnfilteredActions().filter { isActionOnCooldown(it.identifier) }
 
     fun getHealthPercent(): Int = (100.0 * getActualHealth() / health.value()).toInt()
 
@@ -78,6 +78,10 @@ open class RPGCharacter(val id: Long, val name: String) {
         cycleAttributeModifiers()
         cycleCooldowns()
     }
+
+    fun getAllAttributes() = getPrimaryAttributes() + getSecondaryAttributes()
+
+    fun isActionOnCooldown(actionIdentifier: String): Boolean = cooldowns[actionIdentifier] != null
 
     protected fun applyTraitsFromStats() = CharacterTraits.getQualifiedCharacterTraitsFor(this).forEach { it.applyEffects(this) }
 
@@ -111,8 +115,6 @@ open class RPGCharacter(val id: Long, val name: String) {
     private fun cycleAttributeModifiers() {
         getAllAttributes().forEach(Attribute::cycleClearAndConsolidateModifiers)
     }
-
-    private fun getAllAttributes() = getPrimaryAttributes() + getSecondaryAttributes()
 
     private fun cycleCooldowns() {
         cooldowns.replaceAll { _, turnsLeft -> turnsLeft - 1 }

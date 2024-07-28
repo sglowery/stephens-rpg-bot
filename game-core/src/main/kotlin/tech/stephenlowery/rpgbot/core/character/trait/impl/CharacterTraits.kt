@@ -19,8 +19,8 @@ object CharacterTraits {
             criteria = { power.value() > 10 && precision.value() < 7 },
         ) {
             withEffects {
-                damageGivenScalar.addAdditiveMod(20.0, name = "reckless")
-                damageTakenScalar.addAdditiveMod(20.0, name = "reckless")
+                damageGivenScalar.addAdditiveMod(20.0, name = "Reckless")
+                damageTakenScalar.addAdditiveMod(20.0, name = "Reckless")
             }
 
         }
@@ -33,7 +33,7 @@ object CharacterTraits {
             criteria = { health.base < 100 },
         ) {
             withEffects {
-                damageTakenScalar.addAdditiveMod(-10.0, name = "lifestealer")
+                damageTakenScalar.addAdditiveMod(-10.0, name = "Lifestealer")
             }
 
         }
@@ -46,8 +46,8 @@ object CharacterTraits {
             criteria = { precision.value() > 12 },
         ) {
             withEffects {
-                criticalChance.addAdditiveMod(30.0, name = "precise")
-                criticalEffectScalar.addAdditiveMod(50.0, name = "precise")
+                criticalChance.addAdditiveMod(30.0, name = "Precise")
+                criticalEffectScalar.addAdditiveMod(50.0, name = "Precise")
             }
         }
 
@@ -59,7 +59,7 @@ object CharacterTraits {
             criteria = { defense.value() > 12 && power.value() < 8 },
         ) {
             withEffects {
-                defense.addMultiplicativeMod(1.0, name = "brutish")
+                defense.addMultiplicativeMod(1.0, name = "Brutish")
             }
             givesAbility { CharacterActionAssets.SuperDefend }
         }

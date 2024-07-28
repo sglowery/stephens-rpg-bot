@@ -144,7 +144,8 @@ object TelegramRpgBot {
 
     private fun sendPlayersInGameActions(bot: Bot, chatID: Long) {
         val game = GameManager.findGame(chatID)!!
-        game.getHumanPlayers().values.living().filter { it.characterState == UserState.CHOOSING_ACTION }.forEach {
+        val livingHumanPlayers = game.getHumanPlayers().values.living()
+        livingHumanPlayers.filter { it.characterState == UserState.CHOOSING_ACTION }.forEach {
             val keyboard = makeKeyboardFromPlayerActions(it.getAvailableActions())
             val replyMarkup = InlineKeyboardMarkup.create(keyboard)
             bot.sendMessage(ChatId.fromId(it.id), it.getPreActionText() + "\n\nPick an action.", replyMarkup = replyMarkup)

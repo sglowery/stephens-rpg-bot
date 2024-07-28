@@ -9,7 +9,7 @@ class Attribute(
 ) {
     
     private var additiveModifiers = mutableListOf<AttributeModifier>()
-    private var multiplyModifiers = mutableListOf(AttributeModifier(1.0, -1))
+    private var multiplyModifiers = mutableListOf<AttributeModifier>()
     
     fun cycleClearAndConsolidateModifiers() {
         cycleModifiers()
@@ -25,13 +25,13 @@ class Attribute(
         addModifier(multiplyModifiers, value, duration, name)
     }
     
-    fun value(): Int = (multiplyModifiers.sum() * (base + additiveModifiers.sum())).toInt()
+    fun value(): Int = ((1.0 + multiplyModifiers.sum() / 100.0) * (base + additiveModifiers.sum())).toInt()
     
     fun displayValue(): String = displayValueFn(value())
     
     fun reset() {
         additiveModifiers = mutableListOf()
-        multiplyModifiers = mutableListOf(AttributeModifier(1.0, -1))
+        multiplyModifiers = mutableListOf()
     }
     
     fun consolidateModifiers() {

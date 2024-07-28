@@ -62,7 +62,7 @@ class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Ga
 
     private fun shouldBonk(): Boolean = dummy.getActualHealth() == DUMMY_HEALTH || Random.nextInt(100) < CHANCE_TO_BONK
 
-    override fun numberOfPlayersIsValid(): Boolean = !players.isEmpty()
+    override fun numberOfPlayersIsValid(): Boolean = players.isNotEmpty()
 
     override fun isOver(): Boolean {
         return livingPlayers<PlayerCharacter>().isEmpty() || dummy.isDead()

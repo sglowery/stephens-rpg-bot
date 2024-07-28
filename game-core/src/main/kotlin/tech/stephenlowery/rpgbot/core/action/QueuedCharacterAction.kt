@@ -10,16 +10,16 @@ class QueuedCharacterAction(
 
     private var cycle = 0
 
-    private var lastActionResult: EffectResult? = null
+    private var previousPrimaryResult: EffectResult? = null
 
     fun cycleAndResolve(): QueuedCharacterActionResolvedResults {
         val results = action.applyEffect(source, target!!, cycle)
-        lastActionResult = results.first()
+        previousPrimaryResult = results.first()
         cycle++
         return QueuedCharacterActionResolvedResults(action, results)
     }
 
-    fun isExpired(): Boolean = action.isExpired(cycle) || lastActionResult?.miss == true
+    fun isExpired(): Boolean = action.isExpired(cycle) || previousPrimaryResult?.miss == true
 
     fun isUnresolved(): Boolean = cycle == 0
 
@@ -38,5 +38,5 @@ class QueuedCharacterActionResolvedResults(
     var actionResultedInDeath = false
 
     val stringResult: String
-        get() = stringResultOverride ?: effectResults.joinToString(effectResultSeparator, transform = action.strings::getFormattedEffectResultString)
+        get() = stringResultOverride ?: action.strings.getFormattedEffectResultString(effectResults.first())
 }
