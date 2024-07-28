@@ -50,7 +50,7 @@ object GameManager {
 
         val newCharacterState = game.queueActionFromCharacter(actionName, playerId)
 
-        return ChooseActionResult(newCharacterState, character.queuedAction!!.getQueuedText())
+        return ChooseActionResult(newCharacterState, character.queuedAction!!.getQueuedText(), character)
     }
     
     fun findCharacter(playerId: Long): PlayerCharacter? = findGameContainingCharacter(playerId)?.findPlayerCharacterFromID(playerId)

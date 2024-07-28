@@ -12,6 +12,7 @@ import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import tech.stephenlowery.rpgbot.core.character.UserState
+import tech.stephenlowery.rpgbot.core.game.ChooseActionResult
 import tech.stephenlowery.rpgbot.core.game.Game
 import tech.stephenlowery.rpgbot.core.game.GameManager
 import tech.stephenlowery.telegram.formatters.formatTelegramUserLink
@@ -161,12 +162,9 @@ object TelegramRpgBot {
         val userID = callbackQuery.from.id
         val actionName = callbackQuery.data
         val callbackQueryMessageId = message.messageId
-        val newCharacterState: UserState
-        val queuedText: String
+        val chooseActionResult: ChooseActionResult
         try {
-            val chooseActionResult = GameManager.chooseActionForCharacter(userID, actionName)
-            newCharacterState = chooseActionResult.newCharacterState
-            queuedText = chooseActionResult.queuedActionText
+            chooseActionResult = GameManager.chooseActionForCharacter(userID, actionName)
         } catch (exception: RuntimeException) {
             exception.printStackTrace()
             // TODO
@@ -175,6 +173,8 @@ object TelegramRpgBot {
             bot.deleteMessage(ChatId.fromId(userID), callbackQueryMessageId)
             return
         }
+        val (newCharacterState, queuedActionText, character) = chooseActionResult
+        val queuedText = character.getPreActionText() + "\n\n" + queuedActionText
         if (newCharacterState == UserState.WAITING) {
             bot.editMessageText(
                 chatId = ChatId.fromId(userID),
@@ -217,7 +217,7 @@ object TelegramRpgBot {
                 chatId = ChatId.fromId(userId),
                 messageId = callbackQuery.message!!.messageId,
                 inlineMessageId = null,
-                text = fromCharacter.queuedAction!!.getQueuedText()
+                text = fromCharacter.getPreActionText() + "\n\n" + fromCharacter.queuedAction!!.getQueuedText()
             )
             if (game.allPlayersReadyForTurnToResolve()) {
                 resolveActionsInGame(bot, game)
