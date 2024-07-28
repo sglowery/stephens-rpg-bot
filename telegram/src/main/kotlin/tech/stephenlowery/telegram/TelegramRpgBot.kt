@@ -151,9 +151,14 @@ object TelegramRpgBot {
             val replyMarkup = InlineKeyboardMarkup.create(keyboard)
             bot.sendMessage(ChatId.fromId(it.id), it.getPreActionText() + "\n\nPick an action.", replyMarkup = replyMarkup)
         }
-        game.getHumanPlayers().values.living().filter { it.characterState == UserState.OCCUPIED }.forEach {
-            bot.sendMessage(ChatId.fromId(it.id), "You are occupied this turn and can't choose an action.")
-        }
+        notifyOccupiedUsers(bot, game)
+    }
+
+    private fun notifyOccupiedUsers(bot: Bot, game: Game) {
+        game.livingPlayers().filter { it.characterState == UserState.OCCUPIED }
+            .forEach {
+                bot.sendMessage(ChatId.fromId(it.id), "You are occupied this turn and can't choose an action.")
+            }
     }
 
     // TODO move this code to a handler
@@ -239,6 +244,7 @@ object TelegramRpgBot {
             GameManager.cancelGame(game.id)
         } else {
             if (game.allPlayersReadyForTurnToResolve()) {
+                notifyOccupiedUsers(bot, game)
                 resolveActionsInGame(bot, game)
             } else {
                 sendPlayersInGameActions(bot, game.id)
