@@ -16,7 +16,7 @@ typealias ComposeEffectContext<T> = (
 open class ComposeEffect<T : ActionEffect> internal constructor(
     val outer: T,
     val inner: ActionEffect,
-    val compose: ComposeEffectContext<T>,
+    val compose: ComposeEffectContext<T> = ::defaultCompose,
 ) : ActionEffect(max(outer.duration, inner.duration)) {
 
     override fun applyEffect(
@@ -25,3 +25,12 @@ open class ComposeEffect<T : ActionEffect> internal constructor(
         cycle: Int,
     ): List<EffectResult> = compose(from, to, cycle, outer, inner.applyEffect(from, to, cycle))
 }
+
+private fun <T : ActionEffect> defaultCompose(
+    from: RPGCharacter,
+    to: RPGCharacter,
+    cycle: Int,
+    outer: T,
+    innerResults: List<EffectResult>
+): List<EffectResult> =
+    outer.applyEffect(from, to, cycle) + innerResults
