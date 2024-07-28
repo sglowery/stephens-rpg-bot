@@ -44,7 +44,7 @@ class NonPlayerCharacter(
     }
 
     private fun initAttributes(vararg valueAttributePairs: Pair<Int?, Attribute>) {
-        valueAttributePairs.forEach { it.second.base = it.first?.toDouble() ?: 1.0 }
+        valueAttributePairs.forEach { it.second.base = it.first?.toDouble() ?: it.second.base }
     }
 
     override fun toString(): String {
