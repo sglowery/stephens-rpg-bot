@@ -101,11 +101,13 @@ open class RPGCharacter(val id: Long, val name: String) {
 
     protected fun giveRandomStats() {
         repeat(STAT_POINTS_TO_DISTRIBUTE) {
+            val isLucky = Random.nextInt(100) < 20
+            val luckModifier = if (isLucky) 2 else 0
             when (Random.nextInt(4)) {
-                0 -> health.base += 10
-                1 -> power.base += 1
-                2 -> precision.base += 1
-                3 -> defense.base += 1
+                0 -> health.base += (9..13).random() + luckModifier
+                1 -> power.base += 1 + luckModifier
+                2 -> precision.base += 1 + luckModifier
+                3 -> defense.base += 1 + luckModifier
             }
         }
     }
