@@ -24,7 +24,7 @@ class AttributeModifier(
 
     private fun operator(): String = when (value > 0) {
         true  -> "+"
-        false -> "-"
+        false -> ""
     }
 
 }
