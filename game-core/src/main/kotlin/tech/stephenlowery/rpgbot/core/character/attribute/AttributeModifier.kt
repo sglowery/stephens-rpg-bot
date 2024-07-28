@@ -1,9 +1,11 @@
 package tech.stephenlowery.rpgbot.core.character.attribute
 
-class AttributeModifier(val value: Double,
-                        val duration: Int = -1,
-                        val name: String? = null,
-                        val modifierType: AttributeModifierType) {
+class AttributeModifier(
+    val value: Double,
+    val duration: Int = -1,
+    val name: String? = null,
+    val modifierType: AttributeModifierType,
+) {
 
     var turnsActive: Int = 0
 
@@ -15,8 +17,14 @@ class AttributeModifier(val value: Double,
 
     fun isPermanent(): Boolean = duration == -1
 
-    fun displayValue(): String = when(modifierType) {
-        AttributeModifierType.ADDITIVE -> value.toInt().toString()
+    fun displayValue(): String = operator() + when (modifierType) {
+        AttributeModifierType.ADDITIVE       -> value.toInt().toString()
         AttributeModifierType.MULTIPLICATIVE -> "${value.toInt()}%"
     }
+
+    private fun operator(): String = when (value > 0) {
+        true  -> "+"
+        false -> "-"
+    }
+
 }
