@@ -13,6 +13,7 @@ open class StatModEffect(
     duration: Int = 1,
     protected val statGetter: StatGetterFn,
     protected val attributeModifierType: AttributeModifierType,
+    internal val modifierName: String? = null,
 ) : ActionEffect(duration) {
 
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
@@ -26,8 +27,8 @@ open class StatModEffect(
 
     private fun addModifier(from: RPGCharacter, to: RPGCharacter): List<EffectResult> {
         when (attributeModifierType) {
-            AttributeModifierType.ADDITIVE       -> statGetter(to).addAdditiveMod(value!!.toDouble(), modDuration)
-            AttributeModifierType.MULTIPLICATIVE -> statGetter(to).addMultiplicativeMod(value!!.toDouble(), modDuration)
+            AttributeModifierType.ADDITIVE       -> statGetter(to).addAdditiveMod(value!!.toDouble(), modDuration, modifierName)
+            AttributeModifierType.MULTIPLICATIVE -> statGetter(to).addMultiplicativeMod(value!!.toDouble(), modDuration, modifierName)
         }
         return EffectResult.singleResult(source = from, target = to, value = abs(value!!))
     }
