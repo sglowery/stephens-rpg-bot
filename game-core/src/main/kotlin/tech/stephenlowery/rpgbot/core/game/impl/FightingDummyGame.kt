@@ -18,7 +18,7 @@ private const val BOSCO_ID = 2L
 
 private const val GAME_STARTED_MESSAGE = "You're in a Debug Dummy game. Have fun testing this."
 
-private const val CHANCE_TO_BONK = 20
+private const val CHANCE_TO_BONK = 75
 
 private const val DUMMY_HEALTH = 1000
 
@@ -27,9 +27,8 @@ private val dummyHealStrings = CharacterActionStrings(
     actionText = "The dummy glows softly...",
     successText = "It heals itself for {value}!"
 )
-
 private val dummyHeal = CharacterAction(
-    effect = HealEffect(20, 50, canCrit = false, canFail = false),
+    effect = HealEffect(40, 50, canCrit = false, canMiss = false),
     displayName = "Debug Dummy Heal",
     description = "Just making it hard, but not impossible, to kill the dummy",
     identifier = "dummyheal",
@@ -45,9 +44,8 @@ private val dummyBonkStrings = CharacterActionStrings(
     critText = "The gods channel their energy and help the dummy deliver a particularly brutal bonk, for {value} damage!",
     missedText = "The dummy falls over harmlessly."
 )
-
 private val dummyBonk = CharacterAction(
-    effect = DamageHealthEffect(min = 12, max = 30),
+    effect = DamageHealthEffect(min = 22, max = 36),
     displayName = "Debug Dummy Bonk",
     description = "Sometimes the dummy strikes back.",
     identifier = "dummybonk",
@@ -106,7 +104,7 @@ private val boscoHealDartAction = CharacterAction(
 class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Game(id, initiatorId, initiatorName) {
 
     private val dummy = NonPlayerCharacter("Debug Dummy", 1, healthValue = DUMMY_HEALTH) {
-        if(shouldBonk()) {
+        if (shouldBonk()) {
             QueuedCharacterAction(dummyBonk, this, livingPlayers<PlayerCharacter>().random())
         } else {
             QueuedCharacterAction(dummyHeal, this, this)
