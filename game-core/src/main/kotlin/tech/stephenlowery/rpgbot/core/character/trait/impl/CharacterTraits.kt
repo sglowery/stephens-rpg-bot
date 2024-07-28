@@ -59,7 +59,7 @@ object CharacterTraits {
             criteria = { defense.base > 12 && power.base < 8 },
         ) {
             withEffects {
-                defense.addMultiplicativeMod(1.0, name = "Brutish")
+                defense.addMultiplicativeMod(100.0, name = "Brutish")
             }
             givesAbility { CharacterActionAssets.SuperDefend }
         }
