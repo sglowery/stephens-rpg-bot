@@ -37,6 +37,15 @@ class Attribute(
     fun consolidateModifiers() {
         additiveModifiers = consolidateModifierSet(additiveModifiers)
     }
+
+    fun getTemporaryAndNamedModifiers(): List<String> {
+        return (additiveModifiers + multiplyModifiers).filter { !it.isPermanent() || it.name != null}
+            .map { if (it.isPermanent()) "${it.name}: ${it.value}" else "${it.name}: ${it.value} (${it.duration - it.turnsActive} turn(s) remaining)" }
+    }
+
+    fun hasNamedModifier(name: String): Boolean {
+        return additiveModifiers.any { it.name == name } || multiplyModifiers.any { it.name == name }
+    }
     
     private fun clearExpiredModifiers() {
         additiveModifiers.removeIf { it.isExpired() }

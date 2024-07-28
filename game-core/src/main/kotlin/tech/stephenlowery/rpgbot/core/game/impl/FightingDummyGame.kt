@@ -3,12 +3,18 @@ package tech.stephenlowery.rpgbot.core.game.impl
 import tech.stephenlowery.rpgbot.core.action.*
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.DamageHealthEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.HealEffect
+import tech.stephenlowery.rpgbot.core.action.action_effect.impl.NoOpEffect
+import tech.stephenlowery.rpgbot.core.action.action_effect.meta.MultiEffect
+import tech.stephenlowery.rpgbot.core.action.action_effect.meta.StatModEffect
 import tech.stephenlowery.rpgbot.core.character.NonPlayerCharacter
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
+import tech.stephenlowery.rpgbot.core.character.RPGCharacter
+import tech.stephenlowery.rpgbot.core.character.attribute.AttributeModifierType
 import tech.stephenlowery.rpgbot.core.game.Game
 import kotlin.random.Random
 
 private const val DUMMY_ID = 1L
+private const val BOSCO_ID = 2L
 
 private const val GAME_STARTED_MESSAGE = "You're in a Debug Dummy game. Have fun testing this."
 
@@ -50,6 +56,53 @@ private val dummyBonk = CharacterAction(
     strings = dummyBonkStrings,
 )
 
+val boscoNoOpStrings = CharacterActionStrings(
+    queuedText = "",
+    actionText = "{source} floats around in the air, unable to do anything."
+)
+
+private val boscoNoOp = CharacterAction(
+    effect = NoOpEffect(),
+    displayName = "Do Nothing",
+    description = "Does nothing. How are you seeing this anyway?",
+    identifier = "bosconoop",
+    actionType = CharacterActionType.OTHER,
+    targetingType = TargetingType.SELF,
+    strings = boscoNoOpStrings
+)
+
+private const val boscoHealModifierName = "Bosco Invigoration"
+private val boscoHealStrings = CharacterActionStrings(
+    queuedText = "",
+    actionText = "Bosco aims a healing dart at {target} and shoots...",
+    successText = "The dart flies true and injects its invigorating goo!",
+    missedText = "The dart misses and embeds itself in the ground. Nature is healing.",
+)
+private val boscoHealDartAction = CharacterAction(
+    effect = MultiEffect(
+        HealEffect(
+            min = 20,
+            max = 30,
+            canCrit = false,
+            canMiss = true,
+        ),
+        StatModEffect(
+            value = -15,
+            modDuration = 5,
+            statGetter = RPGCharacter::damageTakenScalar,
+            attributeModifierType = AttributeModifierType.MULTIPLICATIVE,
+            modifierName = boscoHealModifierName,
+        )
+    ),
+    displayName = "Bosco Heal Dart",
+    description = "This dart does some healing and reduces damage taken for a few turns",
+    identifier = "boscohealdart",
+    cooldown = 3,
+    actionType = CharacterActionType.HEALING,
+    targetingType = TargetingType.SINGLE_TARGET,
+    strings = boscoHealStrings,
+)
+
 class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Game(id, initiatorId, initiatorName) {
 
     private val dummy = NonPlayerCharacter("Debug Dummy", 1, healthValue = DUMMY_HEALTH) {
@@ -57,6 +110,26 @@ class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Ga
             QueuedCharacterAction(dummyBonk, this, livingPlayers<PlayerCharacter>().random())
         } else {
             QueuedCharacterAction(dummyHeal, this, this)
+        }
+    }
+
+    private val bosco = NonPlayerCharacter("Bosco", 2) {
+        val target = livingPlayers<PlayerCharacter>().filter { !characterHasActiveInvigoration(it) }.randomOrNull()
+        val isOffCooldown = !this.isActionOnCooldown(boscoHealDartAction.identifier)
+        when (target != null && isOffCooldown) {
+            true -> QueuedCharacterAction(boscoHealDartAction, this, target)
+            false -> QueuedCharacterAction(boscoNoOp, this, this)
+        }
+    }
+
+    private fun characterHasActiveInvigoration(it: PlayerCharacter): Boolean {
+        return it.damageTakenScalar.hasNamedModifier(boscoHealModifierName)
+    }
+
+    override fun getTargetsForCharacter(character: PlayerCharacter): Collection<RPGCharacter> {
+        return when (character.queuedAction?.action?.actionType) {
+            CharacterActionType.DAMAGE -> listOf(dummy)
+            else                       -> getHumanPlayers().values.filter(PlayerCharacter::isAlive)
         }
     }
 
@@ -75,9 +148,10 @@ class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Ga
 
     override fun startGame(): Collection<Pair<Long, String>> {
         players[DUMMY_ID] = dummy
+        players[BOSCO_ID] = bosco
         startGameStateAndPrepCharacters()
         return players.keys
-            .filter { it != DUMMY_ID }
+            .filter { it != DUMMY_ID && it != BOSCO_ID }
             .map { it to GAME_STARTED_MESSAGE }
     }
 
