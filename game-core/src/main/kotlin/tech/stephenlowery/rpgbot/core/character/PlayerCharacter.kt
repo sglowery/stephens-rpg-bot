@@ -51,7 +51,6 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
             newQueuedCharacterAction.target = this
         }
         characterState = if (action.targetingType.requiresChoosingTarget()) UserState.CHOOSING_TARGETS else UserState.WAITING
-        setCooldownForAction(action)
         return newQueuedCharacterAction
     }
 

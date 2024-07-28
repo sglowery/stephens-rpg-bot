@@ -78,6 +78,12 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
         val queuedActions = listOf(actionQueue, npcActions)
             .flatMap(::partitionAndShuffleActionQueue)
             .toMutableList()
+        queuedActions.forEach {
+            val action = it.action
+            if (action.cooldown > 0 && !it.source.isActionOnCooldown(action.identifier)) {
+                it.source.setCooldownForAction(action)
+            }
+        }
         val results: MutableCollection<QueuedCharacterActionResolvedResults> = resolveActions(queuedActions)
         val stringResults: MutableList<String> = results.map { it.stringResult }.toMutableList()
         queuedActions.removeIf { it.isExpired() }
