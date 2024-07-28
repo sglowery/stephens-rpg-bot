@@ -16,7 +16,7 @@ object CharacterTraits {
             name = "Reckless",
             description = "You are powerful but imprecise; your reckless nature means you do more damage but are more vulnerable to it too.",
             technicalDescription = "Increases damage dealt and taken by 20%",
-            criteria = { power.value() > 10 && precision.value() < 7 },
+            criteria = { power.base > 10 && precision.base < 7 },
         ) {
             withEffects {
                 damageGivenScalar.addAdditiveMod(20.0, name = "Reckless")
@@ -43,7 +43,7 @@ object CharacterTraits {
             name = "Precise",
             description = "Your deadly precision taught you how to deliver devastating blows, significantly increasing your chance to deal critical hits and increasing the damage they do.",
             technicalDescription = "Critical change increased by 30% and critical damage dealt increased by 50%",
-            criteria = { precision.value() > 12 },
+            criteria = { precision.base > 12 },
         ) {
             withEffects {
                 criticalChance.addAdditiveMod(30.0, name = "Precise")
@@ -56,7 +56,7 @@ object CharacterTraits {
             name = "Brutish",
             description = "'Sometimes the best offense is a good defense.' You benefit twice as much from defense and you have an extra powerful defend ability.",
             technicalDescription = "Defense multiplier increased by 100%",
-            criteria = { defense.value() > 12 && power.value() < 8 },
+            criteria = { defense.base > 12 && power.base < 8 },
         ) {
             withEffects {
                 defense.addMultiplicativeMod(1.0, name = "Brutish")
