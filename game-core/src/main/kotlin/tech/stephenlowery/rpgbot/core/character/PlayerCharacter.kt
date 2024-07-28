@@ -23,7 +23,7 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         """.trimIndent()
         val specialMessages = getSpecialMessages()
         return baseText + when (specialMessages.isNotEmpty()) {
-            true  -> "Additionally, your stats grant you the following properties:\n\n" + specialMessages.joinToString("\n\n") { "- $it" }
+            true  -> "\n\nAdditionally, your stats grant you the following properties:\n\n" + specialMessages.joinToString("\n\n") { "- $it" }
             false -> ""
         }
     }
