@@ -150,7 +150,7 @@ object TelegramRpgBot {
         livingHumanPlayers.filter { it.characterState == UserState.CHOOSING_ACTION }.forEach {
             val keyboard = makeKeyboardFromPlayerActions(it.getAvailableActions())
             val replyMarkup = InlineKeyboardMarkup.create(keyboard)
-            bot.sendMessage(ChatId.fromId(it.id), it.getPreActionText() + "\n\nPick an action.", replyMarkup = replyMarkup)
+            bot.sendMessage(ChatId.fromId(it.id), it.getPreActionText() + "\n\nPick an action.", replyMarkup = replyMarkup, parseMode = ParseMode.MARKDOWN)
         }
         notifyOccupiedUsers(bot, game)
     }
@@ -186,7 +186,8 @@ object TelegramRpgBot {
                 chatId = ChatId.fromId(userID),
                 messageId = callbackQueryMessageId,
                 inlineMessageId = null,
-                text = queuedText
+                text = queuedText,
+                parseMode = ParseMode.MARKDOWN
             )
         } else if (newCharacterState == UserState.CHOOSING_TARGETS) {
             sendTargetsToPlayer(bot, userID, callbackQueryMessageId)
@@ -206,7 +207,8 @@ object TelegramRpgBot {
             messageId = messageId,
             inlineMessageId = null,
             text = character.getPreActionText() + "\n\nChoose a target.",
-            replyMarkup = InlineKeyboardMarkup.create(makeKeyboardFromPlayerNames(targets))
+            replyMarkup = InlineKeyboardMarkup.create(makeKeyboardFromPlayerNames(targets)),
+            parseMode = ParseMode.MARKDOWN
         )
     }
 
@@ -223,7 +225,8 @@ object TelegramRpgBot {
                 chatId = ChatId.fromId(userId),
                 messageId = callbackQuery.message!!.messageId,
                 inlineMessageId = null,
-                text = fromCharacter.getPreActionText() + "\n\n" + fromCharacter.queuedAction!!.getQueuedText()
+                text = fromCharacter.getPreActionText() + "\n\n" + fromCharacter.queuedAction!!.getQueuedText(),
+                parseMode = ParseMode.MARKDOWN
             )
             if (game.allPlayersReadyForTurnToResolve()) {
                 resolveActionsInGame(bot, game)

@@ -23,12 +23,16 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         """.trimIndent()
         val specialMessages = getSpecialMessages()
         return baseText + when (specialMessages.isNotEmpty()) {
-            true  -> "\n\nAdditionally, your stats grant you the following properties:\n\n" + specialMessages.joinToString("\n\n") { "- $it" }
+            true  -> "Additionally, your stats grant you the following properties:\n\n" + specialMessages.joinToString("\n\n") { "- $it" }
             false -> ""
         }
     }
 
-    fun getPreActionText(): String = getCharacterStatusText() + (if (cooldowns.isNotEmpty()) "\n\n" + getUnavailableAbilitiesText() else "")
+    fun getPreActionText(): String = listOfNotNull(
+        getCharacterSummaryText(),
+        if (cooldowns.isNotEmpty()) getUnavailableAbilitiesText() else null,
+        getAttributeModifiersAsString()
+    ).filter { it.isNotEmpty() }.joinToString("\n\n")
 
     fun getCharacterStatusText(): String {
         return "Your current stats:\n" +
@@ -44,7 +48,8 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
     }
 
     fun chooseAction(actionIdentifier: String): QueuedCharacterAction {
-        val action = getAvailableActions().find { it.identifier == actionIdentifier } ?: throw RuntimeException("Unable to find action for identifier $actionIdentifier")
+        val action = getAvailableActions().find { it.identifier == actionIdentifier }
+            ?: throw RuntimeException("Unable to find action for identifier $actionIdentifier")
         val newQueuedCharacterAction = QueuedCharacterAction(action, source = this)
         queuedAction = newQueuedCharacterAction
         if (action.targetingType == TargetingType.SELF) {
@@ -62,6 +67,17 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
     override fun resetCharacter() {
         clearQueuedAction()
         super.resetCharacter()
+    }
+
+    private fun getAttributeModifiersAsString(): String? {
+        val modifiersText = getAllAttributes()
+            .map { it to it.getTemporaryAndNamedModifiers() }
+            .filter { it.second.isNotEmpty() }
+            .joinToString("\n\n") { "${it.first.name}: ${it.second.joinToString("\n")}" }
+        return when(modifiersText.isEmpty()) {
+            true -> null
+            false -> "*---Attribute Modifiers---*\n$modifiersText"
+        }
     }
 
     private fun clearQueuedAction() {

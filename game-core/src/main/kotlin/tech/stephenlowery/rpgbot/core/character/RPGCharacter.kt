@@ -19,14 +19,26 @@ open class RPGCharacter(val id: Long, val name: String) {
     val precision = Attribute("Precision", DEFAULT_BASE_PRIMARY_ATTRIBUTE)
     val defense = Attribute("Defense", DEFAULT_BASE_PRIMARY_ATTRIBUTE)
 
-    val damageTakenScalar = Attribute("Damage taken", 100.0)
-    val damageGivenScalar = Attribute("Damage given", 100.0)
+    val damageTakenScalar = Attribute("Damage taken", 100.0) {
+        "$it%"
+    }
+    val damageGivenScalar = Attribute("Damage given", 100.0) {
+        "$it%"
+    }
 
-    val healingTakenScalar = Attribute("Healing taken", 100.0)
-    val healingGivenScalar = Attribute("Healing given", 100.0)
+    val healingTakenScalar = Attribute("Healing taken", 100.0) {
+        "$it%"
+    }
+    val healingGivenScalar = Attribute("Healing given", 100.0) {
+        "$it%"
+    }
 
-    val criticalEffectScalar = Attribute("Critical Effect", BASE_CRIT_EFFECT_MULTIPLIER * 100)
-    val criticalChance = Attribute("Critical Hit Chance", BASE_CRIT_CHANCE)
+    val criticalEffectScalar = Attribute("Critical Effect", BASE_CRIT_EFFECT_MULTIPLIER * 100) {
+        "$it%"
+    }
+    val criticalChance = Attribute("Critical Hit Chance", BASE_CRIT_CHANCE) {
+        "$it%"
+    }
 
     var characterState: UserState = UserState.NONE
 
@@ -53,8 +65,10 @@ open class RPGCharacter(val id: Long, val name: String) {
     fun getHealthPercent(): Int = (100.0 * getActualHealth() / health.value()).toInt()
 
     fun getUnavailableAbilitiesText(): String {
-        return "The following abilities are on cooldown:\n" + getAbilitiesOnCooldown().joinToString("\n") { ability ->
-            "${ability.displayName} (${cooldowns[ability.identifier]} turn(s) remaining)"
+        return "*The following abilities are on cooldown:*\n" + getAbilitiesOnCooldown().joinToString("\n") { ability ->
+            val turns = cooldowns[ability.identifier]!!
+            val turnsText = if (turns == 1) "turn" else "turns"
+            "${ability.displayName} (${turns} $turnsText remaining)"
         }
     }
 
