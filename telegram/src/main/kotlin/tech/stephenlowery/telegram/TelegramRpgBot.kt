@@ -130,13 +130,14 @@ object TelegramRpgBot {
         bot.sendMessage(ChatId.fromId(chatID), result.message, replyToMessageId = message.messageId, replyMarkup = replyMarkup)
     }
 
-    private fun cancelGameChoiceHandler(callbackDataSplit: List<String>, bot: Bot, update: Update) = when (callbackDataSplit[1].lowercase()) {
-        "yes" -> TelegramRpgBot::cancelGameYes
-        else  -> TelegramRpgBot::cancelGameNo
-    }.invoke(bot, update.message!!)
+    private fun cancelGameChoiceHandler(callbackDataSplit: List<String>, bot: Bot, update: Update) = when (callbackDataSplit.first().lowercase()) {
+        "yes" -> ::cancelGameYes
+        else  -> ::cancelGameNo
+    }.invoke(bot, update.callbackQuery!!.message!!)
 
     private fun cancelGameYes(bot: Bot, message: Message) {
         bot.sendMessage(ChatId.fromId(message.chat.id), CancelGameConfirmCommandHandler.getGameCanceledMessage(message.from!!.firstName))
+        GameManager.cancelGame(message.chat.id)
     }
 
     private fun cancelGameNo(bot: Bot, message: Message) {
