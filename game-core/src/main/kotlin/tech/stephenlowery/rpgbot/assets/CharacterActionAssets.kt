@@ -8,6 +8,7 @@ import tech.stephenlowery.rpgbot.core.action.action_effect.meta.ComposeEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.DelayedEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.StatModEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.VampirismEffect
+import tech.stephenlowery.rpgbot.core.action.action_effect.meta.ChainEffect
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import tech.stephenlowery.rpgbot.core.character.attribute.AttributeModifierType
 
@@ -15,6 +16,8 @@ object CharacterActionAssets {
 
     val allActions
         get() = listOf(
+            Bleed,
+            Renew,
             GenericAttack,
             GenericSelfDefend,
             SuperDefend,
@@ -52,7 +55,7 @@ object CharacterActionAssets {
             targetingType = TargetingType.SELF,
             strings = CharacterActionStrings(
                 queuedText = "You brace yourself for attacks.",
-                actionText = "{source} assumes a defensive stance."
+                successText = "{source} assumes a defensive stance."
             )
         )
 
@@ -66,7 +69,7 @@ object CharacterActionAssets {
             targetingType = TargetingType.SELF,
             strings = CharacterActionStrings(
                 queuedText = "You brace yourself for attacks.",
-                actionText = "{source} assumes an intimidating defensive stance."
+                successText = "{source} assumes an intimidating defensive stance."
             ),
             cooldown = 3
         )
@@ -188,8 +191,61 @@ object CharacterActionAssets {
                 queuedText = "You start amping yourself up",
                 actionText = "{source} is amping up!",
                 successText = "They hurt {target} for {value} and temporarily increases their power by {other}!",
-                critText = "They hurt {target} for {value} and temporarily increases their power by {other}!",
                 missedText = "Unfortunately, they fizzle out."
+            )
+        )
+
+    val Bleed: CharacterAction
+        get() = CharacterAction(
+            effect = ChainEffect(
+                DamageHealthEffect(
+                    min = 20,
+                    max = 32,
+                ),
+                DamageHealthEffect(
+                    min = 5,
+                    max = 9,
+                    duration = 5,
+                    canMiss = false,
+                    canCrit = false
+                )
+            ),
+            displayName = "Bleed",
+            description = "Bleed your blast life.",
+            identifier = "action|bleed",
+            cooldown = 4,
+            actionType = CharacterActionType.DAMAGE,
+            targetingType = TargetingType.SINGLE_TARGET,
+            strings = CharacterActionStrings(
+                queuedText = "You prepare to bleed {target} dry.",
+                actionText = "{source} goes for the jugular!",
+                successText = "They tear the skin apart, doing {value} damage and making {target} bleed out!",
+                missedText = "They whiff. No blood will be drawn for now.",
+                effectContinuedText = "{target} bleeds out for {value} damage.",
+                effectOverText = "{target} is done bleeding blood."
+            )
+        )
+
+    val Renew: CharacterAction
+        get() = CharacterAction(
+            effect = HealEffect(
+                min = 12,
+                max = 16,
+                duration = 5,
+                canCrit = true
+            ),
+            displayName = "Renew",
+            description = "Heal over time",
+            identifier = "action|renew",
+            cooldown = 4,
+            actionType = CharacterActionType.HEALING,
+            targetingType = TargetingType.SELF,
+            strings = CharacterActionStrings(
+                queuedText = "You will cast renew on yourself. Totally not a WoW ripoff.",
+                actionText = "{source} casts renew on themselves.",
+                successText = "{source} is healed for {value}.",
+                effectContinuedText = "{source} is healed for {value}.",
+                effectOverText = "{source}'s Renew has expired."
             )
         )
 

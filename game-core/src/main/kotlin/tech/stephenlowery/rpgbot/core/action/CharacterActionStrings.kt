@@ -15,30 +15,35 @@ data class CharacterActionStrings(
 ) {
 
     fun getFormattedEffectResultString(effectResult: EffectResult): String {
-        return when {
-            effectResult.occupied                          -> ""
-            effectResult.miss                              -> this.missedText
-            effectResult.crit && !effectResult.miss        -> this.critText
-            effectResult.continued && effectResult.expired -> this.effectOverText
-            effectResult.continued && !effectResult.miss   -> this.effectContinuedText
-            effectResult.chained && !effectResult.miss     -> this.effectChainedText
-            !effectResult.crit && !effectResult.miss       -> this.successText
-            else                                           -> throwUnresolvableEffectResultException(effectResult)
-        }.formatWithActionText(effectResult, actionText)
+        return listOfNotNull(
+            getActionText(effectResult),
+            getBaseText(effectResult),
+            getExtraText(effectResult)
+        ).joinToString("\n")
             .formatFromEffectResult(effectResult)
+    }
+
+    private fun getBaseText(effectResult: EffectResult): String? = when {
+        effectResult.occupied  -> null
+        effectResult.miss      -> this.missedText
+        effectResult.continued -> this.effectContinuedText
+        effectResult.chained   -> this.effectChainedText
+        effectResult.crit      -> this.critText.takeUnless { it.isEmpty() } ?: this.successText
+        else                   -> this.successText
+    }
+
+    private fun getExtraText(effectResult: EffectResult): String? {
+        return when {
+            effectResult.continued && effectResult.expired -> this.effectOverText
+            else                                           -> null
+        }
     }
 
     fun getFormattedQueuedText(from: RPGCharacter, to: RPGCharacter?) = queuedText.formatFromEffectResult(EffectResult(source = from, target = to))
 
-    private fun String.formatWithActionText(effectResult: EffectResult, actionText: String): String {
-        return getActionText(effectResult, actionText) + this
-    }
-
-    private fun getActionText(effectResult: EffectResult, actionText: String): String =
+    private fun getActionText(effectResult: EffectResult): String? =
         if (effectResult.continued || effectResult.expired || effectResult.chained || actionText.isEmpty())
-            ""
-        else if (!effectResult.occupied)
-            actionText + "\n"
+            null
         else
             actionText
 
@@ -48,10 +53,4 @@ data class CharacterActionStrings(
             .replace("{source}", effectResult.source?.name ?: "")
             .replace("{other}", effectResult.other ?: "")
     }
-
-    private fun throwUnresolvableEffectResultException(effectResult: EffectResult): Nothing {
-        throw UnresolvableEffectResultParameterException("Effect result has unresolvable parameters: $effectResult")
-    }
 }
-
-class UnresolvableEffectResultParameterException(message: String) : Exception(message)

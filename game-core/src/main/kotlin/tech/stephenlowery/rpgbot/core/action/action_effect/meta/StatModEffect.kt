@@ -17,20 +17,26 @@ open class StatModEffect(
 ) : ActionEffect(duration) {
 
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
-        return addModifier(from, to)
+        return addModifier(from, to, cycle)
     }
 
     open fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int, value: Int): List<EffectResult> {
         this.value = value
-        return this.addModifier(from, to)
+        return this.addModifier(from, to, cycle)
     }
 
-    private fun addModifier(from: RPGCharacter, to: RPGCharacter): List<EffectResult> {
+    private fun addModifier(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
         when (attributeModifierType) {
             AttributeModifierType.ADDITIVE       -> statGetter(to).addAdditiveMod(value!!.toDouble(), modDuration, modifierName)
             AttributeModifierType.MULTIPLICATIVE -> statGetter(to).addMultiplicativeMod(value!!.toDouble(), modDuration, modifierName)
         }
-        return EffectResult.singleResult(source = from, target = to, value = abs(value!!))
+        return EffectResult.singleResult(
+            source = from,
+            target = to,
+            value = abs(value!!),
+            expired = duration > 1 && isExpired(cycle + 1),
+            continued = duration > 1 && cycle > 0
+        )
     }
 
 }

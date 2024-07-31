@@ -40,16 +40,19 @@ class DamageHealthEffect(
         val isCrit = isCrit(from, to)
         val doesHit = isSuccessful(from, to)
         var totalDamage = 0
+        var result: List<EffectResult>? = null
         if (doesHit) {
             totalDamage = calculateDamage(from, to, isCrit).toInt()
-            super.applyEffect(from, to, cycle, totalDamage)
+            result = super.applyEffect(from, to, cycle, totalDamage)
         }
         return EffectResult.singleResult(
             source = from,
             target = to,
             value = totalDamage,
             miss = !doesHit,
-            crit = isCrit
+            crit = isCrit,
+            expired = result?.first()?.expired ?: false,
+            continued = result?.first()?.continued ?: false,
         )
     }
 

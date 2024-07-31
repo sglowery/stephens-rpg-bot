@@ -25,14 +25,14 @@ class CharacterActionStringsTest extends Specification {
         new EffectResult(charOne, charTwo, 1, true, false, false, false, false, false, "")  | ""         || "missed"
         new EffectResult(charOne, charTwo, 1, false, true, false, false, false, false, "")  | ""         || "crit"
         new EffectResult(charOne, charTwo, 1, false, false, true, false, false, false, "")  | ""         || "continued"
-        new EffectResult(charOne, charTwo, 1, false, false, true, true, false, false, "")   | ""         || "effectOver"
+        new EffectResult(charOne, charTwo, 1, false, false, true, true, false, false, "")   | ""         || "continued\neffectOver"
         new EffectResult(charOne, charTwo, 1, false, false, false, false, true, false, "")  | ""         || "chained"
 
         new EffectResult(charOne, charTwo, 1, false, false, false, false, false, false, "") | "action"   || "action\nsuccess"
         new EffectResult(charOne, charTwo, 1, true, false, false, false, false, false, "")  | "action"   || "action\nmissed"
         new EffectResult(charOne, charTwo, 1, false, true, false, false, false, false, "")  | "action"   || "action\ncrit"
         new EffectResult(charOne, charTwo, 1, false, false, true, false, false, false, "")  | "action"   || "continued"
-        new EffectResult(charOne, charTwo, 1, false, false, true, true, false, false, "")   | "action"   || "effectOver"
+        new EffectResult(charOne, charTwo, 1, false, false, true, true, false, false, "")   | "action"   || "continued\neffectOver"
         new EffectResult(charOne, charTwo, 1, false, false, false, false, true, false, "")  | "action"   || "chained"
         new EffectResult(charOne, charTwo, 1, false, false, false, false, false, true, "")  | "action"   || "action"
     }

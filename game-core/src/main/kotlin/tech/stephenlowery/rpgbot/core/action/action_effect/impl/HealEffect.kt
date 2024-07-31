@@ -32,15 +32,18 @@ class HealEffect(
         val isCrit = isCrit(from, to)
         val totalHealing = calculateHealing(from, to, isCrit)
         val succeeds = isSuccessful(from)
+        var results: List<EffectResult>? = null
         if (succeeds) {
-            super.applyEffect(from, to, cycle, -totalHealing.toInt())
+            results = super.applyEffect(from, to, cycle, -totalHealing.toInt())
         }
         return EffectResult.singleResult(
             source = from,
             target = to,
             miss = !succeeds,
             value = totalHealing.toInt(),
-            crit = isCrit
+            crit = isCrit,
+            expired = results?.first()?.expired ?: false,
+            continued = results?.first()?.continued ?: false,
         )
     }
 
@@ -52,7 +55,9 @@ class HealEffect(
             target = to,
             miss = false,
             value = results.first().value,
-            crit = results.first().crit
+            crit = results.first().crit,
+            expired = results.first().expired,
+            continued = results.first().continued,
         )
     }
 
