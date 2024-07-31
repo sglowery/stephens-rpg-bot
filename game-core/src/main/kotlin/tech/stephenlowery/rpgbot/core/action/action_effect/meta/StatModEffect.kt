@@ -1,5 +1,6 @@
 package tech.stephenlowery.rpgbot.core.action.action_effect.meta
 
+import tech.stephenlowery.rpgbot.core.action.CharacterActionType
 import tech.stephenlowery.rpgbot.core.action.EffectResult
 import tech.stephenlowery.rpgbot.core.action.action_effect.ActionEffect
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
@@ -34,6 +35,7 @@ open class StatModEffect(
             source = from,
             target = to,
             value = abs(value!!),
+            actionType = CharacterActionType.OTHER,
             expired = duration > 1 && isExpired(cycle + 1),
             continued = duration > 1 && cycle > 0
         )

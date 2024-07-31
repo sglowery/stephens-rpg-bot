@@ -5,7 +5,7 @@ import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 class QueuedCharacterAction(
     val action: CharacterAction,
     val source: RPGCharacter,
-    var target: RPGCharacter? = null
+    var target: RPGCharacter? = null,
 ) {
 
     private var cycle = 0
@@ -29,10 +29,10 @@ class QueuedCharacterAction(
 }
 
 class QueuedCharacterActionResolvedResults(
-    private val action: CharacterAction,
-    private val effectResults: List<EffectResult>,
+    val action: CharacterAction,
+    val effectResults: List<EffectResult>,
     private val effectResultSeparator: String = "\n\n",
-    private val stringResultOverride: String? = null
+    private val stringResultOverride: String? = null,
 ) {
 
     var actionResultedInDeath = false

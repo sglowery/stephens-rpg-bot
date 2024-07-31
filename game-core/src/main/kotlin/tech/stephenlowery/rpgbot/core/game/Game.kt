@@ -118,6 +118,57 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
         return charactersBesidesSelf(character)
     }
 
+    fun getPostGameStatsString(): String {
+        val idToPlayerGameStatsMap: Map<Long, PlayerGameStats> =
+            players.values.associate { it.id to PlayerGameStats(it.name, it is NonPlayerCharacter, it.getActualHealth()) }
+        var totalDamageDone = 0
+        var totalHealingDone = 0
+        resultsHistory.forEachIndexed { round, queuedActionResultsForRound ->
+            queuedActionResultsForRound.forEach { queuedResult ->
+                queuedResult.effectResults.forEach { actionEffectResult ->
+                    val source = actionEffectResult.source
+                    val target = actionEffectResult.target
+                    val value = actionEffectResult.value
+                    val fromStats = idToPlayerGameStatsMap[source.id]!!
+                    val targetStats = idToPlayerGameStatsMap[target.id]!!
+                    when (actionEffectResult.actionType) {
+                        CharacterActionType.DAMAGE      -> {
+                            fromStats.damageDone += value
+                            targetStats.damageTaken += value
+                            totalDamageDone += value
+                            if (queuedResult.actionResultedInDeath) {
+                                targetStats.diedOnRound = round + 1
+                                fromStats.playersKilled.add(target.name)
+                            }
+                        }
+                        CharacterActionType.HEALING     -> {
+                            fromStats.healingDone += value
+                            targetStats.healingTaken += value
+                            totalHealingDone += value
+                        }
+                        CharacterActionType.DAMAGE_HEAL -> {
+                            val healing = actionEffectResult.other?.toInt() ?: 0
+                            fromStats.damageDone += value
+                            fromStats.healingDone += healing
+                            fromStats.healingTaken += healing
+                            targetStats.damageTaken += value
+                            totalDamageDone += value
+                            totalHealingDone += healing
+                        }
+                        else                            -> {}
+                    }
+                }
+            }
+        }
+        return "Post-Game Stats:\n\n" +
+                "Total damage done: $totalDamageDone\n" +
+                "Total healing done: $totalHealingDone\n\n" +
+                idToPlayerGameStatsMap.values.joinToString(
+                    separator = "\n\n",
+                    transform = PlayerGameStats::toString,
+                )
+    }
+
     fun cancel() {
         actionQueue.clear()
         players.clear()

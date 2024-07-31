@@ -1,5 +1,6 @@
 package tech.stephenlowery.rpgbot.core.action.action_effect.impl
 
+import tech.stephenlowery.rpgbot.core.action.CharacterActionType
 import tech.stephenlowery.rpgbot.core.action.EffectResult
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.StatModEffect
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
@@ -39,8 +40,9 @@ class HealEffect(
         return EffectResult.singleResult(
             source = from,
             target = to,
-            miss = !succeeds,
             value = totalHealing.toInt(),
+            actionType = CharacterActionType.HEALING,
+            miss = !succeeds,
             crit = isCrit,
             expired = results?.first()?.expired ?: false,
             continued = results?.first()?.continued ?: false,
@@ -53,8 +55,9 @@ class HealEffect(
         return EffectResult.singleResult(
             source = from,
             target = to,
-            miss = false,
             value = results.first().value,
+            actionType = CharacterActionType.HEALING,
+            miss = false,
             crit = results.first().crit,
             expired = results.first().expired,
             continued = results.first().continued,

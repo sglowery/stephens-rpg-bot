@@ -4,16 +4,17 @@ import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import java.util.Collections.singletonList
 
 class EffectResult(
-    var source: RPGCharacter? = null,
-    var target: RPGCharacter? = null,
-    var value: Int = 0,
-    var miss: Boolean = false,
-    var crit: Boolean = false,
+    val source: RPGCharacter,
+    val target: RPGCharacter,
+    val value: Int = 0,
+    val actionType: CharacterActionType = CharacterActionType.OTHER,
+    val miss: Boolean = false,
+    val crit: Boolean = false,
     var continued: Boolean = false,
     var expired: Boolean = false,
-    var chained: Boolean = false,
-    var occupied: Boolean = false,
-    var other: String? = null,
+    val chained: Boolean = false,
+    val occupied: Boolean = false,
+    val other: String? = null,
 ) {
 
     fun isNormalAttack(): Boolean = !continued && !expired && !chained
@@ -27,9 +28,10 @@ class EffectResult(
     companion object {
 
         fun singleResult(
-            source: RPGCharacter? = null,
-            target: RPGCharacter? = null,
+            source: RPGCharacter,
+            target: RPGCharacter,
             value: Int = 0,
+            actionType: CharacterActionType,
             miss: Boolean = false,
             crit: Boolean = false,
             continued: Boolean = false,
@@ -42,6 +44,7 @@ class EffectResult(
                 source,
                 target,
                 value,
+                actionType,
                 miss,
                 crit,
                 continued,

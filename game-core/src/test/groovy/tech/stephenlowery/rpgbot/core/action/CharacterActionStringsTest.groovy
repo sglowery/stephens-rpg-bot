@@ -1,6 +1,7 @@
 package tech.stephenlowery.rpgbot.core.action
 
 import spock.lang.Specification
+import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import tech.stephenlowery.rpgbot.utils.TestUtils
 
 class CharacterActionStringsTest extends Specification {
@@ -17,45 +18,81 @@ class CharacterActionStringsTest extends Specification {
         )
 
         expect:
-        text == characterActionStrings.getFormattedEffectResultString(effectResult)
+        text == characterActionStrings.getFormattedEffectResultString(result)
 
         where:
-        effectResult                                                                        | actionText || text
-        new EffectResult(charOne, charTwo, 1, false, false, false, false, false, false, "") | ""         || "success"
-        new EffectResult(charOne, charTwo, 1, true, false, false, false, false, false, "")  | ""         || "missed"
-        new EffectResult(charOne, charTwo, 1, false, true, false, false, false, false, "")  | ""         || "crit"
-        new EffectResult(charOne, charTwo, 1, false, false, true, false, false, false, "")  | ""         || "continued"
-        new EffectResult(charOne, charTwo, 1, false, false, true, true, false, false, "")   | ""         || "continued\neffectOver"
-        new EffectResult(charOne, charTwo, 1, false, false, false, false, true, false, "")  | ""         || "chained"
+        result                                                                          | actionText || text
+        effectResult(charOne, charTwo, 1, false, false, false, false, false, false, "") | ""         || "success"
+        effectResult(charOne, charTwo, 1, true, false, false, false, false, false, "")  | ""         || "missed"
+        effectResult(charOne, charTwo, 1, false, true, false, false, false, false, "")  | ""         || "crit"
+        effectResult(charOne, charTwo, 1, false, false, true, false, false, false, "")  | ""         || "continued"
+        effectResult(charOne, charTwo, 1, false, false, true, true, false, false, "")   | ""         || "continued\neffectOver"
+        effectResult(charOne, charTwo, 1, false, false, false, false, true, false, "")  | ""         || "chained"
 
-        new EffectResult(charOne, charTwo, 1, false, false, false, false, false, false, "") | "action"   || "action\nsuccess"
-        new EffectResult(charOne, charTwo, 1, true, false, false, false, false, false, "")  | "action"   || "action\nmissed"
-        new EffectResult(charOne, charTwo, 1, false, true, false, false, false, false, "")  | "action"   || "action\ncrit"
-        new EffectResult(charOne, charTwo, 1, false, false, true, false, false, false, "")  | "action"   || "continued"
-        new EffectResult(charOne, charTwo, 1, false, false, true, true, false, false, "")   | "action"   || "continued\neffectOver"
-        new EffectResult(charOne, charTwo, 1, false, false, false, false, true, false, "")  | "action"   || "chained"
-        new EffectResult(charOne, charTwo, 1, false, false, false, false, false, true, "")  | "action"   || "action"
+        effectResult(charOne, charTwo, 1, false, false, false, false, false, false, "") | "action"   || "action\nsuccess"
+        effectResult(charOne, charTwo, 1, true, false, false, false, false, false, "")  | "action"   || "action\nmissed"
+        effectResult(charOne, charTwo, 1, false, true, false, false, false, false, "")  | "action"   || "action\ncrit"
+        effectResult(charOne, charTwo, 1, false, false, true, false, false, false, "")  | "action"   || "continued"
+        effectResult(charOne, charTwo, 1, false, false, true, true, false, false, "")   | "action"   || "continued\neffectOver"
+        effectResult(charOne, charTwo, 1, false, false, false, false, true, false, "")  | "action"   || "chained"
+        effectResult(charOne, charTwo, 1, false, false, false, false, false, true, "")  | "action"   || "action"
     }
 
     def "formatFromEffectResult replaces text markers with information in EffectResult"() {
         given:
         def characterActionStrings = new CharacterActionStrings(
-                "", "", "{source} {target} {value} {other}", "", "", "", "", "", ""
+                "",
+                "",
+                "{source} {target} {value} {other}",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
         )
 
         expect:
         "Stephen Ashley 1 swag" == characterActionStrings.getFormattedEffectResultString(
-                new EffectResult(
-                        source: charOne,
-                        target: charTwo,
-                        value: 1,
-                        miss: false,
-                        crit: false,
-                        continued: false,
-                        expired: false,
-                        chained: false,
-                        other: "swag"
+                effectResult(
+                        charOne,
+                        charTwo,
+                        1,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        "swag"
                 )
+        )
+    }
+
+    def effectResult(
+            RPGCharacter from,
+            RPGCharacter to,
+            int value,
+            boolean miss,
+            boolean crit,
+            boolean continued,
+            boolean expired,
+            boolean chained,
+            boolean occupied,
+            String other
+    ) {
+        return new EffectResult(
+                from,
+                to,
+                value,
+                CharacterActionType.OTHER,
+                miss,
+                crit,
+                continued,
+                expired,
+                chained,
+                occupied,
+                other
         )
     }
 }

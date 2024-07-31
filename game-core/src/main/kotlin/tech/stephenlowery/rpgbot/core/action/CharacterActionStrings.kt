@@ -39,7 +39,8 @@ data class CharacterActionStrings(
         }
     }
 
-    fun getFormattedQueuedText(from: RPGCharacter, to: RPGCharacter?) = queuedText.formatFromEffectResult(EffectResult(source = from, target = to))
+    // TODO resolve this dumb workaround
+    fun getFormattedQueuedText(from: RPGCharacter, to: RPGCharacter?) = queuedText.formatFromEffectResult(EffectResult(source = from, target = to ?: RPGCharacter(-1, "")))
 
     private fun getActionText(effectResult: EffectResult): String? =
         if (effectResult.continued || effectResult.expired || effectResult.chained || actionText.isEmpty())
@@ -48,9 +49,9 @@ data class CharacterActionStrings(
             actionText
 
     private fun String.formatFromEffectResult(effectResult: EffectResult): String {
-        return this.replace("{target}", effectResult.target?.name ?: "")
+        return this.replace("{target}", effectResult.target.name)
             .replace("{value}", effectResult.value.toString())
-            .replace("{source}", effectResult.source?.name ?: "")
+            .replace("{source}", effectResult.source.name)
             .replace("{other}", effectResult.other ?: "")
     }
 }

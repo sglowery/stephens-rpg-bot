@@ -1,5 +1,6 @@
 package tech.stephenlowery.rpgbot.core.action.action_effect.impl
 
+import tech.stephenlowery.rpgbot.core.action.CharacterActionType
 import tech.stephenlowery.rpgbot.core.game.StatGetterFn
 import tech.stephenlowery.rpgbot.core.game.ValueFromRPGCharacterFn
 import tech.stephenlowery.rpgbot.core.action.EffectResult
@@ -23,6 +24,7 @@ class SwapStatsEffect(
             source = from,
             target = to,
             value = difference,
+            actionType = CharacterActionType.OTHER,
             other = fromStat.name
         )
     }

@@ -1,5 +1,6 @@
 package tech.stephenlowery.rpgbot.core.action.action_effect.meta
 
+import tech.stephenlowery.rpgbot.core.action.CharacterActionType
 import tech.stephenlowery.rpgbot.core.action.EffectResult
 import tech.stephenlowery.rpgbot.core.action.action_effect.ActionEffect
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
@@ -22,12 +23,12 @@ class DelayedEffect(
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> = when {
         cycle == 0             -> handleFirstApplication(from, to, cycle)
         shouldBeApplied(cycle) -> applyDelayedEffect(from, to, cycle)
-        else                   -> EffectResult.singleResult(source = from, target = to, continued = true)
+        else                   -> EffectResult.singleResult(source = from, target = to, actionType = CharacterActionType.OTHER, continued = true)
     }
 
     private fun handleFirstApplication(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
         occupyUserIfApplicable(from)
-        return EffectResult.singleResult(source = from, target = to, occupied = occupySource, value = 0)
+        return EffectResult.singleResult(source = from, target = to, value = 0, actionType = CharacterActionType.OTHER, occupied = occupySource)
     }
 
 
@@ -49,6 +50,7 @@ class DelayedEffect(
             source = from,
             target = to,
             value = delayedActionEffectResult.value,
+            actionType = delayedActionEffectResult.actionType,
             crit = delayedActionEffectResult.crit,
             miss = delayedActionEffectResult.miss,
             expired = true,

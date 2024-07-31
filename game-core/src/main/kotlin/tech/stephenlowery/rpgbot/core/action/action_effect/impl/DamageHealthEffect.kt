@@ -1,5 +1,6 @@
 package tech.stephenlowery.rpgbot.core.action.action_effect.impl
 
+import tech.stephenlowery.rpgbot.core.action.CharacterActionType
 import tech.stephenlowery.rpgbot.core.action.EffectResult
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.StatModEffect
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
@@ -49,6 +50,7 @@ class DamageHealthEffect(
             source = from,
             target = to,
             value = totalDamage,
+            actionType = CharacterActionType.DAMAGE,
             miss = !doesHit,
             crit = isCrit,
             expired = result?.first()?.expired ?: false,

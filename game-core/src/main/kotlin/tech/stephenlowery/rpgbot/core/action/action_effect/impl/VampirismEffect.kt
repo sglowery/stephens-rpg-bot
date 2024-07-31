@@ -1,5 +1,6 @@
 package tech.stephenlowery.rpgbot.core.action.action_effect.impl
 
+import tech.stephenlowery.rpgbot.core.action.CharacterActionType
 import tech.stephenlowery.rpgbot.core.action.EffectResult
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.ComposeEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.StatModEffect
@@ -23,6 +24,7 @@ class VampirismEffect(
             source = from,
             target = to,
             value = damageDone,
+            actionType = CharacterActionType.DAMAGE_HEAL,
             miss = damageDone == 0,
             other = healingResults.first().value.toString()
         )

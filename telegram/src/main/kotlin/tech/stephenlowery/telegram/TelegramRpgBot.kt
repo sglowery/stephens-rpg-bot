@@ -242,9 +242,10 @@ object TelegramRpgBot {
         deadPlayers.forEach { player ->
             bot.sendMessage(ChatId.fromId(player.id), "You died in the previous round and have been removed from the game.")
         }
-        game.removeCharacters(deadPlayers)
+//        game.removeCharacters(deadPlayers)
         if (game.isOver()) {
             bot.sendMessage(ChatId.fromId(game.id), game.getGameEndedText())
+            bot.sendMessage(ChatId.fromId(game.id), game.getPostGameStatsString())
             GameManager.cancelGame(game.id)
         } else {
             if (game.allPlayersReadyForTurnToResolve()) {

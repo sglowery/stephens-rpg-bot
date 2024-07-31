@@ -175,6 +175,7 @@ object CharacterActionAssets {
                         source = from,
                         target = to,
                         value = damageDone,
+                        actionType = CharacterActionType.DAMAGE,
                         miss = innerResults.first().miss,
                         crit = innerResults.first().crit,
                         other = powerIncrease.toString()
