@@ -154,6 +154,10 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
                             targetStats.damageTaken += value
                             totalDamageDone += value
                             totalHealingDone += healing
+                            if (queuedResult.actionResultedInDeath) {
+                                targetStats.diedOnRound = round + 1
+                                fromStats.playersKilled.add(target.name)
+                            }
                         }
                         else                            -> {}
                     }
