@@ -45,12 +45,23 @@ object TelegramRpgBot {
                         "action" -> actionChosen(bot, update, message)
                         "target" -> targetChosen(bot, update, message)
                         "cancel" -> cancelGameChoiceHandler(callbackDataSplit.drop(1), bot, update)
+                        "goback" -> goBackToChoosingAction(bot, message)
                     }
                 }
             }
         }
         println("bot running")
         rpgBot.startPolling()
+    }
+
+    private fun goBackToChoosingAction(bot: Bot, message: Message) {
+        val userCharacter = GameManager.findCharacter(message.chat.id) ?: return
+        if (userCharacter.characterState != UserState.CHOOSING_TARGETS) {
+            return
+        }
+        userCharacter.queuedAction = null
+        userCharacter.characterState = UserState.CHOOSING_ACTION
+        sendSinglePlayerActions(bot, userCharacter, message.messageId)
     }
 
     private fun newGameCommand(bot: Bot, update: Update, message: Message) {
@@ -155,6 +166,18 @@ object TelegramRpgBot {
         notifyOccupiedUsers(bot, game)
     }
 
+    private fun sendSinglePlayerActions(bot: Bot, player: PlayerCharacter, editMessageId: Long) {
+        val keyboard = makeKeyboardFromPlayerActions(player.getAvailableActions())
+        val replyMarkup = InlineKeyboardMarkup.create(keyboard)
+        bot.editMessageText(
+            ChatId.fromId(player.id),
+            editMessageId,
+            text = player.getPreActionText() + "\n\nPick an action.",
+            replyMarkup = replyMarkup,
+            parseMode = ParseMode.MARKDOWN
+        )
+    }
+
     private fun notifyOccupiedUsers(bot: Bot, game: Game) {
         game.livingPlayers().filter { it.characterState == UserState.OCCUPIED }
             .forEach {
@@ -207,9 +230,13 @@ object TelegramRpgBot {
             messageId = messageId,
             inlineMessageId = null,
             text = character.getPreActionText() + "\n\nChoose a target.",
-            replyMarkup = InlineKeyboardMarkup.create(makeKeyboardFromPlayerNames(targets)),
+            replyMarkup = InlineKeyboardMarkup.create(makeKeyboardForChoosingTarget(targets)),
             parseMode = ParseMode.MARKDOWN
         )
+    }
+
+    private fun makeKeyboardForChoosingTarget(targets: Collection<RPGCharacter>): List<List<InlineKeyboardButton>> {
+        return listOf(listOf(InlineKeyboardButton.CallbackData("<-- Go Back", "goback"))) + makeKeyboardFromPlayerNames(targets)
     }
 
     // TODO move this code to a handler
