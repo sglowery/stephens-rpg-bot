@@ -21,7 +21,7 @@ object CharacterActionAssets {
             GenericAttack,
             GenericSelfDefend,
             SuperDefend,
-            SelfHeal,
+            Heal,
             WindupAttack,
             LongChargeUpAttack,
             LifeSteal,
@@ -74,19 +74,18 @@ object CharacterActionAssets {
             cooldown = 3
         )
 
-    val SelfHeal: CharacterAction
+    val Heal: CharacterAction
         get() = CharacterAction(
-            effect = HealEffect(9, 23),
+            effect = HealEffect(16, 23),
             displayName = "Heal",
             description = "A weak spell that heals you for a little. Cooldown of three turns.",
             identifier = "action|heal",
             actionType = CharacterActionType.HEALING,
-            targetingType = TargetingType.SELF,
+            targetingType = TargetingType.SINGLE_TARGET_INCLUDING_SELF,
             strings = CharacterActionStrings(
-                queuedText = "You prepare to heal your wounds.",
+                queuedText = "You prepare to heal some wounds.",
                 actionText = "{source} utters an incantation...",
-                successText = "They are bathed in golden light as their wounds begin to heal, negating {value} damage.",
-                missedText = "{source} emits a bright but brief flash of light as their healing spell fails.",
+                successText = "{target} is bathed in golden light as their wounds begin to heal, negating {value} damage.",
             ),
             cooldown = 3,
         )
