@@ -106,14 +106,16 @@ class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Ga
 
     private val dummy = NonPlayerCharacter("Debug Dummy", 1, healthValue = DUMMY_HEALTH) {
         if (shouldBonk()) {
-            val target = listOf(chooseTargetFromMostDamageDone(), chooseTargetFromMostHealingDone()).random()
+            val target = listOf(chooseTargetFromMostDamageDone(), chooseTargetFromMostHealingDone())
+                .randomOrNull()
+                ?: livingPlayers<PlayerCharacter>().random()
             QueuedCharacterAction(dummyBonk, this, target)
         } else {
             QueuedCharacterAction(dummyHeal, this, this)
         }
     }
 
-    private fun chooseTargetFromMostDamageDone(): PlayerCharacter {
+    private fun chooseTargetFromMostDamageDone(): PlayerCharacter? {
         return resultsHistory
             .flatten()
             .flatMap(QueuedCharacterActionResolvedResults::effectResults)
@@ -123,30 +125,30 @@ class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Ga
                     this[effect.source as PlayerCharacter] = effect.value + (this[effect.source] ?: 0)
                 }
             }
-            .maxBy { it.value }
-            .key
+            .maxByOrNull { it.value }
+            ?.key
     }
 
-    private fun chooseTargetFromMostHealingDone(): RPGCharacter {
+    private fun chooseTargetFromMostHealingDone(): PlayerCharacter? {
         return resultsHistory
             .flatten()
             .flatMap(QueuedCharacterActionResolvedResults::effectResults)
             .filter {
-                it.target == dummy &&
-                        it.source is PlayerCharacter &&
-                        it.actionType == CharacterActionType.HEALING || it.actionType == CharacterActionType.DAMAGE_HEAL
+                it.source is PlayerCharacter &&
+                        (it.actionType == CharacterActionType.HEALING
+                                || (it.target == dummy && it.actionType == CharacterActionType.DAMAGE_HEAL))
             }
-            .fold(mutableMapOf<RPGCharacter, Int>()) { characterDamageMap, effect ->
+            .fold(mutableMapOf<PlayerCharacter, Int>()) { characterDamageMap, effect ->
                 val effectHealingValue = when (effect.actionType) {
                     CharacterActionType.HEALING -> effect.value
                     else                        -> effect.other?.toInt() ?: 0
                 }
                 return@fold characterDamageMap.apply {
-                    this[effect.source] = effectHealingValue + (this[effect.source] ?: 0)
+                    this[effect.source as PlayerCharacter] = effectHealingValue + (this[effect.source] ?: 0)
                 }
             }
-            .maxBy { it.value }
-            .key
+            .maxByOrNull { it.value }
+            ?.key
     }
 
     private val bosco = NonPlayerCharacter("Bosco", 2) {
