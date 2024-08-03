@@ -20,7 +20,8 @@ private const val GAME_STARTED_MESSAGE = "You're in a Debug Dummy game. Have fun
 
 private const val CHANCE_TO_BONK = 75
 
-private const val DUMMY_HEALTH = 1000
+private const val DUMMY_HEALTH = 1200
+private const val DUMMY_HEALTH_PLAYER_SCALAR = 800
 
 private val dummyHealStrings = CharacterActionStrings(
     queuedText = "",
@@ -145,6 +146,7 @@ class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Ga
     }
 
     override fun startGame(): Collection<Pair<Long, String>> {
+        dummy.setHealth(DUMMY_HEALTH + DUMMY_HEALTH_PLAYER_SCALAR * getHumanPlayers().size)
         players[DUMMY_ID] = dummy
         players[BOSCO_ID] = bosco
         startGameStateAndPrepCharacters()

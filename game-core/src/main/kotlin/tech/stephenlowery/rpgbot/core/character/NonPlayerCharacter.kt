@@ -48,6 +48,11 @@ class NonPlayerCharacter(
     }
 
     override fun toString(): String {
-        return "NonPlayerCharacter(id=$id, name=$name)"
+        return "NonPlayerCharacter(name=$name, id=$id)"
+    }
+
+    fun setHealth(healthValue: Int) {
+        health.base = healthValue.toDouble()
+        setHealthBounds()
     }
 }
