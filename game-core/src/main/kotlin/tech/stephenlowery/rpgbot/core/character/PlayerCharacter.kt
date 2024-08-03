@@ -98,7 +98,7 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
     }
 
     override fun toString(): String {
-        return "PlayerCharacter(id=$id, name=$name)"
+        return "PlayerCharacter(name=$name, id=$id)"
     }
 
 }

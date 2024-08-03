@@ -154,7 +154,7 @@ open class RPGCharacter(val id: Long, val name: String) {
     }
 
     override fun toString(): String {
-        return "RPGCharacter(id=$id, name=$name)"
+        return "RPGCharacter(name=$name, id=$id)"
     }
 
 }
