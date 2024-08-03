@@ -17,7 +17,7 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
     var hasStarted = false
     private var turnCounter = 0
 
-    private val resultsHistory = mutableListOf<Collection<QueuedCharacterActionResolvedResults>>()
+    protected val resultsHistory = mutableListOf<Collection<QueuedCharacterActionResolvedResults>>()
 
     init {
         addPlayerToGame(initiatorId, initiatorName)

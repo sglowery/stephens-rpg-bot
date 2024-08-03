@@ -106,39 +106,70 @@ class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Ga
 
     private val dummy = NonPlayerCharacter("Debug Dummy", 1, healthValue = DUMMY_HEALTH) {
         if (shouldBonk()) {
-            QueuedCharacterAction(dummyBonk, this, livingPlayers<PlayerCharacter>().random())
+            val target = listOf(chooseTargetFromMostDamageDone(), chooseTargetFromMostHealingDone()).random()
+            QueuedCharacterAction(dummyBonk, this, target)
         } else {
             QueuedCharacterAction(dummyHeal, this, this)
         }
+    }
+
+    private fun chooseTargetFromMostDamageDone(): PlayerCharacter {
+        return resultsHistory
+            .flatten()
+            .flatMap(QueuedCharacterActionResolvedResults::effectResults)
+            .filter { it.target == dummy && it.source is PlayerCharacter }
+            .fold(mutableMapOf<PlayerCharacter, Int>()) { characterDamageMap, effect ->
+                return@fold characterDamageMap.apply {
+                    this[effect.source as PlayerCharacter] = effect.value + (this[effect.source] ?: 0)
+                }
+            }
+            .maxBy { it.value }
+            .key
+    }
+
+    private fun chooseTargetFromMostHealingDone(): RPGCharacter {
+        return resultsHistory
+            .flatten()
+            .flatMap(QueuedCharacterActionResolvedResults::effectResults)
+            .filter {
+                it.target == dummy &&
+                        it.source is PlayerCharacter &&
+                        it.actionType == CharacterActionType.HEALING || it.actionType == CharacterActionType.DAMAGE_HEAL
+            }
+            .fold(mutableMapOf<RPGCharacter, Int>()) { characterDamageMap, effect ->
+                val effectHealingValue = when (effect.actionType) {
+                    CharacterActionType.HEALING -> effect.value
+                    else                        -> effect.other?.toInt() ?: 0
+                }
+                return@fold characterDamageMap.apply {
+                    this[effect.source] = effectHealingValue + (this[effect.source] ?: 0)
+                }
+            }
+            .maxBy { it.value }
+            .key
     }
 
     private val bosco = NonPlayerCharacter("Bosco", 2) {
         val target = livingPlayers<PlayerCharacter>().filter { !characterHasActiveInvigoration(it) }.randomOrNull()
         val isOffCooldown = !this.isActionOnCooldown(boscoHealDartAction.identifier)
         when (target != null && isOffCooldown) {
-            true -> QueuedCharacterAction(boscoHealDartAction, this, target)
+            true  -> QueuedCharacterAction(boscoHealDartAction, this, target)
             false -> QueuedCharacterAction(boscoNoOp, this, this)
         }
-    }
-
-    private fun characterHasActiveInvigoration(it: PlayerCharacter): Boolean {
-        return it.damageTakenScalar.hasNamedModifier(boscoHealModifierName)
     }
 
     override fun getTargetsForCharacter(character: PlayerCharacter): Collection<RPGCharacter> {
         return when (character.queuedAction?.action?.actionType) {
             CharacterActionType.DAMAGE -> listOf(dummy)
-            else                       -> getHumanPlayers().values.filter(PlayerCharacter::isAlive)
+            else                       -> getTargetsForPlayerAction(character)
         }
     }
-
-    private fun shouldBonk(): Boolean = dummy.getActualHealth() == DUMMY_HEALTH || Random.nextInt(100) < CHANCE_TO_BONK
-
-    override fun numberOfPlayersIsValid(): Boolean = players.isNotEmpty()
 
     override fun isOver(): Boolean {
         return livingPlayers<PlayerCharacter>().isEmpty() || dummy.isDead()
     }
+
+    override fun numberOfPlayersIsValid(): Boolean = players.isNotEmpty()
 
     override fun getGameEndedText(): String = when {
         livingPlayers<PlayerCharacter>().isEmpty() -> "The dummy wins lol. SAD!!"
@@ -154,5 +185,19 @@ class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Ga
             .filter { it != DUMMY_ID && it != BOSCO_ID }
             .map { it to GAME_STARTED_MESSAGE }
     }
+
+    private fun characterHasActiveInvigoration(it: PlayerCharacter): Boolean {
+        return it.damageTakenScalar.hasNamedModifier(boscoHealModifierName)
+    }
+
+    private fun getTargetsForPlayerAction(character: PlayerCharacter): Collection<RPGCharacter> {
+        val livingPlayers = getHumanPlayers().values.filter { it.isAlive() }
+        return when (character.queuedAction?.action?.targetingType) {
+            TargetingType.SINGLE_TARGET -> livingPlayers.filter { it.id != character.id }
+            else                        -> livingPlayers
+        }
+    }
+
+    private fun shouldBonk(): Boolean = dummy.getActualHealth() == DUMMY_HEALTH || Random.nextInt(100) < CHANCE_TO_BONK
 
 }
