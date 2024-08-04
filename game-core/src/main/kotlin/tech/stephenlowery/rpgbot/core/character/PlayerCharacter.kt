@@ -2,6 +2,7 @@ package tech.stephenlowery.rpgbot.core.character
 
 import tech.stephenlowery.rpgbot.core.action.QueuedCharacterAction
 import tech.stephenlowery.rpgbot.core.action.TargetingType
+import tech.stephenlowery.rpgbot.core.game.GameManager
 
 class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
 
@@ -29,9 +30,9 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
     }
 
     fun getPreActionText(): String = listOfNotNull(
-        getCharacterSummaryText(),
+        getAttributeModifiersAsString(),
         if (cooldowns.isNotEmpty()) getUnavailableAbilitiesText() else null,
-        getAttributeModifiersAsString()
+        getCharacterSummaryText(),
     ).filter { it.isNotEmpty() }.joinToString("\n\n")
 
     fun getCharacterStatusText(): String {
@@ -74,8 +75,8 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
             .map { it to it.getTemporaryAndNamedModifiers() }
             .filter { it.second.isNotEmpty() }
             .joinToString("\n\n") { "${it.first.name}: ${it.second.joinToString("\n")}" }
-        return when(modifiersText.isEmpty()) {
-            true -> null
+        return when (modifiersText.isEmpty()) {
+            true  -> null
             false -> "*---Attribute Modifiers---*\n$modifiersText"
         }
     }
