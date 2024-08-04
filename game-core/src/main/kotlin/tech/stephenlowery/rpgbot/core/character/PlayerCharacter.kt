@@ -23,7 +23,7 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
             Defense: ${defense.value()}
         """.trimIndent()
         val specialMessages = getSpecialMessages()
-        return baseText + when (specialMessages.isNotEmpty()) {
+        return baseText + when (specialMessages.isNotEmpty() && GameManager.findGameContainingCharacter(this.id)?.turnCounter!! > 0) {
             true  -> "\n\nAdditionally, your stats grant you the following properties:\n\n" + specialMessages.joinToString("\n\n") { "- $it" }
             false -> ""
         }

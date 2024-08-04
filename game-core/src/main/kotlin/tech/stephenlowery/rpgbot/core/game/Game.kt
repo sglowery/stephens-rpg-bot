@@ -15,7 +15,7 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
     val players = mutableMapOf<Long, RPGCharacter>()
 
     var hasStarted = false
-    private var turnCounter = 0
+    var turnCounter = 0
 
     protected val resultsHistory = mutableListOf<Collection<QueuedCharacterActionResolvedResults>>()
 
