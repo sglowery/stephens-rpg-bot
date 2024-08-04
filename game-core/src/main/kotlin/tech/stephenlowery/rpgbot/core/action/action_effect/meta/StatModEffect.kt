@@ -15,6 +15,7 @@ open class StatModEffect(
     protected val statGetter: StatGetterFn,
     protected val attributeModifierType: AttributeModifierType,
     internal val modifierName: String? = null,
+    private val beforeAfterValueComparator: (RPGCharacter) -> Int = { statGetter(it).value() },
 ) : ActionEffect(duration) {
 
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
@@ -27,14 +28,16 @@ open class StatModEffect(
     }
 
     private fun addModifier(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
+        val before = beforeAfterValueComparator(to)
         when (attributeModifierType) {
             AttributeModifierType.ADDITIVE       -> statGetter(to).addAdditiveMod(value!!.toDouble(), modDuration, modifierName)
             AttributeModifierType.MULTIPLICATIVE -> statGetter(to).addMultiplicativeMod(value!!.toDouble(), modDuration, modifierName)
         }
+        val after = beforeAfterValueComparator(to)
         return EffectResult.singleResult(
             source = from,
             target = to,
-            value = abs(value!!),
+            value = abs(after - before),
             actionType = CharacterActionType.OTHER,
             expired = duration > 1 && isExpired(cycle + 1),
             continued = duration > 1 && cycle > 0

@@ -26,21 +26,22 @@ class HealEffect(
     modDuration = modDuration,
     duration = duration,
     statGetter = RPGCharacter::damage,
-    attributeModifierType = AttributeModifierType.ADDITIVE
+    attributeModifierType = AttributeModifierType.ADDITIVE,
+    beforeAfterValueComparator = RPGCharacter::getActualHealth
 ) {
 
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
         val isCrit = isCrit(from, to)
-        val totalHealing = calculateHealing(from, to, isCrit)
+        val totalHealing = calculateHealing(from, to, isCrit).toInt()
         val succeeds = isSuccessful(from)
         var results: List<EffectResult>? = null
         if (succeeds) {
-            results = super.applyEffect(from, to, cycle, -totalHealing.toInt())
+            results = super.applyEffect(from, to, cycle, -totalHealing)
         }
         return EffectResult.singleResult(
             source = from,
             target = to,
-            value = totalHealing.toInt(),
+            value = results?.first()?.value ?: totalHealing ,
             actionType = CharacterActionType.HEALING,
             miss = !succeeds,
             crit = isCrit,

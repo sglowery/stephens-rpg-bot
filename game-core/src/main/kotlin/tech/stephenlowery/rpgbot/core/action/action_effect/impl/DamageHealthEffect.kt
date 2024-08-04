@@ -28,7 +28,8 @@ class DamageHealthEffect(
     modDuration = modDuration,
     duration = duration,
     statGetter = RPGCharacter::damage,
-    attributeModifierType = AttributeModifierType.ADDITIVE
+    attributeModifierType = AttributeModifierType.ADDITIVE,
+    beforeAfterValueComparator = RPGCharacter::getActualHealth
 ) {
 
     init {
@@ -49,7 +50,7 @@ class DamageHealthEffect(
         return EffectResult.singleResult(
             source = from,
             target = to,
-            value = totalDamage,
+            value = result?.first()?.value ?: totalDamage,
             actionType = CharacterActionType.DAMAGE,
             miss = !doesHit,
             crit = isCrit,
