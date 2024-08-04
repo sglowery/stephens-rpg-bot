@@ -74,7 +74,7 @@ private const val boscoHealModifierName = "Bosco Invigoration"
 private val boscoHealStrings = CharacterActionStrings(
     queuedText = "",
     actionText = "Bosco aims a healing dart at {target} and shoots...",
-    successText = "The dart flies true and injects its invigorating goo!",
+    successText = "The dart flies true and injects its invigorating goo, healing for {value}!",
     missedText = "The dart misses and embeds itself in the ground. Nature is healing.",
 )
 private val boscoHealDartAction = CharacterAction(
