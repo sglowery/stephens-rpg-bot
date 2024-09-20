@@ -8,6 +8,8 @@ class QueuedCharacterAction(
     var target: RPGCharacter? = null,
 ) {
 
+    var cooldownApplied = false
+
     private var cycle = 0
 
     private var previousPrimaryResult: EffectResult? = null

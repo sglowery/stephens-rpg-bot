@@ -40,15 +40,20 @@ object GameManager {
     fun chooseActionForCharacter(playerId: Long, actionName: String): ChooseActionResult {
         val game = findGame(userToGameMap[playerId])
         val character = game?.getHumanPlayers()?.get(playerId)
-        if (character?.queuedAction != null) {
-            throw RuntimeException("Player with id $playerId attempted to add an extra action.")
-        }
 
         if (game == null || character == null) {
             throw RuntimeException("Game or character is null; cannot choose action")
         }
 
-        val newCharacterState = game.queueActionFromCharacter(actionName, playerId)
+        if (character.queuedAction != null) {
+            throw RuntimeException("Player with id $playerId attempted to add an extra action.")
+        }
+
+        val queuedAction = character.chooseAction(actionName)
+        if (queuedAction.target != null) {
+            game.actionQueue.add(queuedAction)
+        }
+        val newCharacterState = character.characterState
 
         return ChooseActionResult(newCharacterState, character.queuedAction!!.getQueuedText(), character)
     }

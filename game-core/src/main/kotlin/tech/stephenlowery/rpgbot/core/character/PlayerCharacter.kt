@@ -52,11 +52,11 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         val action = getAvailableActions().find { it.identifier == actionIdentifier }
             ?: throw RuntimeException("Unable to find action for identifier $actionIdentifier")
         val newQueuedCharacterAction = QueuedCharacterAction(action, source = this)
-        queuedAction = newQueuedCharacterAction
         if (action.targetingType == TargetingType.SELF) {
             newQueuedCharacterAction.target = this
         }
         characterState = if (action.targetingType.requiresChoosingTarget()) UserState.CHOOSING_TARGETS else UserState.WAITING
+        queuedAction = newQueuedCharacterAction
         return newQueuedCharacterAction
     }
 

@@ -48,8 +48,9 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
         val toCharacter = getCharacterFromId(to)
         if (fromCharacter != null && toCharacter != null) {
             fromCharacter.addTargetToAction(toCharacter)
+            actionQueue.add(fromCharacter.queuedAction!!)
         } else {
-            println("character missing for addTargetToCharacterAction")
+            println("target, character or action missing for addTargetToCharacterAction")
         }
     }
 
@@ -80,8 +81,9 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
             .toMutableList()
         queuedActions.forEach {
             val action = it.action
-            if (action.cooldown > 0 && !it.source.isActionOnCooldown(action.identifier)) {
+            if (action.cooldown > 0 && !it.source.isActionOnCooldown(action.identifier) && !it.cooldownApplied) {
                 it.source.setCooldownForAction(action)
+                it.cooldownApplied = true
             }
         }
         val results: MutableCollection<QueuedCharacterActionResolvedResults> = resolveActions(queuedActions)
