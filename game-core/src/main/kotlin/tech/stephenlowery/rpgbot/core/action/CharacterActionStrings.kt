@@ -15,7 +15,7 @@ data class CharacterActionStrings(
 ) {
 
     fun getFormattedEffectResultString(effectResult: EffectResult): String {
-        return listOfNotNull(
+        return listOfNotNullOrEmpty(
             getActionText(effectResult),
             getBaseText(effectResult),
             getExtraText(effectResult)
@@ -30,7 +30,7 @@ data class CharacterActionStrings(
         effectResult.chained   -> this.effectChainedText
         effectResult.crit      -> this.critText.takeUnless { it.isEmpty() } ?: this.successText
         else                   -> this.successText
-    }
+    }.takeUnless { it?.isEmpty() ?: false }
 
     private fun getExtraText(effectResult: EffectResult): String? {
         return when {
@@ -53,5 +53,10 @@ data class CharacterActionStrings(
             .replace("{value}", effectResult.value.toString())
             .replace("{source}", effectResult.source.name)
             .replace("{other}", effectResult.other ?: "")
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun listOfNotNullOrEmpty(vararg possiblyNullOrEmptyStrings: String?): List<String> {
+        return possiblyNullOrEmptyStrings.filter { !it.isNullOrEmpty() }.toList() as List<String>
     }
 }
