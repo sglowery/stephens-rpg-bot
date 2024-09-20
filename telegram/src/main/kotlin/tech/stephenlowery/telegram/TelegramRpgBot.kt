@@ -90,18 +90,8 @@ object TelegramRpgBot {
             result.messages.forEach { (playerId, message) ->
                 bot.sendMessage(ChatId.fromId(playerId), message)
             }
-            // determine roles, let players pick archetypes and skills
-            // should probably just happen in the game class
             sendPlayersInGameActions(bot, chatID)
         }
-    }
-
-    private fun sendPlayerSkillList(bot: Bot, player: PlayerCharacter, skills: Collection<CharacterAction>) {
-        val userId = player.id
-        val keyboard = skills.map { InlineKeyboardButton.CallbackData(it.displayName, "pickSkill|${it.identifier}") }.chunked(2)
-        val replyMarkup = InlineKeyboardMarkup.create(keyboard)
-        bot.sendMessage(ChatId.fromId(userId), "Pick a skill", replyMarkup = replyMarkup)
-        // TODO implement players choosing skills instead of always having them randomly assigned
     }
 
     private fun characterStatsCommand(bot: Bot, update: Update, message: Message) {
@@ -269,7 +259,6 @@ object TelegramRpgBot {
         deadPlayers.forEach { player ->
             bot.sendMessage(ChatId.fromId(player.id), "You died in the previous round and have been removed from the game.")
         }
-//        game.removeCharacters(deadPlayers)
         if (game.isOver()) {
             bot.sendMessage(ChatId.fromId(game.id), game.getGameEndedText())
             bot.sendMessage(ChatId.fromId(game.id), game.getPostGameStatsString())
