@@ -20,13 +20,14 @@ data class CharacterActionStrings(
             getBaseText(effectResult),
             getExtraText(effectResult)
         ).joinToString("\n")
+            .addDamageAndHealing(effectResult)
             .formatFromEffectResult(effectResult)
     }
 
     private fun getBaseText(effectResult: EffectResult): String? = when {
         effectResult.occupied  -> null
         effectResult.miss      -> this.missedText
-        effectResult.continued -> this.effectContinuedText
+        effectResult.continued -> this.effectContinuedText.takeUnless { it.isEmpty() } ?: this.successText
         effectResult.chained   -> this.effectChainedText
         effectResult.crit      -> this.critText.takeUnless { it.isEmpty() } ?: this.successText
         else                   -> this.successText
@@ -40,7 +41,8 @@ data class CharacterActionStrings(
     }
 
     // TODO resolve this dumb workaround
-    fun getFormattedQueuedText(from: RPGCharacter, to: RPGCharacter?) = queuedText.formatFromEffectResult(EffectResult(source = from, target = to ?: RPGCharacter(-1, "")))
+    fun getFormattedQueuedText(from: RPGCharacter, to: RPGCharacter?) =
+        queuedText.formatFromEffectResult(EffectResult(source = from, target = to ?: RPGCharacter(-1, "")))
 
     private fun getActionText(effectResult: EffectResult): String? =
         if (effectResult.continued || effectResult.expired || effectResult.chained || actionText.isEmpty())
@@ -53,6 +55,20 @@ data class CharacterActionStrings(
             .replace("{value}", effectResult.value.toString())
             .replace("{source}", effectResult.source.name)
             .replace("{other}", effectResult.other ?: "")
+    }
+
+    private fun String.addDamageAndHealing(effectResult: EffectResult): String {
+        if (effectResult.actionType == CharacterActionType.OTHER || effectResult.miss) {
+            return this
+        }
+        val critText = if (effectResult.crit) "critical " else ""
+        return "$this (" +
+                when (effectResult.actionType) {
+                    CharacterActionType.DAMAGE      -> "{value} ${critText}damage"
+                    CharacterActionType.HEALING     -> "{value} ${critText}healing"
+                    CharacterActionType.DAMAGE_HEAL -> "{value} ${critText}damage, {other} healing"
+                    else                            -> (if (effectResult.value >= 0) "+" else "-") + "{value}"
+                } + ")"
     }
 
     @Suppress("UNCHECKED_CAST")

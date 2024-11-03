@@ -39,7 +39,7 @@ object CharacterActionAssets {
             strings = CharacterActionStrings(
                 queuedText = "You ready yourself for a generic attack.",
                 actionText = "{source} generically attacks {target}!",
-                successText = "It connects and {target} generically receives {value} damage.",
+                successText = "{target} is generically hurt.",
                 missedText = "The attack misses in a pretty generic way.",
                 critText = "The generic attack is somehow more generically powerful and does a YUGE {value} damage to {target}!"
             )
@@ -85,7 +85,7 @@ object CharacterActionAssets {
             strings = CharacterActionStrings(
                 queuedText = "You prepare to heal some wounds.",
                 actionText = "{source} utters an incantation...",
-                successText = "{target} is bathed in golden light as their wounds begin to heal, negating {value} damage.",
+                successText = "{target} is bathed in golden light as their wounds begin to heal.",
             ),
             cooldown = 3,
         )
@@ -107,9 +107,9 @@ object CharacterActionAssets {
                 queuedText = "You wind up a big attack",
                 actionText = "{source} winds up for a big attack.",
                 effectContinuedText = "{source} is still winding up their attack.",
-                successText = "{source} unleashes their wind-up attack on {target} for {value} damage.",
+                successText = "{source}'s powerful wind-up attack hits {target}!",
                 missedText = "{source} misses their wind-up attack. What a waste.",
-                critText = "{source} do an big ouchie on {target} for {value}.",
+                critText = "{source} do an big ouchie on {target}!",
             ),
         )
 
@@ -130,9 +130,8 @@ object CharacterActionAssets {
                 queuedText = "You start gathering energy for a big attack.",
                 actionText = "{source} begins gathering energy for a devastating attack!",
                 effectContinuedText = "{source} is still gathering energy!",
-                successText = "{source} blasts {target} for {value} damage.",
+                successText = "{source} blasts {target}!",
                 missedText = "{source} wastes 2 turns of waiting and misses their blast on {target}.",
-                critText = "{source}'s time spent gathering energy results in a devastating blast, hitting {target} for {value}."
             )
         )
 
@@ -145,7 +144,7 @@ object CharacterActionAssets {
                 canMiss = false
             ),
             displayName = "Life Steal",
-            description = "Life steal your blast life.",
+            description = "Deal some damage and heal for a proportion of the damage done.",
             identifier = "action|lifesteal",
             cooldown = 4,
             actionType = CharacterActionType.DAMAGE,
@@ -153,8 +152,7 @@ object CharacterActionAssets {
             strings = CharacterActionStrings(
                 queuedText = "You get ready to steal some life.",
                 actionText = "{source} steals {target}'s life!",
-                successText = "They do {value} damage and heal themself for {other}.",
-                critText = "They do {value} damage and heal themself for {other}."
+                successText = "{target} is sapped of their life force, and {source} feels healthier.",
             )
         )
 
@@ -166,7 +164,7 @@ object CharacterActionAssets {
                                       modDuration = 5,
                                       attributeModifierType = AttributeModifierType.ADDITIVE,
                                       modifierName = "Amped Up"),
-                compose = { from, to, cycle, outer, innerResults ->
+                compose = {
                     val damageDone = innerResults.filter { !it.miss && it.target == to }.sumOf { it.value }
                     val powerIncrease = (damageDone * 0.75).toInt()
                     outer.applyEffect(from, from, cycle, powerIncrease)
@@ -182,7 +180,7 @@ object CharacterActionAssets {
                 }
             ),
             displayName = "Amp Up",
-            description = "Amp up your blast life.",
+            description = "Do damage and increase your power temporarily by a proportion of the damage done.",
             identifier = "action|amp",
             cooldown = 4,
             actionType = CharacterActionType.DAMAGE,
@@ -190,7 +188,7 @@ object CharacterActionAssets {
             strings = CharacterActionStrings(
                 queuedText = "You start amping yourself up",
                 actionText = "{source} is amping up!",
-                successText = "They hurt {target} for {value} and temporarily increases their power by {other}!",
+                successText = "They lash out at {target} and feel invigorated!",
                 missedText = "Unfortunately, they fizzle out."
             )
         )
@@ -219,10 +217,10 @@ object CharacterActionAssets {
             strings = CharacterActionStrings(
                 queuedText = "You prepare to bleed {target} dry.",
                 actionText = "{source} goes for the jugular!",
-                successText = "They tear the skin apart, doing {value} damage and making {target} bleed out!",
+                successText = "They tear the skin apart, making {target} bleed out!",
                 missedText = "They whiff. No blood will be drawn for now.",
-                effectContinuedText = "{target} bleeds out for {value} damage.",
-                effectOverText = "{target} is done bleeding blood."
+                effectContinuedText = "{target} keeps losing blood.",
+                effectOverText = "{target}'s wounds close enough to stop the bleeding."
             )
         )
 
@@ -243,8 +241,7 @@ object CharacterActionAssets {
             strings = CharacterActionStrings(
                 queuedText = "You will cast renew on yourself. Totally not a WoW ripoff.",
                 actionText = "{source} casts renew on themselves.",
-                successText = "{source} is healed for {value}.",
-                effectContinuedText = "{source} is healed for {value}.",
+                successText = "{source}'s wounds glow and are slightly healed up.",
                 effectOverText = "{source}'s Renew has expired."
             )
         )

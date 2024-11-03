@@ -26,7 +26,7 @@ private const val DUMMY_HEALTH_PLAYER_SCALAR = 800
 private val dummyHealStrings = CharacterActionStrings(
     queuedText = "",
     actionText = "The dummy glows softly...",
-    successText = "It heals itself for {value}!"
+    successText = "It magically stitches itself up!"
 )
 private val dummyHeal = CharacterAction(
     effect = HealEffect(40, 50, canCrit = false, canMiss = false),
@@ -41,8 +41,8 @@ private val dummyHeal = CharacterAction(
 private val dummyBonkStrings = CharacterActionStrings(
     queuedText = "",
     actionText = "The dummy wobbles menacingly at {target}...",
-    successText = "It gives a solid bonk for {value} damage!",
-    critText = "The gods channel their energy and help the dummy deliver a particularly brutal bonk, for {value} damage!",
+    successText = "It gives a solid bonk!",
+    critText = "The gods channel their energy and help the dummy deliver a particularly brutal bonk!",
     missedText = "The dummy falls over harmlessly."
 )
 private val dummyBonk = CharacterAction(
@@ -74,7 +74,7 @@ private const val boscoHealModifierName = "Bosco Invigoration"
 private val boscoHealStrings = CharacterActionStrings(
     queuedText = "",
     actionText = "Bosco aims a healing dart at {target} and shoots...",
-    successText = "The dart flies true and injects its invigorating goo, healing for {value}!",
+    successText = "The dart flies true and injects its invigorating goo!",
     missedText = "The dart misses and embeds itself in the ground. Nature is healing.",
 )
 private val boscoHealDartAction = CharacterAction(
