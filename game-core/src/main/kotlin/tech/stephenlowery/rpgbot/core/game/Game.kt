@@ -75,7 +75,9 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
     fun deadPlayers(): Collection<RPGCharacter> = players.values.filterNot { it.isAlive() }
 
     open fun resolveActionsAndGetResults(): String {
-        val npcActions = livingPlayers<NonPlayerCharacter>().mapNotNull { it.queueAction(this) }
+        val npcActions = livingPlayers<NonPlayerCharacter>()
+            .filter { it.characterState != UserState.OCCUPIED }
+            .mapNotNull { it.queueAction(this) }
         val queuedActions = listOf(actionQueue, npcActions)
             .flatMap(::partitionAndShuffleActionQueue)
             .toMutableList()

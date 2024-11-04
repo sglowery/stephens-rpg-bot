@@ -4,6 +4,7 @@ import tech.stephenlowery.rpgbot.core.action.*
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.DamageHealthEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.HealEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.NoOpEffect
+import tech.stephenlowery.rpgbot.core.action.action_effect.meta.DelayedEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.MultiEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.StatModEffect
 import tech.stephenlowery.rpgbot.core.character.NonPlayerCharacter
@@ -18,25 +19,28 @@ private const val BOSCO_ID = 2L
 
 private const val GAME_STARTED_MESSAGE = "You're in a Debug Dummy game. Have fun testing this."
 
-private const val CHANCE_TO_BONK = 75
+private const val CHANCE_TO_BONK = 80
+private const val CHANCE_TO_HEAVY_BONK = 100
 
 private const val DUMMY_HEALTH = 1200
 private const val DUMMY_HEALTH_PLAYER_SCALAR = 800
+private const val DUMMY_HEALTH_PERCENT_BERSERK_THRESHOLD = 50
 
 private val dummyHealStrings = CharacterActionStrings(
     queuedText = "",
     actionText = "The dummy glows softly...",
     successText = "It magically stitches itself up!"
 )
-private val dummyHeal = CharacterAction(
-    effect = HealEffect(40, 50, canCrit = false, canMiss = false),
-    displayName = "Debug Dummy Heal",
-    description = "Just making it hard, but not impossible, to kill the dummy",
-    identifier = "dummyheal",
-    actionType = CharacterActionType.HEALING,
-    targetingType = TargetingType.SELF,
-    strings = dummyHealStrings
-)
+private val dummyHeal
+    get() = CharacterAction(
+        effect = HealEffect(40, 50, canCrit = false, canMiss = false),
+        displayName = "Debug Dummy Heal",
+        description = "Just making it hard, but not impossible, to kill the dummy",
+        identifier = "dummyheal",
+        actionType = CharacterActionType.HEALING,
+        targetingType = TargetingType.SELF,
+        strings = dummyHealStrings
+    )
 
 private val dummyBonkStrings = CharacterActionStrings(
     queuedText = "",
@@ -45,30 +49,107 @@ private val dummyBonkStrings = CharacterActionStrings(
     critText = "The gods channel their energy and help the dummy deliver a particularly brutal bonk!",
     missedText = "The dummy falls over harmlessly."
 )
-private val dummyBonk = CharacterAction(
-    effect = DamageHealthEffect(min = 22, max = 36),
-    displayName = "Debug Dummy Bonk",
-    description = "Sometimes the dummy strikes back.",
-    identifier = "dummybonk",
-    actionType = CharacterActionType.DAMAGE,
-    targetingType = TargetingType.SINGLE_TARGET,
-    strings = dummyBonkStrings,
-)
+private val dummyBonk
+    get() = CharacterAction(
+        effect = DamageHealthEffect(min = 22, max = 36),
+        displayName = "Debug Dummy Bonk",
+        description = "Sometimes the dummy strikes back.",
+        identifier = "dummybonk",
+        actionType = CharacterActionType.DAMAGE,
+        targetingType = TargetingType.SINGLE_TARGET,
+        strings = dummyBonkStrings,
+    )
 
-val boscoNoOpStrings = CharacterActionStrings(
+private val dummyBerserkStrings = CharacterActionStrings(
+    queuedText = "",
+    actionText = "The dummy goes berserk!",
+)
+private val dummyBerserk
+    get() = CharacterAction(
+        effect = MultiEffect(
+            StatModEffect(
+                10,
+                statGetter = RPGCharacter::power,
+                attributeModifierType = AttributeModifierType.MULTIPLICATIVE,
+                modifierName = "Dummy Berserk",
+            ),
+            StatModEffect(
+                100,
+                statGetter = RPGCharacter::power,
+                attributeModifierType = AttributeModifierType.MULTIPLICATIVE,
+                modifierName = "Dummy Berserk",
+            ),
+            StatModEffect(
+                value = 5,
+                statGetter = RPGCharacter::defense,
+                attributeModifierType = AttributeModifierType.ADDITIVE,
+                modifierName = "Dummy Berserk",
+            ),
+            StatModEffect(
+                value = 10,
+                statGetter = RPGCharacter::defense,
+                attributeModifierType = AttributeModifierType.MULTIPLICATIVE,
+                modifierName = "Dummy Berserk",
+            ),
+            StatModEffect(
+                value = 25,
+                statGetter = RPGCharacter::precision,
+                attributeModifierType = AttributeModifierType.MULTIPLICATIVE,
+                modifierName = "Dummy Berserk",
+            ),
+            StatModEffect(
+                value = 50,
+                statGetter = RPGCharacter::criticalEffectScalar,
+                attributeModifierType = AttributeModifierType.MULTIPLICATIVE,
+                modifierName = "Dummy Berserk",
+            )
+        ),
+        displayName = "Debug Dummy Berserk",
+        description = "Dummy goes wild!",
+        identifier = "dummyberserk",
+        cooldown = 999,
+        actionType = CharacterActionType.BUFF,
+        targetingType = TargetingType.SELF,
+        strings = dummyBerserkStrings
+    )
+
+val dummyBigAttackStrings = CharacterActionStrings(
+    queuedText = "",
+    actionText = "{source} rotates toward {target} and starts glowing.",
+    successText = "It bonks them extra hard!",
+    missedText = "A small pop is heard and it abruptly stops glowing."
+)
+val dummyBigAttack
+    get() = CharacterAction(
+        displayName = "Big Attack",
+        description = "Big attack go owie",
+        identifier = "dummybigattack",
+        cooldown = 4,
+        actionType = CharacterActionType.DAMAGE,
+        targetingType = TargetingType.SINGLE_TARGET,
+        effect = DelayedEffect(
+            delay = 1,
+            delayedActionEffect = DamageHealthEffect(min = 51, max = 60),
+            occupySource = true
+        ),
+        strings = dummyBigAttackStrings
+    )
+
+private val boscoNoOpStrings = CharacterActionStrings(
     queuedText = "",
     actionText = "{source} floats around in the air, unable to do anything."
 )
 
-private val boscoNoOp = CharacterAction(
-    effect = NoOpEffect(),
-    displayName = "Do Nothing",
-    description = "Does nothing. How are you seeing this anyway?",
-    identifier = "bosconoop",
-    actionType = CharacterActionType.OTHER,
-    targetingType = TargetingType.SELF,
-    strings = boscoNoOpStrings
-)
+private val boscoNoOp
+    get() = CharacterAction(
+        effect = NoOpEffect(),
+        displayName = "Do Nothing",
+        description = "Does nothing. How are you seeing this anyway?",
+        identifier = "bosconoop",
+        actionType = CharacterActionType.OTHER,
+        targetingType = TargetingType.SELF,
+        strings = boscoNoOpStrings
+    )
 
 private const val boscoHealModifierName = "Bosco Invigoration"
 private val boscoHealStrings = CharacterActionStrings(
@@ -77,49 +158,72 @@ private val boscoHealStrings = CharacterActionStrings(
     successText = "The dart flies true and injects its invigorating goo!",
     missedText = "The dart misses and embeds itself in the ground. Nature is healing.",
 )
-private val boscoHealDartAction = CharacterAction(
-    effect = MultiEffect(
-        HealEffect(
-            min = 20,
-            max = 30,
-            canCrit = false,
-            canMiss = true,
+private val boscoHealDartAction
+    get() = CharacterAction(
+        effect = MultiEffect(
+            HealEffect(
+                min = 28,
+                max = 37,
+                canCrit = false,
+                canMiss = true,
+            ),
+            StatModEffect(
+                value = -15,
+                modDuration = 5,
+                statGetter = RPGCharacter::damageTakenScalar,
+                attributeModifierType = AttributeModifierType.MULTIPLICATIVE,
+                modifierName = boscoHealModifierName,
+            )
         ),
-        StatModEffect(
-            value = -15,
-            modDuration = 5,
-            statGetter = RPGCharacter::damageTakenScalar,
-            attributeModifierType = AttributeModifierType.MULTIPLICATIVE,
-            modifierName = boscoHealModifierName,
-        )
-    ),
-    displayName = "Bosco Heal Dart",
-    description = "This dart does some healing and reduces damage taken for a few turns",
-    identifier = "boscohealdart",
-    cooldown = 3,
-    actionType = CharacterActionType.HEALING,
-    targetingType = TargetingType.SINGLE_TARGET,
-    strings = boscoHealStrings,
-)
+        displayName = "Bosco Heal Dart",
+        description = "This dart does some healing and reduces damage taken for a few turns",
+        identifier = "boscohealdart",
+        cooldown = 3,
+        actionType = CharacterActionType.HEALING,
+        targetingType = TargetingType.SINGLE_TARGET,
+        strings = boscoHealStrings,
+    )
 
-class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Game(id, initiatorId, initiatorName) {
+class FightingDummyGame(
+    id: Long,
+    initiatorId: Long,
+    initiatorName: String,
+) : Game(
+    id,
+    initiatorId,
+    initiatorName,
+    description = "Fight against a training dummy, with Bosco to help you out in case you can't handle it."
+) {
 
-    private val dummy = NonPlayerCharacter("Debug Dummy", 1, healthValue = DUMMY_HEALTH) {
-        if (shouldBonk()) {
+    private var hasGoneBerserk = false
+
+    private val dummy = NonPlayerCharacter("Debug Dummy", 1, healthValue = DUMMY_HEALTH, defenseValue = 15) {
+        if (this.getHealthPercent() <= DUMMY_HEALTH_PERCENT_BERSERK_THRESHOLD && !hasGoneBerserk) {
+            hasGoneBerserk = true
+            QueuedCharacterAction(dummyBerserk, this, this)
+        } else if (shouldBonk(getHumanPlayers().size)) {
             val target = listOf(chooseTargetFromMostDamageDone(), chooseTargetFromMostHealingDone())
                 .randomOrNull()
                 ?: livingPlayers<PlayerCharacter>().random()
-            QueuedCharacterAction(dummyBonk, this, target)
+            if (shouldHeavyBonk()) {
+                QueuedCharacterAction(dummyBigAttack, this, target)
+            } else {
+                QueuedCharacterAction(dummyBonk, this, target)
+            }
         } else {
             QueuedCharacterAction(dummyHeal, this, this)
         }
+    }
+
+    private fun shouldHeavyBonk(): Boolean {
+        return !dummy.isActionOnCooldown(dummyBigAttack.identifier) && Random.nextInt(100) < CHANCE_TO_HEAVY_BONK
     }
 
     private fun chooseTargetFromMostDamageDone(): PlayerCharacter? {
         return resultsHistory
             .flatten()
             .flatMap(QueuedCharacterActionResolvedResults::effectResults)
-            .filter { it.target == dummy && it.source is PlayerCharacter }
+            .filter { it.target == dummy && it.source is PlayerCharacter && it.source.isAlive() }
             .fold(mutableMapOf<PlayerCharacter, Int>()) { characterDamageMap, effect ->
                 return@fold characterDamageMap.apply {
                     this[effect.source as PlayerCharacter] = effect.value + (this[effect.source] ?: 0)
@@ -134,7 +238,7 @@ class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Ga
             .flatten()
             .flatMap(QueuedCharacterActionResolvedResults::effectResults)
             .filter {
-                it.source is PlayerCharacter &&
+                it.source is PlayerCharacter && it.source.isAlive() &&
                         (it.actionType == CharacterActionType.HEALING
                                 || (it.target == dummy && it.actionType == CharacterActionType.DAMAGE_HEAL))
             }
@@ -151,7 +255,7 @@ class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Ga
             ?.key
     }
 
-    private val bosco = NonPlayerCharacter("Bosco", 2) {
+    private val bosco = NonPlayerCharacter("Bosco", 2, healthValue = 1, powerValue = 1, defenseValue = 1, precisionValue = 1) {
         val target = livingPlayers<PlayerCharacter>().filter { !characterHasActiveInvigoration(it) }.randomOrNull()
         val isOffCooldown = !this.isActionOnCooldown(boscoHealDartAction.identifier)
         when (target != null && isOffCooldown) {
@@ -179,7 +283,7 @@ class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Ga
     }
 
     override fun startGame(): Collection<Pair<Long, String>> {
-        dummy.setHealth(DUMMY_HEALTH + DUMMY_HEALTH_PLAYER_SCALAR * getHumanPlayers().size)
+        dummy.setHealth(dummyBaseHealthForPlayers(players.size))
         players[DUMMY_ID] = dummy
         players[BOSCO_ID] = bosco
         startGameStateAndPrepCharacters()
@@ -200,6 +304,10 @@ class FightingDummyGame(id: Long, initiatorId: Long, initiatorName: String) : Ga
         }
     }
 
-    private fun shouldBonk(): Boolean = dummy.getActualHealth() == DUMMY_HEALTH || Random.nextInt(100) < CHANCE_TO_BONK
+    private fun dummyBaseHealthForPlayers(players: Int): Int = DUMMY_HEALTH + DUMMY_HEALTH_PLAYER_SCALAR * (getHumanPlayers().size - 1)
+
+    private fun shouldBonk(players: Int): Boolean =
+        dummy.getActualHealth() == dummyBaseHealthForPlayers(players) ||
+                Random.nextInt(100) < CHANCE_TO_BONK
 
 }
