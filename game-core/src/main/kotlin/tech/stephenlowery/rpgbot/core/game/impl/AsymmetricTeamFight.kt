@@ -6,7 +6,16 @@ import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import tech.stephenlowery.rpgbot.core.character.Team
 import tech.stephenlowery.rpgbot.core.game.Game
 
-class AsymmetricTeamFight(id: Long, initiatorId: Long, initiatorName: String) : Game(id, initiatorId, initiatorName) {
+class AsymmetricTeamFight(
+    id: Long,
+    initiatorId: Long,
+    initiatorName: String,
+) : Game(
+    id,
+    initiatorId,
+    initiatorName,
+    description = "Asymmetric Team Fight"
+) {
 
     private val teamPlayerMap = mutableMapOf<Team, Collection<Long>>()
 

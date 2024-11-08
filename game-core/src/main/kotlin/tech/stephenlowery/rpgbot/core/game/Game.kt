@@ -10,7 +10,12 @@ import tech.stephenlowery.rpgbot.core.character.UserState
 
 private val PLAYER_NOT_READY_STATES = listOf(UserState.CHOOSING_ACTION, UserState.CHOOSING_TARGETS)
 
-open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
+open class Game(
+    val id: Long,
+    val initiatorId: Long,
+    initiatorName: String,
+    val description: String,
+) {
 
     val players = mutableMapOf<Long, RPGCharacter>()
 

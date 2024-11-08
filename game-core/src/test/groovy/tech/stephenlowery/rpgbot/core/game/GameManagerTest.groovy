@@ -18,7 +18,7 @@ class GameManagerTest extends Specification {
 
         where:
         gameId || expected
-        1L     || new Game(1L, 2L, 'name')
+        1L     || new Game(1L, 2L, 'name', '')
         2L     || null
     }
 
@@ -34,10 +34,10 @@ class GameManagerTest extends Specification {
 
         where:
         playerId || expected
-        2L       || new Game(1L, 2L, 'initiator')
-        3L       || new Game(1L, 2L, 'initiator')
+        2L       || new Game(1L, 2L, 'initiator', '')
+        3L       || new Game(1L, 2L, 'initiator', '')
         4L       || null
-        5L       || new Game(4L, 5L, 'other initiator')
+        5L       || new Game(4L, 5L, 'other initiator', '')
 
     }
 
@@ -46,7 +46,7 @@ class GameManagerTest extends Specification {
         GameManager.INSTANCE.createGame(1L, 2L, 'name')
 
         expect:
-        GameManager.INSTANCE.games == [1L: new Game(1L, 2L, 'name')]
+        GameManager.INSTANCE.games == [1L: new Game(1L, 2L, 'name', '')]
         GameManager.INSTANCE.userToGameMap == [2L: 1L]
     }
 
@@ -60,12 +60,12 @@ class GameManagerTest extends Specification {
         GameManager.INSTANCE.userToGameMap == [2L: 1L, 3L: 1L]
     }
 
-    def 'CancelGame'() {
-    }
-
-    def 'ChooseActionForCharacter'() {
-    }
-
-    def 'FindCharacter'() {
-    }
+//    def 'CancelGame'() {
+//    }
+//
+//    def 'ChooseActionForCharacter'() {
+//    }
+//
+//    def 'FindCharacter'() {
+//    }
 }
