@@ -15,9 +15,8 @@ class QueuedCharacterAction(
     private var previousPrimaryResult: EffectResult? = null
 
     fun cycleAndResolve(): QueuedCharacterActionResolvedResults {
-        val results = action.applyEffect(source, target!!, cycle)
+        val results = action.applyEffect(source, target!!, cycle++)
         previousPrimaryResult = results.first()
-        cycle++
         return QueuedCharacterActionResolvedResults(action, results)
     }
 

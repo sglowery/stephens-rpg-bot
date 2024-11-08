@@ -12,7 +12,7 @@ import tech.stephenlowery.rpgbot.core.game.GameConstants.CRIT_DAMAGE_PRECISION_S
 import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFENSE_CRIT_CHANCE_REDUCTION_FACTOR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFENSE_DAMAGE_REDUCTION_FACTOR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFENSE_HIT_CHANCE_REDUCTION_FACTOR
-import tech.stephenlowery.rpgbot.core.game.GameConstants.HIT_CHANCE_PRECISION_SCALING
+import tech.stephenlowery.rpgbot.core.game.GameConstants.HIT_CHANCE_PRECISION_SCALAR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.POWER_DAMAGE_SCALAR
 import kotlin.random.Random
 
@@ -120,7 +120,7 @@ class DamageHealthEffect(
     }
 
     private fun sourceHitChance(from: RPGCharacter): Double {
-        return BASE_HIT_CHANCE + from.precision.value() * HIT_CHANCE_PRECISION_SCALING
+        return BASE_HIT_CHANCE + from.precision.value() * HIT_CHANCE_PRECISION_SCALAR
     }
 
     private fun targetHitChanceReduction(to: RPGCharacter): Double {

@@ -11,8 +11,8 @@ class ChainEffect(
     duration = effects.sumOf { it.duration }
 ) {
 
-    private val effectByCycle: List<Int> = mutableListOf<Int>().also { list ->
-        effects.forEachIndexed { index, effect -> repeat(effect.duration) { list += index } }
+    private val effectByCycle: List<Int> = mutableListOf<Int>().apply {
+        effects.forEachIndexed { index, effect -> repeat(effect.duration) { this += index } }
     }
 
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {

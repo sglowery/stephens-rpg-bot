@@ -75,7 +75,7 @@ class Attribute(
         return if (min != null || max != null)
             bringPermanentModifiersWithinBounds(consolidatedModifier, temporaryAndNamedModifiers)
         else
-            mutableListOf(consolidatedModifier).apply { addAll(temporaryAndNamedModifiers) }
+            (listOf(consolidatedModifier) + temporaryAndNamedModifiers).toMutableList()
     }
 
     private fun bringPermanentModifiersWithinBounds(permanent: AttributeModifier, temporaryAndUnique: List<AttributeModifier>): MutableList<AttributeModifier> {

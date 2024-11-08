@@ -11,6 +11,8 @@ import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFAULT_BASE_PRIMARY_AT
 import tech.stephenlowery.rpgbot.core.game.GameConstants.STAT_POINTS_TO_DISTRIBUTE
 import kotlin.random.Random
 
+private fun asPercentage(num: Int): String = "$num%"
+
 open class RPGCharacter(val id: Long, val name: String) {
 
     val health = Attribute("Health", DEFAULT_BASE_HEALTH)
@@ -19,26 +21,14 @@ open class RPGCharacter(val id: Long, val name: String) {
     val precision = Attribute("Precision", DEFAULT_BASE_PRIMARY_ATTRIBUTE)
     val defense = Attribute("Defense", DEFAULT_BASE_PRIMARY_ATTRIBUTE)
 
-    val damageTakenScalar = Attribute("Damage taken", 100.0) {
-        "$it%"
-    }
-    val damageGivenScalar = Attribute("Damage given", 100.0) {
-        "$it%"
-    }
+    val damageTakenScalar = Attribute("Damage taken", 100.0, displayValueFn = ::asPercentage)
+    val damageGivenScalar = Attribute("Damage given", 100.0, displayValueFn = ::asPercentage)
 
-    val healingTakenScalar = Attribute("Healing taken", 100.0) {
-        "$it%"
-    }
-    val healingGivenScalar = Attribute("Healing given", 100.0) {
-        "$it%"
-    }
+    val healingTakenScalar = Attribute("Healing taken", 100.0, displayValueFn = ::asPercentage)
+    val healingGivenScalar = Attribute("Healing given", 100.0, displayValueFn = ::asPercentage)
 
-    val criticalEffectScalar = Attribute("Critical Effect", BASE_CRIT_EFFECT_MULTIPLIER * 100) {
-        "$it%"
-    }
-    val criticalChance = Attribute("Critical Hit Chance", BASE_CRIT_CHANCE) {
-        "$it%"
-    }
+    val criticalEffectScalar = Attribute("Critical Effect", BASE_CRIT_EFFECT_MULTIPLIER * 100, displayValueFn = ::asPercentage)
+    val criticalChance = Attribute("Critical Hit Chance", BASE_CRIT_CHANCE, displayValueFn = ::asPercentage)
 
     var characterState: UserState = UserState.NONE
 

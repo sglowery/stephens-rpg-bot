@@ -5,13 +5,11 @@ import tech.stephenlowery.rpgbot.core.action.EffectResult
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.StatModEffect
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import tech.stephenlowery.rpgbot.core.character.attribute.AttributeModifierType
-import tech.stephenlowery.rpgbot.core.game.GameConstants.BASE_HIT_CHANCE
 import tech.stephenlowery.rpgbot.core.game.GameConstants.CRIT_CHANCE_PRECISION_SCALAR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.CRIT_DAMAGE_PRECISION_SCALAR
-import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFENSE_CRIT_CHANCE_REDUCTION_FACTOR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.HEALING_BASE_HIT_CHANCE
 import tech.stephenlowery.rpgbot.core.game.GameConstants.HEALING_SCALING_FROM_POWER_DEFENSE_SCALAR
-import tech.stephenlowery.rpgbot.core.game.GameConstants.HIT_CHANCE_PRECISION_SCALING
+import tech.stephenlowery.rpgbot.core.game.GameConstants.HIT_CHANCE_PRECISION_SCALAR
 import kotlin.random.Random
 
 class HealEffect(
@@ -103,6 +101,6 @@ class HealEffect(
     private fun succeedsByChance(from: RPGCharacter) = Random.nextInt(100) < sourceHitChance(from)
 
     private fun sourceHitChance(from: RPGCharacter): Double {
-        return HEALING_BASE_HIT_CHANCE + from.precision.value() * HIT_CHANCE_PRECISION_SCALING
+        return HEALING_BASE_HIT_CHANCE + from.precision.value() * HIT_CHANCE_PRECISION_SCALAR
     }
 }

@@ -26,8 +26,7 @@ final class TestUtils {
     }
 
     static PlayerCharacter getTestCharacter() {
-        uniqueCharacterID += 1
-        return new PlayerCharacter(uniqueCharacterID, LocalDateTime.now().toString() + "_$uniqueCharacterID")
+        return new PlayerCharacter(++uniqueCharacterID, LocalDateTime.now().toString() + "_$uniqueCharacterID")
     }
 
     static PlayerCharacter getTestCharacter(Long id, String name = "") {

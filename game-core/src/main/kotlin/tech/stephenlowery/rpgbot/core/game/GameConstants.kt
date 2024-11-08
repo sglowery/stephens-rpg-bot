@@ -3,7 +3,7 @@ package tech.stephenlowery.rpgbot.core.game
 object GameConstants {
 
     const val BASE_HIT_CHANCE = 70.0
-    const val HIT_CHANCE_PRECISION_SCALING = 2.0
+    const val HIT_CHANCE_PRECISION_SCALAR = 2.0
     const val BASE_CRIT_CHANCE = 10.0
     const val POWER_DAMAGE_SCALAR = 1.2
     const val DEFENSE_DAMAGE_REDUCTION_FACTOR = .8
