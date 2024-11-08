@@ -95,14 +95,17 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
         players.values.forEach { player ->
             if (player.getActualHealth() <= 0 && player.characterState != UserState.DEAD) {
                 stringResults.add("${player.name} died! They will be removed from the game.")
-                player.characterState = UserState.DEAD
+                removeEffectsTargetingCharacter(player)
             } else {
                 player.resetForNextTurnAfterAction()
             }
         }
         resultsHistory.add(results)
-        turnCounter += 1
-        return listOf("*----Turn $turnCounter results----*", stringResults.joinToString("\n\n")).joinToString("\n\n")
+        return listOf("*----Turn ${++turnCounter} results----*", stringResults.joinToString("\n\n")).joinToString("\n\n")
+    }
+
+    private fun removeEffectsTargetingCharacter(player: RPGCharacter) {
+        actionQueue.removeIf { it.target == player }
     }
 
     open fun startGame(): Collection<Pair<Long, String>> {
