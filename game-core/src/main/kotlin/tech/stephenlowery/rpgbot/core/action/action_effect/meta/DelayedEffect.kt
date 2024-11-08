@@ -22,7 +22,7 @@ class DelayedEffect(
 
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> = when {
         cycle == 0             -> handleFirstApplication(from, to, cycle)
-        shouldBeApplied(cycle) -> applyDelayedEffect(from, to, cycle)
+        shouldBeApplied(cycle) -> applyDelayedEffect(from, to, cycle - delay)
         else                   -> EffectResult.singleResult(source = from, target = to, actionType = CharacterActionType.OTHER, continued = true)
     }
 
