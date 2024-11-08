@@ -18,7 +18,7 @@ Source code available on GitHub: https://github.com/sglowery/stephens-rpg-bot
 
 data object UserIdNull : StartGameResult("No anonymous admins allowed. Show yourself!")
 
-data object GameCreated : StartGameResult("Game created. /join to join, /start again to start.")
+data object CreateGame : StartGameResult("")
 
 data object UserNotInGame : StartGameResult("You need to join the game with /join.")
 

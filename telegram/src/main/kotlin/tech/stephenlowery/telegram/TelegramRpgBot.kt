@@ -21,18 +21,17 @@ import tech.stephenlowery.telegram.handlers.cancelgame.GameCanBeCanceled
 import tech.stephenlowery.telegram.handlers.joingame.JoinGameCommandHandler
 import tech.stephenlowery.telegram.handlers.joingame.JoinedGame
 import tech.stephenlowery.telegram.handlers.newgame.NewGameCommandHandler
-import tech.stephenlowery.telegram.handlers.startgame.GameStarting
-import tech.stephenlowery.telegram.handlers.startgame.PrivateChat
-import tech.stephenlowery.telegram.handlers.startgame.StartGameCommandHandler
+import tech.stephenlowery.telegram.handlers.startgame.*
 
 object TelegramRpgBot {
 
     fun start(telegramBotToken: String) {
         val rpgBot = bot {
-            logLevel = LogLevel.Error
+            logLevel = LogLevel.All()
             token = telegramBotToken
+
             dispatch {
-                command("newgame") { newGameCommand(bot, update, message) }
+                command("newgame") { handleNewGameCommand(bot, update, message) }
                 command("join") { joinGameCommand(bot, update, message) }
                 command("start") { startGameCommand(bot, update, message) }
                 command("stats") { characterStatsCommand(bot, update, message) }
@@ -42,7 +41,8 @@ object TelegramRpgBot {
                     val callbackDataSplit = update.callbackQuery!!.data.split("|", limit = 2)
                     val message = update.callbackQuery!!.message!!
                     when (callbackDataSplit[0]) {
-                        "action" -> actionChosen(bot, update, message)
+                        "action" -> confirmAction(bot, update, message)
+                        "confirmaction" -> actionChosen(bot, update, message, callbackDataSplit[1])
                         "target" -> targetChosen(bot, update, message)
                         "cancel" -> cancelGameChoiceHandler(callbackDataSplit.drop(1), bot, update)
                         "goback" -> goBackToChoosingAction(bot, message)
@@ -56,7 +56,7 @@ object TelegramRpgBot {
 
     private fun goBackToChoosingAction(bot: Bot, message: Message) {
         val userCharacter = GameManager.findCharacter(message.chat.id) ?: return
-        if (userCharacter.characterState != UserState.CHOOSING_TARGETS) {
+        if (userCharacter.characterState != UserState.CHOOSING_TARGETS && userCharacter.characterState != UserState.CHOOSING_ACTION) {
             return
         }
         userCharacter.queuedAction = null
@@ -64,23 +64,62 @@ object TelegramRpgBot {
         sendSinglePlayerActions(bot, userCharacter, message.messageId)
     }
 
-    private fun newGameCommand(bot: Bot, update: Update, message: Message) {
-        val result = NewGameCommandHandler.execute(message)
-        bot.sendMessage(ChatId.fromId(message.chat.id), result.message)
+    private fun handleNewGameCommand(bot: Bot, update: Update, message: Message) {
+        bot.sendMessage(ChatId.fromId(message.from!!.id), "You are starting an RPGBot game; this message is to test that I can message you.")
+            .fold(
+                ifSuccess = { createNewGame(bot, message, it) },
+                ifError = { notifyUserHasNotStartedBot(bot, message.chat.id, message.messageId) }
+            )
+
+    }
+
+    private fun createNewGame(bot: Bot, messageFromUser: Message, messageToUser: Message) {
+        val result = NewGameCommandHandler.execute(messageFromUser)
+        bot.sendMessage(ChatId.fromId(messageFromUser.chat.id), result.message)
+        bot.deleteMessage(ChatId.fromId(messageToUser.chat.id), messageToUser.messageId)
     }
 
     private fun joinGameCommand(bot: Bot, update: Update, message: Message) {
-        val result = JoinGameCommandHandler.execute(message)
-        val replyToMessageId = if (result is JoinedGame) null else message.messageId
-        bot.sendMessage(ChatId.fromId(message.chat.id), result.message, replyToMessageId = replyToMessageId)
+        bot.sendMessage(ChatId.fromId(message.from!!.id), "You are joining an RPGBot game; this message is to test that I can message you.")
+            .fold(
+                ifSuccess = { attemptToJoinGame(bot, message, it) },
+                ifError = { notifyUserHasNotStartedBot(bot, message.chat.id, message.messageId) }
+            )
+    }
+
+    private fun attemptToJoinGame(bot: Bot, messageFromUser: Message, botMessageToUser: Message) {
+        val result = JoinGameCommandHandler.execute(messageFromUser)
+        val replyToMessageId = if (result is JoinedGame) null else messageFromUser.messageId
+        bot.sendMessage(ChatId.fromId(messageFromUser.chat.id), result.message, replyToMessageId = replyToMessageId)
+        if (replyToMessageId != null) {
+            bot.editMessageText(
+                ChatId.fromId(botMessageToUser.chat.id),
+                botMessageToUser.messageId,
+                text = "You have joined an RPGBot game. Wait for the initiator to start it."
+            )
+        }
+    }
+
+    private fun notifyUserHasNotStartedBot(bot: Bot, chatId: Long, messageId: Long) {
+        bot.sendMessage(ChatId.fromId(chatId), "You need to open a private chat with me and use the /start command.", replyToMessageId = messageId)
     }
 
     private fun startGameCommand(bot: Bot, update: Update, message: Message) {
+        val result = StartGameCommandHandler.execute(message)
+        when (result) {
+            is CreateGame -> handleNewGameCommand(bot, update, message)
+            else          -> {
+                handleStartGameCommand(bot, message, result)
+            }
+        }
+
+    }
+
+    private fun handleStartGameCommand(bot: Bot, message: Message, result: StartGameResult) {
         val chatID = message.chat.id
         val game = GameManager.findGame(chatID)
         var replyToMessageID: Long? = message.messageId
         var parseMode: ParseMode? = null
-        val result = StartGameCommandHandler.execute(message)
         if (result is PrivateChat) {
             parseMode = ParseMode.MARKDOWN
             replyToMessageID = null
@@ -175,15 +214,46 @@ object TelegramRpgBot {
             }
     }
 
-    // TODO move this code to a handler
-    private fun actionChosen(bot: Bot, update: Update, message: Message) {
+    private fun confirmAction(bot: Bot, update: Update, message: Message) {
         val callbackQuery = update.callbackQuery!!
-        val userID = callbackQuery.from.id
-        val actionName = callbackQuery.data
+        val action = GameManager.findCharacterAction(callbackQuery.data)!!
+        if (action.targetingType.requiresChoosingTarget()) {
+            actionChosen(bot, update, callbackQuery.message!!, action.identifier)
+        } else {
+            sendConfirmActionButtons(action, callbackQuery, bot)
+        }
+    }
+
+    private fun sendConfirmActionButtons(
+        action: CharacterAction,
+        callbackQuery: CallbackQuery,
+        bot: Bot,
+    ) {
+        val actionName = action.displayName
+        val actionIdentifier = action.identifier
+        val buttons = listOf(
+            listOf(InlineKeyboardButton.CallbackData("Confirm", "confirmaction|$actionIdentifier")),
+            listOf(InlineKeyboardButton.CallbackData("<-- Go Back", "goback"))
+        )
+        val editMessageId = callbackQuery.message!!.messageId
+        bot.editMessageText(
+            chatId = ChatId.fromId(callbackQuery.from.id),
+            messageId = editMessageId,
+            text = "Confirm using $actionName?",
+            replyMarkup = InlineKeyboardMarkup.create(buttons)
+        )
+    }
+
+    // TODO move this code to a handler
+    private fun actionChosen(bot: Bot, update: Update, message: Message, actionIdentifier: String) {
+        val userID = when (message.from?.isBot) {
+            true -> message.chat.id
+            else -> message.from!!.id
+        }
         val callbackQueryMessageId = message.messageId
         val chooseActionResult: ChooseActionResult
         try {
-            chooseActionResult = GameManager.chooseActionForCharacter(userID, actionName)
+            chooseActionResult = GameManager.chooseActionForCharacter(userID, actionIdentifier)
         } catch (exception: RuntimeException) {
             exception.printStackTrace()
             // TODO
@@ -255,13 +325,13 @@ object TelegramRpgBot {
     private fun resolveActionsInGame(bot: Bot, game: Game) {
         val resolvedActionsText = game.resolveActionsAndGetResults()
         bot.sendMessage(ChatId.fromId(game.id), resolvedActionsText, replyMarkup = ReplyKeyboardRemove(), parseMode = ParseMode.MARKDOWN)
-        val deadPlayers = game.getHumanPlayers().values.dead()
+        val deadPlayers = game.getHumanPlayers().values.dead().filter { it.characterState != UserState.DEAD }
         deadPlayers.forEach { player ->
             bot.sendMessage(ChatId.fromId(player.id), "You died in the previous round and have been removed from the game.")
+            player.characterState = UserState.DEAD
         }
         if (game.isOver()) {
-            bot.sendMessage(ChatId.fromId(game.id), game.getGameEndedText())
-            bot.sendMessage(ChatId.fromId(game.id), game.getPostGameStatsString())
+            bot.sendMessage(ChatId.fromId(game.id), game.getGameEndedText() + "\n\n" + game.getPostGameStatsString())
             GameManager.cancelGame(game.id)
         } else {
             if (game.allPlayersReadyForTurnToResolve()) {

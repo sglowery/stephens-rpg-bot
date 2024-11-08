@@ -1,5 +1,8 @@
 package tech.stephenlowery.rpgbot.core.game
 
+import tech.stephenlowery.rpgbot.assets.EquipmentAssets
+import tech.stephenlowery.rpgbot.core.Equipment
+import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
 import tech.stephenlowery.rpgbot.core.game.impl.FightingDummyGame
 
@@ -37,7 +40,7 @@ object GameManager {
         return game != null
     }
     
-    fun chooseActionForCharacter(playerId: Long, actionName: String): ChooseActionResult {
+    fun chooseActionForCharacter(playerId: Long, actionIdentifier: String): ChooseActionResult {
         val game = findGame(userToGameMap[playerId])
         val character = game?.getHumanPlayers()?.get(playerId)
 
@@ -49,7 +52,7 @@ object GameManager {
             throw RuntimeException("Player with id $playerId attempted to add an extra action.")
         }
 
-        val queuedAction = character.chooseAction(actionName)
+        val queuedAction = character.chooseAction(actionIdentifier)
         if (queuedAction.target != null) {
             game.actionQueue.add(queuedAction)
         }
@@ -63,5 +66,9 @@ object GameManager {
     fun resolveActionsForGame(gameId: Long): String {
         val game = games[gameId]!!
         return game.resolveActionsAndGetResults()
+    }
+
+    fun findCharacterAction(identifier: String): CharacterAction? {
+        return EquipmentAssets.allEquipment.flatMap(Equipment::actions).find { it.identifier == identifier }
     }
 }

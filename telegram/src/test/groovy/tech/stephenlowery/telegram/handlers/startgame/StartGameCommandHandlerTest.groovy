@@ -38,7 +38,7 @@ class StartGameCommandHandlerTest extends Specification {
         UserIdNull.INSTANCE == StartGameCommandHandler.INSTANCE.execute(message)
     }
 
-    def "execute returns GameCreated if command is sent in non-private chat from a user but there is no game"() {
+    def "execute returns CreateGame if command is sent in non-private chat from a user and there is no game"() {
         given:
         def message = Mock(Message) {
             getChat() >> Mock(Chat) {
@@ -51,7 +51,7 @@ class StartGameCommandHandlerTest extends Specification {
         }
 
         expect:
-        GameCreated.INSTANCE == StartGameCommandHandler.INSTANCE.execute(message)
+        CreateGame.INSTANCE == StartGameCommandHandler.INSTANCE.execute(message)
     }
 
     def "execute returns UserNotInGame if command is sent in non-private chat from a user and a game exists but user is not in game"() {

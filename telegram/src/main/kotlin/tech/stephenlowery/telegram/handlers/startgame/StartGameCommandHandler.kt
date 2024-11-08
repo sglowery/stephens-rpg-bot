@@ -13,17 +13,12 @@ object StartGameCommandHandler : TelegramCommandHandler<StartGameResult> {
         return when {
             message.chat.type == "private"     -> PrivateChat
             userId == null                     -> UserIdNull
-            game == null                       -> createGame(message.chat.id, userId, message.from!!.firstName)
+            game == null                       -> CreateGame
             !game.containsPlayerWithID(userId) -> UserNotInGame
             !game.numberOfPlayersIsValid()     -> IllegalNumberOfUsers
             userId != game.initiatorId         -> UserNotInitiator
             else                               -> startGame(game)
         }
-    }
-
-    private fun createGame(chatId: Long, userId: Long, name: String): GameCreated {
-        GameManager.createGame(chatId, userId, name)
-        return GameCreated
     }
 
     private fun startGame(game: Game): GameStarting {
