@@ -13,7 +13,7 @@ class GameTest extends Specification {
 
     def "when new game is created, initiator is automatically added to list of players"() {
         when:
-        def game = new Game(1L, 2L, "initiator")
+        def game = new Game(1L, 2L, "initiator", '')
 
         then:
         game.players.size() == 1
@@ -24,7 +24,7 @@ class GameTest extends Specification {
 
     def "can add players to game after creation"() {
         given:
-        def game = new Game(1L, 2L, 'initiator')
+        def game = new Game(1L, 2L, 'initiator', '')
 
         when:
         game.addPlayerToGame(3L, 'name')
@@ -42,7 +42,7 @@ class GameTest extends Specification {
     def "when game starts, state of all players is set to 'choosing action'"() {
         given:
         def characters = (1..5).collect { new PlayerCharacter(it.toLong(), "") }
-        def game = new Game(1L, characters.get(0).id, 'initiator')
+        def game = new Game(1L, characters.get(0).id, 'initiator', '')
         characters.forEach(game.&addCharacter)
 
         when:
@@ -55,7 +55,7 @@ class GameTest extends Specification {
     def "waitingOn() correctly returns players who are still choosing an action or targets"() {
         given:
         def character = TestUtils.getTestCharacter().tap { it.characterState = UserState.WAITING }
-        def game = new Game(1L, character.id, character.name)
+        def game = new Game(1L, character.id, character.name, '')
         def userStates = [UserState.WAITING, UserState.WAITING, UserState.CHOOSING_ACTION, UserState.CHOOSING_TARGETS]
         def characters = userStates.collect { userState -> TestUtils.getTestCharacter().tap { it.characterState = userState } }
         characters.forEach(game.&addCharacter)
@@ -69,7 +69,7 @@ class GameTest extends Specification {
         given:
         def character = TestUtils.getTestCharacter()
         def id = character.id
-        def game = new Game(1L, id, character.name)
+        def game = new Game(1L, id, character.name, '')
         game.addCharacter(character)
 
         when:
@@ -85,7 +85,7 @@ class GameTest extends Specification {
         def firstCharacter = characters.first()
         def firstCharacterId = firstCharacter.id
         def targetCharacterId = characters[2].id
-        def game = new Game(1L, firstCharacterId, firstCharacter.name)
+        def game = new Game(1L, firstCharacterId, firstCharacter.name, '')
         characters.forEach(game.&addCharacter)
         game.queueActionFromCharacter("action|attack", firstCharacterId)
 
@@ -98,7 +98,7 @@ class GameTest extends Specification {
 
     def "containsPlayerWithID returns true if a character with the given ID exists in the game"() {
         given:
-        def game = new Game(1L, TestUtils.getTestCharacter(1L).id, 'name')
+        def game = new Game(1L, TestUtils.getTestCharacter(1L).id, 'name', '')
 
         expect:
         shouldBeInGame == game.containsPlayerWithID(id)
@@ -116,7 +116,7 @@ class GameTest extends Specification {
         def defensiveAction = TestUtils.getTestCharacterAction(CharacterActionType.DEFENSIVE)
         def defensiveQueuedAction = new QueuedCharacterAction(defensiveAction, Mock(RPGCharacter), null)
         def actionsList = [offensiveQueuedAction, offensiveQueuedAction, offensiveQueuedAction, defensiveQueuedAction, offensiveQueuedAction, defensiveQueuedAction]
-        def game = new Game(1L, 1L, 'name').tap { actionQueue.addAll(actionsList) }
+        def game = new Game(1L, 1L, 'name', '').tap { actionQueue.addAll(actionsList) }
 
         when:
         def sortedList = game.partitionAndShuffleActionQueue(game.actionQueue)

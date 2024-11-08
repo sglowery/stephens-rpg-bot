@@ -1,6 +1,6 @@
 package tech.stephenlowery.rpgbot.core.character
 
-import tech.stephenlowery.rpgbot.assets.CharacterActionAssets
+import tech.stephenlowery.rpgbot.assets.EquipmentAssets
 import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.character.attribute.Attribute
 import tech.stephenlowery.rpgbot.core.character.trait.impl.CharacterTraits
@@ -46,7 +46,7 @@ open class RPGCharacter(val id: Long, val name: String) {
 
     fun getSpecialMessages(): List<String> = CharacterTraits.getQualifiedCharacterTraitsFor(this).map { it.description }
 
-    fun getUnfilteredActions(): List<CharacterAction> = CharacterActionAssets.allActions
+    open fun getUnfilteredActions(): List<CharacterAction> = EquipmentAssets.allEquipment.flatMap { it.actions } //CharacterActionAssets.allActions
 
     fun getAvailableActions(): List<CharacterAction> {
         return getUnfilteredActions().filter { !cooldowns.containsKey(it.identifier) }
@@ -63,14 +63,6 @@ open class RPGCharacter(val id: Long, val name: String) {
     fun getAbilitiesOnCooldown() = getUnfilteredActions().filter { isActionOnCooldown(it.identifier) }
 
     fun getHealthPercent(): Int = (100.0 * getActualHealth() / health.value()).toInt()
-
-    fun getUnavailableAbilitiesText(): String {
-        return "*The following abilities are on cooldown:*\n" + getAbilitiesOnCooldown().joinToString("\n") { ability ->
-            val turns = cooldowns[ability.identifier]!!
-            val turnsText = if (turns == 1) "turn" else "turns"
-            "${ability.displayName} (${turns} $turnsText remaining)"
-        }
-    }
 
     fun setCooldownForAction(action: CharacterAction) {
         if (action.cooldown > 0) {

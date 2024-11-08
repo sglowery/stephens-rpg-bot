@@ -5,32 +5,32 @@ import tech.stephenlowery.rpgbot.core.action.action_effect.ActionEffect
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import kotlin.math.max
 
-typealias ComposeEffectContext<T> = (
-    from: RPGCharacter,
-    to: RPGCharacter,
-    cycle: Int,
-    outer: T,
-    innerResults: List<EffectResult>,
-) -> List<EffectResult>
+data class ComposeEffectContext<T : ActionEffect>(
+    val from: RPGCharacter,
+    val to: RPGCharacter,
+    val cycle: Int,
+    val outer: T,
+    val innerResults: List<EffectResult>,
+)
 
 open class ComposeEffect<T : ActionEffect> internal constructor(
     val outer: T,
     val inner: ActionEffect,
-    val compose: ComposeEffectContext<T> = ::defaultCompose,
+    val compose: ComposeEffectContext<T>.() -> List<EffectResult> = ComposeEffectContext<T>::defaultCompose,
 ) : ActionEffect(max(outer.duration, inner.duration)) {
 
     override fun applyEffect(
         from: RPGCharacter,
         to: RPGCharacter,
         cycle: Int,
-    ): List<EffectResult> = compose(from, to, cycle, outer, inner.applyEffect(from, to, cycle))
+    ): List<EffectResult> = ComposeEffectContext(from, to, cycle, outer, inner.applyEffect(from, to, cycle)).compose()
 }
 
-private fun <T : ActionEffect> defaultCompose(
-    from: RPGCharacter,
-    to: RPGCharacter,
-    cycle: Int,
-    outer: T,
-    innerResults: List<EffectResult>
-): List<EffectResult> =
+private fun <T : ActionEffect> ComposeEffectContext<T>.defaultCompose(): List<EffectResult> =
     outer.applyEffect(from, to, cycle) + innerResults
+
+object Composers {
+    val dumbApplyOuterToSelf: ComposeEffectContext<StatModEffect>.() -> List<EffectResult> = {
+        outer.applyEffect(from, from, cycle) + innerResults
+    }
+}

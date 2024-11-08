@@ -107,7 +107,9 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
 
     open fun startGame(): Collection<Pair<Long, String>> {
         startGameStateAndPrepCharacters()
-        return players.map { it.key to "You've entered a free-for-all game. The last one alive wins. Good luck ${it.value.name}." }
+        return players
+            .filterValues { it is PlayerCharacter }
+            .map { it.key to getGameStartedMessageForPlayer(it.value as PlayerCharacter) }
     }
 
     open fun isOver() = livingPlayers().size > 1
@@ -197,6 +199,13 @@ open class Game(val id: Long, val initiatorId: Long, initiatorName: String) {
     }
 
     protected inline fun <reified T : RPGCharacter> livingPlayers(): Collection<T> = players.values.filterIsInstance<T>().filter { it.isAlive() }
+
+    private fun getGameStartedMessageForPlayer(player: PlayerCharacter): String {
+        return listOf(
+            description,
+            player.getFirstTimeGameStartedCharacterText()
+        ).joinToString("\n\n")
+    }
 
     private fun removeCharactersByUserIDs(userIDs: Collection<Long>) {
         userIDs.forEach(players::remove)
