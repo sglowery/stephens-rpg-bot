@@ -16,8 +16,8 @@ class VampirismEffect(
 ) : ComposeEffect<StatModEffect>(
     outer = HealEffect(min = min, max = max, duration = 1),
     inner = DamageHealthEffect(min, max, canMiss = canMiss, canCrit = canCrit),
-    compose = { from, to, cycle, outer, effects ->
-        val damageDone = effects.filter { !it.miss && it.target == to }.sumOf { it.value }
+    compose = {
+        val damageDone = innerResults.filter { !it.miss && it.target == to }.sumOf { it.value }
         val healing = damageDone.toDouble() * proportion
         val healingResults = outer.applyEffect(from, from, cycle, healing.toInt())
         EffectResult.singleResult(
