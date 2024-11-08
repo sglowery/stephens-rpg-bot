@@ -40,7 +40,7 @@ class DamageHealthEffect(
 
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {
         val isCrit = isCrit(from, to)
-        val doesHit = isSuccessful(from, to)
+        val doesHit = isSuccessful(from, to, cycle)
         var totalDamage = 0
         var result: List<EffectResult>? = null
         if (doesHit) {
@@ -55,7 +55,7 @@ class DamageHealthEffect(
             miss = !doesHit,
             crit = isCrit,
             expired = result?.first()?.expired ?: false,
-            continued = result?.first()?.continued ?: false,
+            continued = (result?.first()?.continued ?: false) || isContinued(cycle),
         )
     }
 
@@ -111,8 +111,8 @@ class DamageHealthEffect(
         return to.defense.value() * DEFENSE_CRIT_CHANCE_REDUCTION_FACTOR
     }
 
-    private fun isSuccessful(from: RPGCharacter, to: RPGCharacter): Boolean {
-        return !canMiss || succeedsByChance(from, to)
+    private fun isSuccessful(from: RPGCharacter, to: RPGCharacter, cycle: Int): Boolean {
+        return cycle > 0 || !canMiss || succeedsByChance(from, to)
     }
 
     private fun succeedsByChance(from: RPGCharacter, to: RPGCharacter): Boolean {

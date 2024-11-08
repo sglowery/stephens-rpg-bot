@@ -10,4 +10,6 @@ abstract class ActionEffect(val duration: Int = 1) {
     fun isExpired(cycle: Int): Boolean = !isPermanent() && cycle >= duration
 
     fun isPermanent(): Boolean = duration == -1
+
+    fun isContinued(cycle: Int): Boolean = cycle > 0
 }

@@ -44,7 +44,7 @@ class HealEffect(
             miss = !succeeds,
             crit = isCrit,
             expired = results?.first()?.expired ?: false,
-            continued = results?.first()?.continued ?: false,
+            continued = (results?.first()?.continued ?: false) || isContinued(cycle),
         )
     }
 
@@ -59,7 +59,7 @@ class HealEffect(
             miss = false,
             crit = results.first().crit,
             expired = results.first().expired,
-            continued = results.first().continued,
+            continued = results.first().continued || isContinued(cycle),
         )
     }
 

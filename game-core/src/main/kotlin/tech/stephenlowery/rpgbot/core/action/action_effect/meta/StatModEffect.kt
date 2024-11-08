@@ -40,7 +40,7 @@ open class StatModEffect(
             value = abs(after - before),
             actionType = CharacterActionType.OTHER,
             expired = duration > 1 && isExpired(cycle + 1),
-            continued = duration > 1 && cycle > 0
+            continued = duration > 1 && isContinued(cycle)
         )
     }
 
