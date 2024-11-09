@@ -112,15 +112,17 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
     }
 
     private fun getEquipmentListString(): String {
-        val equipmentAndActionsGrantedText = equipment.map {
-            val name = it.name
-            val actionNames = it.actions.map(CharacterAction::displayName)
-            return@map "$name\n ${actionNames.joinToString("\n", prefix = "    - ")}"
-        }
-        return """
-            *--- You have been given the following equipment and actions ---*
-            ${equipmentAndActionsGrantedText.joinToString("\n")}
-        """.trimIndent()
+        val equipmentAndActionsGrantedText = equipment
+            .map {
+                val name = it.name
+                val actionNames = it.actions.map(CharacterAction::displayName)
+                return@map if (actionNames.isEmpty())
+                    name
+                else
+                    "$name\n${actionNames.joinToString("\n") { actionName -> "   - $actionName" }}"
+            }
+        return "*--- You have been given the following equipment and actions ---*" +
+                equipmentAndActionsGrantedText.joinToString("\n\n", prefix = "\n")
     }
 
     private fun getAttributeModifiersAsString(): String? {
