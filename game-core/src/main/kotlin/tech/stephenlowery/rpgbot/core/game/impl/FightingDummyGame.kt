@@ -3,7 +3,6 @@ package tech.stephenlowery.rpgbot.core.game.impl
 import tech.stephenlowery.rpgbot.core.action.*
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.DamageHealthEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.HealEffect
-import tech.stephenlowery.rpgbot.core.action.action_effect.impl.NoOpEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.DelayedEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.MultiEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.StatModEffect
@@ -135,20 +134,22 @@ val dummyBigAttack
         strings = dummyBigAttackStrings
     )
 
-private val boscoNoOpStrings = CharacterActionStrings(
+private val boscoPelletGunStrings = CharacterActionStrings(
     queuedText = "",
-    actionText = "{source} floats around in the air, unable to do anything."
+    actionText = "{source} aims its pellet gun at {target} and fires a single shot!",
+    successText = "They get pelted in the head. Ow.",
+    missedText = "The pellet misses and lands harmlessly on the ground."
 )
 
-private val boscoNoOp
+private val boscoPelletGunAttack
     get() = CharacterAction(
-        effect = NoOpEffect(),
-        displayName = "Do Nothing",
-        description = "Does nothing. How are you seeing this anyway?",
-        identifier = "bosconoop",
-        actionType = CharacterActionType.OTHER,
-        targetingType = TargetingType.SELF,
-        strings = boscoNoOpStrings
+        effect = DamageHealthEffect(9, 13),
+        displayName = "Pellet Gun Shot",
+        description = "Fires the pellet gun. How are you seeing this anyway?",
+        identifier = "boscopelletgun",
+        actionType = CharacterActionType.DAMAGE,
+        targetingType = TargetingType.SINGLE_TARGET,
+        strings = boscoPelletGunStrings
     )
 
 private const val boscoHealModifierName = "Bosco Invigoration"
@@ -256,11 +257,11 @@ class FightingDummyGame(
     }
 
     private val bosco = NonPlayerCharacter("Bosco", 2, healthValue = 1, powerValue = 1, defenseValue = 1, precisionValue = 1) {
-        val target = livingPlayers<PlayerCharacter>().filter { !characterHasActiveInvigoration(it) }.randomOrNull()
+        val target = livingPlayers<PlayerCharacter>().filter { characterCanBeChosenForHeal(it) }.randomOrNull()
         val isOffCooldown = !this.isActionOnCooldown(boscoHealDartAction.identifier)
         when (target != null && isOffCooldown) {
             true  -> QueuedCharacterAction(boscoHealDartAction, this, target)
-            false -> QueuedCharacterAction(boscoNoOp, this, this)
+            false -> QueuedCharacterAction(boscoPelletGunAttack, this, dummy)
         }
     }
 
@@ -286,14 +287,15 @@ class FightingDummyGame(
         dummy.setHealth(dummyBaseHealthForPlayers(players.size))
         players[DUMMY_ID] = dummy
         players[BOSCO_ID] = bosco
-        startGameStateAndPrepCharacters()
-        return players.keys
-            .filter { it != DUMMY_ID && it != BOSCO_ID }
-            .map { it to GAME_STARTED_MESSAGE }
+        return super.startGame()
     }
 
-    private fun characterHasActiveInvigoration(it: PlayerCharacter): Boolean {
-        return it.damageTakenScalar.hasNamedModifier(boscoHealModifierName)
+    private fun characterCanBeChosenForHeal(player: PlayerCharacter): Boolean {
+        return !characterHasActiveInvigoration(player) && player.getHealthPercent() < 100
+    }
+
+    private fun characterHasActiveInvigoration(player: PlayerCharacter): Boolean {
+        return player.damageTakenScalar.hasNamedModifier(boscoHealModifierName)
     }
 
     private fun getTargetsForPlayerAction(character: PlayerCharacter): Collection<RPGCharacter> {
