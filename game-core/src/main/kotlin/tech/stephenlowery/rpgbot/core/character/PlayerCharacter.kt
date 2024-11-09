@@ -2,10 +2,23 @@ package tech.stephenlowery.rpgbot.core.character
 
 import tech.stephenlowery.rpgbot.assets.EquipmentAssets
 import tech.stephenlowery.rpgbot.core.Equipment
-import tech.stephenlowery.rpgbot.core.action.CharacterAction
-import tech.stephenlowery.rpgbot.core.action.QueuedCharacterAction
-import tech.stephenlowery.rpgbot.core.action.TargetingType
-import tech.stephenlowery.rpgbot.core.game.GameManager
+import tech.stephenlowery.rpgbot.core.action.*
+import tech.stephenlowery.rpgbot.core.action.action_effect.impl.DamageHealthEffect
+
+val StupidDebugAction: CharacterAction
+    get() = CharacterAction(
+        displayName = "Debug Attack",
+        description = "Do a huge attack for the sake of hurrying up finishing a game",
+        identifier = "action|debugattack",
+        effect = DamageHealthEffect(800, 1100, canMiss = false),
+        actionType = CharacterActionType.DAMAGE,
+        targetingType = TargetingType.SINGLE_TARGET,
+        strings = CharacterActionStrings(
+            queuedText = "Debug attack",
+            actionText = "{source} is debug attacking {target}.",
+            successText = "Owie."
+        )
+    )
 
 class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
 
@@ -42,7 +55,7 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
     private fun getTraitMessage(): String? {
         val specialMessages = getSpecialMessages()
         return when (specialMessages.isNotEmpty()) {
-            true -> "Additionally, your stats grant you the following properties:\n\n" + specialMessages.joinToString("\n\n") { "- $it" }
+            true  -> "Additionally, your stats grant you the following properties:\n\n" + specialMessages.joinToString("\n\n") { "- $it" }
             false -> null
         }
     }
@@ -86,7 +99,7 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         return newQueuedCharacterAction
     }
 
-    override fun getUnfilteredActions(): List<CharacterAction> = equipment.flatMap { it.actions }
+    override fun getUnfilteredActions(): List<CharacterAction> = equipment.flatMap { it.actions } + StupidDebugAction
 
     override fun resetForNextTurnAfterAction() {
         clearQueuedAction()
