@@ -14,6 +14,7 @@ import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFENSE_DAMAGE_REDUCTIO
 import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFENSE_HIT_CHANCE_REDUCTION_FACTOR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.HIT_CHANCE_PRECISION_SCALAR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.POWER_DAMAGE_SCALAR
+import kotlin.math.pow
 import kotlin.random.Random
 
 class DamageHealthEffect(
@@ -74,7 +75,7 @@ class DamageHealthEffect(
     }
 
     private fun totalBaseDamage(from: RPGCharacter, to: RPGCharacter): Double {
-        return (baseDamage(from) - targetDamageReduction(to)).coerceAtLeast(0.0)
+        return (baseDamage(from) * (100 - targetDamageReduction(to)) / 100).coerceAtLeast(0.0)
     }
 
     private fun baseDamage(from: RPGCharacter): Double {
@@ -82,7 +83,7 @@ class DamageHealthEffect(
     }
 
     private fun targetDamageReduction(to: RPGCharacter): Double {
-        return to.defense.value().toDouble() * DEFENSE_DAMAGE_REDUCTION_FACTOR
+        return (to.defense.value().toDouble() / 4).pow(1.69)
     }
 
     private fun damageScalar(from: RPGCharacter, to: RPGCharacter): Double {
