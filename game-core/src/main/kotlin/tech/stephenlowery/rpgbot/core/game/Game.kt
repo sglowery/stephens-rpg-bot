@@ -181,10 +181,7 @@ open class Game(
         return "Post-Game Stats:\n\n" +
                 "Total damage done: $totalDamageDone\n" +
                 "Total healing done: $totalHealingDone\n\n" +
-                idToPlayerGameStatsMap.values.joinToString(
-                    separator = "\n\n",
-                    transform = PlayerGameStats::toString,
-                )
+                idToPlayerGameStatsMap.values.joinToString(separator = "\n\n") { it.toString(turnCounter) }
     }
 
     fun cancel() {
