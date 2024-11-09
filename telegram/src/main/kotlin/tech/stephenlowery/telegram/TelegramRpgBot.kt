@@ -232,8 +232,8 @@ object TelegramRpgBot {
         val actionName = action.displayName
         val actionIdentifier = action.identifier
         val buttons = listOf(
-            listOf(InlineKeyboardButton.CallbackData("Confirm", "confirmaction|$actionIdentifier")),
-            listOf(InlineKeyboardButton.CallbackData("<-- Go Back", "goback"))
+            listOf(InlineKeyboardButton.CallbackData("<-- Go Back", "goback")),
+            listOf(InlineKeyboardButton.CallbackData("Confirm", "confirmaction|$actionIdentifier"))
         )
         val editMessageId = callbackQuery.message!!.messageId
         bot.editMessageText(
