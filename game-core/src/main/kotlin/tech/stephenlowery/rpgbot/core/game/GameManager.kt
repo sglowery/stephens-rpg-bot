@@ -4,7 +4,6 @@ import tech.stephenlowery.rpgbot.assets.EquipmentAssets
 import tech.stephenlowery.rpgbot.core.Equipment
 import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
-import tech.stephenlowery.rpgbot.core.character.StupidDebugAction
 import tech.stephenlowery.rpgbot.core.game.impl.FightingDummyGame
 
 object GameManager {
@@ -70,6 +69,6 @@ object GameManager {
     }
 
     fun findCharacterAction(identifier: String): CharacterAction? {
-        return (EquipmentAssets.allEquipment.flatMap(Equipment::actions) + StupidDebugAction).find { it.identifier == identifier }
+        return EquipmentAssets.allEquipment.flatMap(Equipment::actions).find { it.identifier == identifier }
     }
 }

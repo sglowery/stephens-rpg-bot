@@ -2,29 +2,15 @@ package tech.stephenlowery.rpgbot.core.character
 
 import tech.stephenlowery.rpgbot.assets.EquipmentAssets
 import tech.stephenlowery.rpgbot.core.Equipment
-import tech.stephenlowery.rpgbot.core.action.*
-import tech.stephenlowery.rpgbot.core.action.action_effect.impl.DamageHealthEffect
-
-val StupidDebugAction: CharacterAction
-    get() = CharacterAction(
-        displayName = "Debug Attack",
-        description = "Do a huge attack for the sake of hurrying up finishing a game",
-        identifier = "action|debugattack",
-        effect = DamageHealthEffect(800, 1100, canMiss = false),
-        actionType = CharacterActionType.DAMAGE,
-        targetingType = TargetingType.SINGLE_TARGET,
-        strings = CharacterActionStrings(
-            queuedText = "Debug attack",
-            actionText = "{source} is debug attacking {target}.",
-            successText = "Owie."
-        )
-    )
+import tech.stephenlowery.rpgbot.core.action.CharacterAction
+import tech.stephenlowery.rpgbot.core.action.QueuedCharacterAction
+import tech.stephenlowery.rpgbot.core.action.TargetingType
 
 class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
 
     var queuedAction: QueuedCharacterAction? = null
 
-    val equipment: Collection<Equipment> = EquipmentAssets.allEquipment
+    private val equipment: Collection<Equipment> = EquipmentAssets.allEquipment
         .groupBy { it.equipmentRole }
         .flatMap { (_, equipmentList) -> equipmentList.shuffled().take(2) }
 
@@ -99,7 +85,7 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         return newQueuedCharacterAction
     }
 
-    override fun getUnfilteredActions(): List<CharacterAction> = equipment.flatMap { it.actions } + StupidDebugAction
+    override fun getUnfilteredActions(): List<CharacterAction> = equipment.flatMap { it.actions }
 
     override fun resetForNextTurnAfterAction() {
         clearQueuedAction()

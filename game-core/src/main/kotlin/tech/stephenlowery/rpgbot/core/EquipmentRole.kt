@@ -5,4 +5,5 @@ enum class EquipmentRole {
     DEFENSIVE,
     HEALING,
     UTILITY,
+    DEBUG,
 }

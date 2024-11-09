@@ -27,6 +27,7 @@ object EquipmentAssets {
         LeftoverLasagna,
         Bong,
         BoxingGloves,
+        DebugPants,
     )
 
     private val BeerBottle: Equipment
@@ -462,8 +463,26 @@ object EquipmentAssets {
             )
         )
 
-
-
+    private val DebugPants: Equipment
+        get() = Equipment(
+            name = "Debug Pants",
+            equipmentRole = EquipmentRole.DEBUG,
+            actions = listOf(
+                CharacterAction(
+                    displayName = "Debug Attack",
+                    description = "Do a huge attack for the sake of hurrying up finishing a game",
+                    identifier = "action|debugattack",
+                    effect = DamageHealthEffect(800, 1100, canMiss = false),
+                    actionType = CharacterActionType.DAMAGE,
+                    targetingType = TargetingType.SINGLE_TARGET,
+                    strings = CharacterActionStrings(
+                        queuedText = "Debug attack",
+                        actionText = "{source} is debug attacking {target}.",
+                        successText = "Owie."
+                    )
+                )
+            )
+        )
 }
 
 fun main(args: Array<String>) {
