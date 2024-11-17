@@ -17,8 +17,8 @@ class AttributeModifier(
 
     fun isPermanent(): Boolean = duration == -1
 
-    fun displayValue(): String = operator() + when (modifierType) {
-        AttributeModifierType.ADDITIVE       -> value.toInt().toString()
+    fun displayValue(displayValueFn: (Int) -> String): String = operator() + when (modifierType) {
+        AttributeModifierType.ADDITIVE       -> displayValueFn(value.toInt())
         AttributeModifierType.MULTIPLICATIVE -> "${value.toInt()}%"
     }
 

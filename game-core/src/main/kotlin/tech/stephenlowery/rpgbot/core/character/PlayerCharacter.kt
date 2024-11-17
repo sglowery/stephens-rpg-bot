@@ -115,7 +115,7 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         val modifiersText = getAllAttributes()
             .map { it to it.getTemporaryAndNamedModifiers() }
             .filter { it.second.isNotEmpty() }
-            .joinToString("\n\n") { "${it.first.name}: ${it.second.joinToString("\n")}" }
+            .joinToString("\n\n") { "${it.first.name}:\n${it.second.joinToString("\n").prependIndent("    ")}" }
         return when (modifiersText.isEmpty()) {
             true  -> null
             false -> "*---Attribute Modifiers---*\n$modifiersText"

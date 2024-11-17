@@ -41,7 +41,7 @@ class Attribute(
     fun getTemporaryAndNamedModifiers(): List<String> {
         return (additiveModifiers + multiplyModifiers).filter { (!it.isPermanent() || it.name != null) && it.value != 0.0 }
             .map {
-                val baseText = "${it.name} -- ${it.displayValue()}"
+                val baseText = "${it.name} -- ${it.displayValue(displayValueFn)}"
                 val turnsLeft = it.duration - it.turnsActive
                 val turnsText = if (turnsLeft == 1) "turn" else "turns"
                 if (it.isPermanent())
