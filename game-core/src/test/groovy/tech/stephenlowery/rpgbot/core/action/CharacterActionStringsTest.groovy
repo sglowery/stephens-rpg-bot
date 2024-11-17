@@ -12,9 +12,14 @@ class CharacterActionStringsTest extends Specification {
     def "getFormattedEffectResultString returns correctly formatted string based on EffectResult's fields"() {
         given:
         def characterActionStrings = new CharacterActionStrings(
-                "queued", actionText, "success",
-                "missed", "failed", "effectOver",
-                "crit", "continued", "chained"
+                "queued",
+                actionText,
+                "success",
+                "missed",
+                "crit",
+                "continued",
+                "effectOver",
+                "chained"
         )
 
         expect:
@@ -44,11 +49,9 @@ class CharacterActionStringsTest extends Specification {
                 "",
                 "",
                 "{source} {target} {value} {other}",
-                "",
-                "",
-                "",
-                "",
-                "",
+                "", "", "",
+                ""
+                ,
                 "",
         )
 

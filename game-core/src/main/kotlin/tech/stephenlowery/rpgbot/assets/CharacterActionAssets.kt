@@ -55,7 +55,7 @@ object CharacterActionAssets {
             targetingType = TargetingType.SELF,
             strings = CharacterActionStrings(
                 queuedText = "You brace yourself for attacks.",
-                successText = "{source} assumes a defensive stance."
+                actionText = "{source} assumes a defensive stance."
             )
         )
 
@@ -69,7 +69,7 @@ object CharacterActionAssets {
             targetingType = TargetingType.SELF,
             strings = CharacterActionStrings(
                 queuedText = "You brace yourself for attacks.",
-                successText = "{source} assumes an intimidating defensive stance."
+                actionText = "{source} assumes an intimidating defensive stance."
             ),
             cooldown = 3
         )

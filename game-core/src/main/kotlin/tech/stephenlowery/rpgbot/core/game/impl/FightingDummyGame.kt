@@ -45,8 +45,8 @@ private val dummyBonkStrings = CharacterActionStrings(
     queuedText = "",
     actionText = "The dummy wobbles menacingly at {target}...",
     successText = "It gives a solid bonk!",
-    critText = "The gods channel their energy and help the dummy deliver a particularly brutal bonk!",
-    missedText = "The dummy falls over harmlessly."
+    missedText = "The dummy falls over harmlessly.",
+    critText = "The gods channel their energy and help the dummy deliver a particularly brutal bonk!"
 )
 private val dummyBonk
     get() = CharacterAction(

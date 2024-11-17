@@ -25,7 +25,7 @@ class QueuedCharacterAction(
     fun isUnresolved(): Boolean = cycle == 0
 
     fun getQueuedText(): String {
-        return action.strings.getFormattedQueuedText(source, target)
+        return action.strings.getFormattedQueuedText(source, target!!)
     }
 }
 

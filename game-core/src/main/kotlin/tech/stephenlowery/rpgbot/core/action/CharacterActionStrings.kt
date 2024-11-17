@@ -4,34 +4,33 @@ import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 
 data class CharacterActionStrings(
     private val queuedText: String,
-    private val actionText: String = "",
-    private val successText: String = "",
-    private val missedText: String = "",
-    private val failedText: String = "",
-    private val effectOverText: String = "",
-    private val critText: String = "",
-    private val effectContinuedText: String = "",
-    private val effectChainedText: String = "",
+    private val actionText: String,
+    private val successText: String? = null,
+    private val missedText: String? = null,
+    private val critText: String? = null,
+    private val effectContinuedText: String? = null,
+    private val effectOverText: String? = null,
+    private val effectChainedText: String? = null,
 ) {
 
     fun getFormattedEffectResultString(effectResult: EffectResult): String {
         return listOfNotNullOrEmpty(
             getActionText(effectResult),
-            getBaseText(effectResult),
+            getEffectResultText(effectResult),
             getExtraText(effectResult)
         ).joinToString("\n")
             .addDamageAndHealing(effectResult)
             .formatFromEffectResult(effectResult)
     }
 
-    private fun getBaseText(effectResult: EffectResult): String? = when {
+    private fun getEffectResultText(effectResult: EffectResult): String? = when {
         effectResult.occupied  -> null
         effectResult.miss      -> this.missedText
-        effectResult.continued -> this.effectContinuedText.takeUnless { it.isEmpty() } ?: this.successText
+        effectResult.continued -> this.effectContinuedText ?: this.successText
         effectResult.chained   -> this.effectChainedText
-        effectResult.crit      -> this.critText.takeUnless { it.isEmpty() } ?: this.successText
+        effectResult.crit      -> this.critText ?: this.successText
         else                   -> this.successText
-    }.takeUnless { it?.isEmpty() ?: false }
+    }
 
     private fun getExtraText(effectResult: EffectResult): String? {
         return when {
@@ -40,21 +39,34 @@ data class CharacterActionStrings(
         }
     }
 
-    // TODO resolve this dumb workaround
-    fun getFormattedQueuedText(from: RPGCharacter, to: RPGCharacter?) =
-        queuedText.formatFromEffectResult(EffectResult(source = from, target = to ?: RPGCharacter(-1, "")))
+    fun getFormattedQueuedText(from: RPGCharacter, to: RPGCharacter) =
+        queuedText.formatCharacterNames(from.name, to.name)
 
     private fun getActionText(effectResult: EffectResult): String? =
-        if (effectResult.continued || effectResult.expired || effectResult.chained || actionText.isEmpty())
+        if (effectResult.continued || effectResult.expired || effectResult.chained)
             null
         else
             actionText
 
     private fun String.formatFromEffectResult(effectResult: EffectResult): String {
-        return this.replace("{target}", effectResult.target.name)
-            .replace("{value}", effectResult.value.toString())
-            .replace("{source}", effectResult.source.name)
-            .replace("{other}", effectResult.other ?: "")
+        return this.formatEffectResultString(
+            target = effectResult.target.name,
+            value = effectResult.value.toString(),
+            source = effectResult.source.name,
+            other = effectResult.other
+        )
+    }
+
+    private fun String.formatEffectResultString(target: String, value: String, source: String, other: String?): String {
+        return this.formatCharacterNames(source, target)
+            .replace("{value}", value)
+            .replace("{other}", other ?: "")
+    }
+
+    private fun String.formatCharacterNames(source: String, target: String): String {
+        return this.replace("{target}", target)
+            .replace("{source}", source)
+
     }
 
     private fun String.addDamageAndHealing(effectResult: EffectResult): String {

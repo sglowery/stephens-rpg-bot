@@ -53,12 +53,14 @@ object GameManager {
         }
 
         val queuedAction = character.chooseAction(actionIdentifier)
-        if (queuedAction.target != null) {
-            game.actionQueue.add(queuedAction)
-        }
         val newCharacterState = character.characterState
 
-        return ChooseActionResult(newCharacterState, character.queuedAction!!.getQueuedText(), character)
+        if (queuedAction.target != null) {
+            game.actionQueue.add(queuedAction)
+            return ChooseActionResult(newCharacterState, character.queuedAction!!.getQueuedText(), character)
+        } else {
+            return ChooseActionResult(newCharacterState, null, character)
+        }
     }
 
     fun findCharacter(playerId: Long): PlayerCharacter? = findGameContainingCharacter(playerId)?.findPlayerCharacterFromID(playerId)

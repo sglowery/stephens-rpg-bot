@@ -205,8 +205,8 @@ object EquipmentAssets {
                         queuedText = "You get ready to bash {target} with the blunt side of your hammer.",
                         actionText = "{source} raises their hand and swings their hammer at {target}!",
                         successText = "The swing connects with a fleshy thud.",
-                        critText = "The blunt side of the hammer connects directly in the head with a sickening crack.",
-                        missedText = "{target} steps away just in time and avoids the hammer."
+                        missedText = "{target} steps away just in time and avoids the hammer.",
+                        critText = "The blunt side of the hammer connects directly in the head with a sickening crack."
                     )
                 ),
                 CharacterAction(
@@ -224,8 +224,8 @@ object EquipmentAssets {
                         queuedText = "You get ready to use the sharp side of the hammer to draw some blood.",
                         actionText = "{source} raises their hand and swings the claw-side of the hammer at {target}!",
                         successText = "The claw embeds itself in {target}. {source} yanks it out with some effort. {target} is bleeding out!",
-                        critText = "A wet thud is heard as the claw of the hammer firmly embeds itself in {target}. {source} nearly knocks them over ripping the claw out. {target} is bleeding out!",
                         missedText = "They whiff the swing entirely.",
+                        critText = "A wet thud is heard as the claw of the hammer firmly embeds itself in {target}. {source} nearly knocks them over ripping the claw out. {target} is bleeding out!",
                         effectContinuedText = "{target}'s wound oozes blood.",
                         effectOverText = "{target}'s hammer wound closes up.",
                     )
@@ -249,7 +249,7 @@ object EquipmentAssets {
                     targetingType = TargetingType.SINGLE_TARGET_INCLUDING_SELF,
                     strings = CharacterActionStrings(
                         queuedText = "You grab a bandage from your kit.",
-                        successText = "{source} applies a bandage to {target}'s wounds.",
+                        actionText = "{source} applies a bandage to {target}'s wounds.",
                         critText = "{source} expertly applies a bandage on one of {target}'s wounds."
                     )
                 ),

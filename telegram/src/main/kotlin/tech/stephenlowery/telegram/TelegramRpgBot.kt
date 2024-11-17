@@ -263,8 +263,8 @@ object TelegramRpgBot {
             return
         }
         val (newCharacterState, queuedActionText, character) = chooseActionResult
-        val queuedText = character.getPreActionText() + "\n\n" + queuedActionText
         if (newCharacterState == UserState.WAITING) {
+            val queuedText = character.getPreActionText() + "\n\n" + queuedActionText
             bot.editMessageText(
                 chatId = ChatId.fromId(userID),
                 messageId = callbackQueryMessageId,
