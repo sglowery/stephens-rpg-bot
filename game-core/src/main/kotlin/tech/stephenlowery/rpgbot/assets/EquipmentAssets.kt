@@ -41,6 +41,7 @@ object EquipmentAssets {
                     description = "Bash a foo with a bottle of beer",
                     actionType = CharacterActionType.DAMAGE,
                     targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
                     effect = DamageHealthEffect(17, 23),
                     strings = CharacterActionStrings(
                         queuedText = "You grip an empty beer bottle and get ready to crack some heads",
@@ -56,6 +57,7 @@ object EquipmentAssets {
                     cooldown = 2,
                     actionType = CharacterActionType.BUFF,
                     targetingType = TargetingType.SELF,
+                    targetIntent = TargetIntent.FRIENDLY,
                     effect = MultiEffect(
                         StatModEffect(
                             value = -15,
@@ -103,6 +105,7 @@ object EquipmentAssets {
                     targetingType = TargetingType.SELF,
                     description = "Something to dull the pain and heal you up. Not addictive at all!*",
                     cooldown = 5,
+                    targetIntent = TargetIntent.FRIENDLY,
                     effect = ChainEffect(
                         StatModEffect(
                             value = -20,
@@ -134,6 +137,7 @@ object EquipmentAssets {
                     identifier = "action|steroid",
                     cooldown = 5,
                     targetingType = TargetingType.SINGLE_TARGET_INCLUDING_SELF,
+                    targetIntent = TargetIntent.FRIENDLY,
                     actionType = CharacterActionType.BUFF,
                     effect = StatModEffect(
                         value = 8,
@@ -165,6 +169,7 @@ object EquipmentAssets {
                     effect = DefendEffect(10, modDuration = 3, modName = "Trash Can Lid Defend"),
                     cooldown = 6,
                     targetingType = TargetingType.SELF,
+                    targetIntent = TargetIntent.FRIENDLY,
                     actionType = CharacterActionType.DEFENSIVE,
                     strings = CharacterActionStrings(
                         queuedText = "You prepare to shift your stance.",
@@ -177,6 +182,7 @@ object EquipmentAssets {
                     description = "Bash your opponent with your dirty trash can lid",
                     cooldown = 2,
                     targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
                     actionType = CharacterActionType.DAMAGE,
                     effect = DamageHealthEffect(11, 15),
                     strings = CharacterActionStrings(
@@ -201,6 +207,7 @@ object EquipmentAssets {
                     identifier = "action|hammerbash",
                     actionType = CharacterActionType.DAMAGE,
                     targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
                     strings = CharacterActionStrings(
                         queuedText = "You get ready to bash {target} with the blunt side of your hammer.",
                         actionText = "{source} raises their hand and swings their hammer at {target}!",
@@ -220,6 +227,7 @@ object EquipmentAssets {
                     cooldown = 3,
                     actionType = CharacterActionType.DAMAGE,
                     targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
                     strings = CharacterActionStrings(
                         queuedText = "You get ready to use the sharp side of the hammer to draw some blood.",
                         actionText = "{source} raises their hand and swings the claw-side of the hammer at {target}!",
@@ -247,6 +255,7 @@ object EquipmentAssets {
                     cooldown = 2,
                     actionType = CharacterActionType.HEALING,
                     targetingType = TargetingType.SINGLE_TARGET_INCLUDING_SELF,
+                    targetIntent = TargetIntent.FRIENDLY,
                     strings = CharacterActionStrings(
                         queuedText = "You grab a bandage from your kit.",
                         actionText = "{source} applies a bandage to {target}'s wounds.",
@@ -261,6 +270,7 @@ object EquipmentAssets {
                     cooldown = 5,
                     actionType = CharacterActionType.DAMAGE,
                     targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
                     strings = CharacterActionStrings(
                         queuedText = "You grab a used syringe out of your kit. Why is it still in there? Come on.",
                         actionText = "{source} pulls a used syringe out of their first-aid kit and throws it at {target}!",
@@ -289,6 +299,7 @@ object EquipmentAssets {
                     description = "Stabby stab",
                     actionType = CharacterActionType.DAMAGE,
                     targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
                     strings = CharacterActionStrings(
                         queuedText = "You grip your knife and get ready to sink it into {target}.",
                         actionText = "{source} thrusts their knife at {target}!",
@@ -315,6 +326,7 @@ object EquipmentAssets {
                     targetingType = TargetingType.SELF,
                     cooldown = 5,
                     effect = DefendEffect(3, modDuration = 5, modName = "Hoodie drawstrings pulled"),
+                    targetIntent = TargetIntent.FRIENDLY,
                     strings = CharacterActionStrings(
                         queuedText = "You wrap your hands tightly around your hoodie's drawstrings",
                         actionText = "{source} wraps their hands around their hoodie drawstrings and pulls tightly!"
@@ -336,6 +348,7 @@ object EquipmentAssets {
                     description = "Headbutt",
                     actionType = CharacterActionType.DAMAGE,
                     targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
                     strings = CharacterActionStrings(
                         queuedText = "You prepare to headbutt {target}.",
                         actionText = "{source} headbutts {target} with their football helmet!",
@@ -356,6 +369,7 @@ object EquipmentAssets {
                     identifier = "action|eatleftovers",
                     actionType = CharacterActionType.HEALING,
                     targetingType = TargetingType.SELF,
+                    targetIntent = TargetIntent.FRIENDLY,
                     cooldown = 5,
                     duration = 5,
                     description = "Eat some cold leftover lasagna",
@@ -382,6 +396,7 @@ object EquipmentAssets {
                     cooldown = 5,
                     actionType = CharacterActionType.DAMAGE,
                     targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
                     effect = ComposeEffect(
                         outer = StatModEffect(
                             -2,
@@ -422,6 +437,7 @@ object EquipmentAssets {
                     description = "Try a punch combo",
                     actionType = CharacterActionType.DAMAGE,
                     targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
                     cooldown = 3,
                     effect = ComposeEffect(
                         outer = DamageHealthEffect(10, 15, alwaysCrits = true, canMiss = false),
@@ -455,7 +471,7 @@ object EquipmentAssets {
                     strings = CharacterActionStrings(
                         queuedText = "You get ready to try to combo a bunch of punches on {target}.",
                         actionText = "{source} attempts to combo punches against {target}!",
-                        successText = "They miss {other} punches, but get at least one in.",
+                        successText = "{other} of the punches connect(s)!",
                         missedText = "They somehow whiffs four consecutive punches. SAD!!",
                         critText = "They successfully execute a brutal combo of four punches and use their momentum to land a nasty uppercut!"
                     )
@@ -475,6 +491,7 @@ object EquipmentAssets {
                     effect = DamageHealthEffect(800, 1100, canMiss = false),
                     actionType = CharacterActionType.DAMAGE,
                     targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
                     strings = CharacterActionStrings(
                         queuedText = "Debug attack",
                         actionText = "{source} is debug attacking {target}.",

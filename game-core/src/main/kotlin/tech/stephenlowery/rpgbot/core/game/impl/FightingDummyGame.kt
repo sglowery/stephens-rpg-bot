@@ -38,6 +38,7 @@ private val dummyHeal
         identifier = "dummyheal",
         actionType = CharacterActionType.HEALING,
         targetingType = TargetingType.SELF,
+        targetIntent = TargetIntent.FRIENDLY,
         strings = dummyHealStrings
     )
 
@@ -56,6 +57,7 @@ private val dummyBonk
         identifier = "dummybonk",
         actionType = CharacterActionType.DAMAGE,
         targetingType = TargetingType.SINGLE_TARGET,
+        targetIntent = TargetIntent.HOSTILE,
         strings = dummyBonkStrings,
     )
 
@@ -109,6 +111,7 @@ private val dummyBerserk
         cooldown = 999,
         actionType = CharacterActionType.BUFF,
         targetingType = TargetingType.SELF,
+        targetIntent = TargetIntent.FRIENDLY,
         strings = dummyBerserkStrings
     )
 
@@ -126,6 +129,7 @@ val dummyBigAttack
         cooldown = 4,
         actionType = CharacterActionType.DAMAGE,
         targetingType = TargetingType.SINGLE_TARGET,
+        targetIntent = TargetIntent.HOSTILE,
         effect = DelayedEffect(
             delay = 1,
             delayedActionEffect = DamageHealthEffect(min = 51, max = 60),
@@ -149,6 +153,7 @@ private val boscoPelletGunAttack
         identifier = "boscopelletgun",
         actionType = CharacterActionType.DAMAGE,
         targetingType = TargetingType.SINGLE_TARGET,
+        targetIntent = TargetIntent.HOSTILE,
         strings = boscoPelletGunStrings
     )
 
@@ -182,6 +187,7 @@ private val boscoHealDartAction
         cooldown = 3,
         actionType = CharacterActionType.HEALING,
         targetingType = TargetingType.SINGLE_TARGET,
+        targetIntent = TargetIntent.FRIENDLY,
         strings = boscoHealStrings,
     )
 
@@ -214,6 +220,10 @@ class FightingDummyGame(
         } else {
             QueuedCharacterAction(dummyHeal, this, this)
         }
+    }
+
+    override fun getEnemiesForCharacter(character: PlayerCharacter, targetingType: TargetingType): Collection<RPGCharacter> {
+        return listOf(dummy)
     }
 
     private fun shouldHeavyBonk(): Boolean {
@@ -265,13 +275,6 @@ class FightingDummyGame(
         }
     }
 
-    override fun getTargetsForCharacter(character: PlayerCharacter): Collection<RPGCharacter> {
-        return when (character.queuedAction?.action?.actionType) {
-            CharacterActionType.DAMAGE -> listOf(dummy)
-            else                       -> getTargetsForPlayerAction(character)
-        }
-    }
-
     override fun isOver(): Boolean {
         return livingPlayers<PlayerCharacter>().isEmpty() || dummy.isDead()
     }
@@ -296,14 +299,6 @@ class FightingDummyGame(
 
     private fun characterHasActiveInvigoration(player: PlayerCharacter): Boolean {
         return player.damageTakenScalar.hasNamedModifier(boscoHealModifierName)
-    }
-
-    private fun getTargetsForPlayerAction(character: PlayerCharacter): Collection<RPGCharacter> {
-        val livingPlayers = getHumanPlayers().values.filter { it.isAlive() }
-        return when (character.queuedAction?.action?.targetingType) {
-            TargetingType.SINGLE_TARGET -> livingPlayers.filter { it.id != character.id }
-            else                        -> livingPlayers
-        }
     }
 
     private fun dummyBaseHealthForPlayers(players: Int): Int = DUMMY_HEALTH + DUMMY_HEALTH_PLAYER_SCALAR * (getHumanPlayers().size - 1)

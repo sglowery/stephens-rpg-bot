@@ -1,8 +1,6 @@
 package tech.stephenlowery.rpgbot.core.game
 
-import tech.stephenlowery.rpgbot.core.action.CharacterActionType
-import tech.stephenlowery.rpgbot.core.action.QueuedCharacterAction
-import tech.stephenlowery.rpgbot.core.action.QueuedCharacterActionResolvedResults
+import tech.stephenlowery.rpgbot.core.action.*
 import tech.stephenlowery.rpgbot.core.character.NonPlayerCharacter
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
@@ -128,8 +126,32 @@ open class Game(
         else -> "Uh oh, this shouldn't happen."
     }
 
-    open fun getTargetsForCharacter(character: PlayerCharacter): Collection<RPGCharacter> {
-        return charactersBesidesSelf(character)
+    fun getTargetsForCharacter(character: PlayerCharacter): Collection<RPGCharacter> {
+        val action = character.queuedAction!!.action
+        val targetingType = action.targetingType
+        val targetIntent = action.targetIntent
+        val selfList = if (targetingType == TargetingType.SINGLE_TARGET_INCLUDING_SELF) listOf(character) else emptyList()
+        return selfList + when (targetIntent){
+            TargetIntent.FRIENDLY -> getFriendliesForCharacter(character, targetingType)
+            TargetIntent.HOSTILE -> getEnemiesForCharacter(character, targetingType)
+            TargetIntent.ANY -> getAllTargetsForCharacter(character, targetingType)
+        }
+    }
+
+    protected open fun getFriendliesForCharacter(character: PlayerCharacter, targetingType: TargetingType): Collection<RPGCharacter> {
+        return getAllLivingHumanPlayersBesidesSelf(character)
+    }
+
+    protected open fun getEnemiesForCharacter(character: PlayerCharacter, targetingType: TargetingType): Collection<RPGCharacter> {
+        return getAllLivingHumanPlayersBesidesSelf(character)
+    }
+
+    protected open fun getAllTargetsForCharacter(character: PlayerCharacter, targetingType: TargetingType): Collection<RPGCharacter> {
+        return getAllLivingHumanPlayersBesidesSelf(character)
+    }
+
+    protected fun getAllLivingHumanPlayersBesidesSelf(character: PlayerCharacter): Collection<RPGCharacter> {
+        return getHumanPlayers().values.filter { it.isAlive() && it.id != character.id }
     }
 
     fun getPostGameStatsString(): String {

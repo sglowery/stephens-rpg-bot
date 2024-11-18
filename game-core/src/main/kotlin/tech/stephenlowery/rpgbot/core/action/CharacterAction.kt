@@ -12,6 +12,7 @@ class CharacterAction(
     val duration: Int? = null,
     val actionType: CharacterActionType,
     val targetingType: TargetingType,
+    val targetIntent: TargetIntent,
     val strings: CharacterActionStrings,
     triggers: (CharacterActionTriggers.Builder.() -> Unit) = { },
 ) {
