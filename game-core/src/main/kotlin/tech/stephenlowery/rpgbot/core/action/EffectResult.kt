@@ -14,6 +14,7 @@ class EffectResult(
     var expired: Boolean = false,
     val chained: Boolean = false,
     val occupied: Boolean = false,
+    val triggered: Boolean = false,
     val other: String? = null,
 ) {
 
@@ -24,6 +25,22 @@ class EffectResult(
     fun isNormalAttackMiss(): Boolean = miss && isNormalAttack()
 
     fun isNormalAttackCritical(): Boolean = crit && !miss && isNormalAttack()
+
+    fun asTriggeredEffect(): EffectResult =
+        EffectResult(
+            source,
+            target,
+            value,
+            actionType,
+            miss,
+            crit,
+            continued,
+            expired,
+            chained,
+            occupied,
+            triggered = true,
+            other
+        )
 
     companion object {
 
@@ -38,6 +55,7 @@ class EffectResult(
             expired: Boolean = false,
             chained: Boolean = false,
             occupied: Boolean = false,
+            triggered: Boolean = false,
             other: String? = null,
         ): List<EffectResult> = singletonList(
             EffectResult(
@@ -51,6 +69,7 @@ class EffectResult(
                 expired,
                 chained,
                 occupied,
+                triggered,
                 other,
             )
         )

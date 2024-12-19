@@ -11,13 +11,14 @@ data class CharacterActionStrings(
     private val effectContinuedText: String? = null,
     private val effectOverText: String? = null,
     private val effectChainedText: String? = null,
+    private val triggeredText: String? = null,
 ) {
 
     fun getFormattedEffectResultString(effectResult: EffectResult): String {
         return listOfNotNullOrEmpty(
             getActionText(effectResult),
             getEffectResultText(effectResult),
-            getExtraText(effectResult)
+            getExtraText(effectResult),
         ).joinToString("\n")
             .addDamageAndHealing(effectResult)
             .formatFromEffectResult(effectResult)
@@ -34,6 +35,7 @@ data class CharacterActionStrings(
 
     private fun getExtraText(effectResult: EffectResult): String? {
         return when {
+            effectResult.triggered                         -> this.triggeredText
             effectResult.continued && effectResult.expired -> this.effectOverText
             else                                           -> null
         }
