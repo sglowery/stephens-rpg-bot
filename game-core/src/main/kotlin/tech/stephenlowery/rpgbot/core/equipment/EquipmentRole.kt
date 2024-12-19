@@ -1,4 +1,4 @@
-package tech.stephenlowery.rpgbot.core
+package tech.stephenlowery.rpgbot.core.equipment
 
 enum class EquipmentRole {
     OFFENSIVE,

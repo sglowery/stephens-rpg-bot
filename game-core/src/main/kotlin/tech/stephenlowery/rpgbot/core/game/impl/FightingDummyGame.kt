@@ -209,9 +209,7 @@ class FightingDummyGame(
             hasGoneBerserk = true
             QueuedCharacterAction(dummyBerserk, this, this)
         } else if (shouldBonk(getHumanPlayers().size)) {
-            val target = listOf(chooseTargetFromMostDamageDone(), chooseTargetFromMostHealingDone())
-                .randomOrNull()
-                ?: livingPlayers<PlayerCharacter>().random()
+            val target = listOf(chooseTargetFromMostDamageDone(), chooseTargetFromMostHealingDone()).randomOrNull() ?: livingPlayers<PlayerCharacter>().random()
             if (shouldHeavyBonk()) {
                 QueuedCharacterAction(dummyBigAttack, this, target)
             } else {

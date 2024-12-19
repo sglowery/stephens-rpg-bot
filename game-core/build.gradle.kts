@@ -4,7 +4,6 @@ plugins {
 }
 
 group = "tech.stephenlowery"
-version = "0.1.0"
 
 repositories {
     mavenCentral()

@@ -1,4 +1,4 @@
-package tech.stephenlowery.rpgbot.core
+package tech.stephenlowery.rpgbot.core.equipment
 
 import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter

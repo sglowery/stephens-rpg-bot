@@ -1,7 +1,7 @@
 package tech.stephenlowery.rpgbot.core.game
 
 import tech.stephenlowery.rpgbot.assets.EquipmentAssets
-import tech.stephenlowery.rpgbot.core.Equipment
+import tech.stephenlowery.rpgbot.core.equipment.Equipment
 import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
 import tech.stephenlowery.rpgbot.core.game.impl.FightingDummyGame

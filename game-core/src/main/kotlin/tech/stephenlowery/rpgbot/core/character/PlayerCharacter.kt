@@ -1,7 +1,7 @@
 package tech.stephenlowery.rpgbot.core.character
 
 import tech.stephenlowery.rpgbot.assets.EquipmentAssets
-import tech.stephenlowery.rpgbot.core.Equipment
+import tech.stephenlowery.rpgbot.core.equipment.Equipment
 import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.action.QueuedCharacterAction
 import tech.stephenlowery.rpgbot.core.action.TargetingType
@@ -19,31 +19,6 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         applyTraitsFromStats()
         setHealthBounds()
         equipment.forEach { it.equipEffects(this) }
-    }
-
-    fun getUnavailableAbilitiesText(): String {
-        return "*The following abilities are on cooldown:*\n" + getAbilitiesOnCooldown().joinToString("\n") { ability ->
-            val turns = cooldowns[ability.identifier]!!
-            val turnsText = if (turns == 1) "turn" else "turns"
-            "${ability.displayName} ($turns $turnsText remaining)"
-        }
-    }
-
-    fun getCharacterSummaryText(): String {
-        return """
-            Health: ${getActualHealth()} / ${health.value()} (${getHealthPercent()}%)
-            Power: ${power.value()}
-            Precision: ${precision.value()}
-            Defense: ${defense.value()}
-        """.trimIndent()
-    }
-
-    private fun getTraitMessage(): String? {
-        val specialMessages = getSpecialMessages()
-        return when (specialMessages.isNotEmpty()) {
-            true  -> "Additionally, your stats grant you the following properties:\n\n" + specialMessages.joinToString("\n\n") { "- $it" }
-            false -> null
-        }
     }
 
     fun getPreActionText(): String = listOfNotNull(
@@ -97,6 +72,23 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         super.resetCharacter()
     }
 
+    private fun getUnavailableAbilitiesText(): String {
+        return "*The following abilities are on cooldown:*\n" + getAbilitiesOnCooldown().joinToString("\n") { ability ->
+            val turns = cooldowns[ability.identifier]!!
+            val turnsText = if (turns == 1) "turn" else "turns"
+            "${ability.displayName} ($turns $turnsText remaining)"
+        }
+    }
+
+    private fun getCharacterSummaryText(): String {
+        return """
+            Health: ${getActualHealth()} / ${health.value()} (${getHealthPercent()}%)
+            Power: ${power.value()}
+            Precision: ${precision.value()}
+            Defense: ${defense.value()}
+        """.trimIndent()
+    }
+
     private fun getEquipmentListString(): String {
         val equipmentAndActionsGrantedText = equipment
             .map {
@@ -119,6 +111,14 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         return when (modifiersText.isEmpty()) {
             true  -> null
             false -> "*---Attribute Modifiers---*\n$modifiersText"
+        }
+    }
+
+    private fun getTraitMessage(): String? {
+        val specialMessages = getSpecialMessages()
+        return when (specialMessages.isNotEmpty()) {
+            true  -> "Additionally, your stats grant you the following properties:\n\n" + specialMessages.joinToString("\n\n") { "- $it" }
+            false -> null
         }
     }
 
