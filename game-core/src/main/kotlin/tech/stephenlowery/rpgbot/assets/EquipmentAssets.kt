@@ -86,7 +86,6 @@ object EquipmentAssets {
         get() = Equipment(
             name = "Glasses",
             equipmentRole = EquipmentRole.UTILITY,
-            actions = emptyList(),
             equipEffects = {
                 this.precision.addAdditiveMod(7.0, name = "Glasses Precision Bonus")
                 this.criticalEffectScalar.addAdditiveMod(25.0, name = "Glasses Critical Effect Increase")
@@ -174,22 +173,6 @@ object EquipmentAssets {
                     strings = CharacterActionStrings(
                         queuedText = "You prepare to shift your stance.",
                         actionText = "{source} shifts into a defensive stance with their trash can lid.",
-                    )
-                ),
-                CharacterAction(
-                    displayName = "Trash can lid bash",
-                    identifier = "action|trashcanlidbash",
-                    description = "Bash your opponent with your dirty trash can lid",
-                    cooldown = 2,
-                    targetingType = TargetingType.SINGLE_TARGET,
-                    targetIntent = TargetIntent.HOSTILE,
-                    actionType = CharacterActionType.DAMAGE,
-                    effect = DamageHealthEffect(11, 15),
-                    strings = CharacterActionStrings(
-                        "You get ready to bash {target} with your trash can lid",
-                        actionText = "{source} pulls their arm back and swings their metal trash can lid at {target}!",
-                        successText = "{target} receives a face-full of lid.",
-                        missedText = "They whiff it, but the scent of garbage juice wafts around and makes the area smell a little unpleasant."
                     )
                 )
             )
@@ -340,23 +323,6 @@ object EquipmentAssets {
             name = "Football Helmet",
             equipmentRole = EquipmentRole.DEFENSIVE,
             equipEffects = { this.defense.addAdditiveMod(6.0, name = "Football Helmet defense bonus") },
-            actions = listOf(
-                CharacterAction(
-                    displayName = "Headbutt",
-                    identifier = "action|headbutt",
-                    effect = DamageHealthEffect(12, 23),
-                    description = "Headbutt",
-                    actionType = CharacterActionType.DAMAGE,
-                    targetingType = TargetingType.SINGLE_TARGET,
-                    targetIntent = TargetIntent.HOSTILE,
-                    strings = CharacterActionStrings(
-                        queuedText = "You prepare to headbutt {target}.",
-                        actionText = "{source} headbutts {target} with their football helmet!",
-                        successText = "It brutally connects.",
-                        missedText = "It misses and they nearly fall over."
-                    )
-                )
-            )
         )
 
     private val LeftoverLasagna: Equipment

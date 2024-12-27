@@ -6,6 +6,6 @@ import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 class Equipment(
     val name: String,
     val equipmentRole: EquipmentRole,
-    val actions: Collection<CharacterAction>,
+    val actions: Collection<CharacterAction> = emptyList(),
     val equipEffects: RPGCharacter.() -> Unit = { },
 )
