@@ -118,7 +118,7 @@ open class Game(
             .map { it.key to getGameStartedMessageForPlayer(it.value as PlayerCharacter) }
     }
 
-    open fun isOver() = livingPlayers().size > 1
+    open fun isOver() = livingPlayers().size <= 1
 
     open fun getGameEndedText(): String = when (livingPlayers().size) {
         1    -> "${livingPlayers().first().name} wins!"
