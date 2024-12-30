@@ -26,7 +26,6 @@ private const val DUMMY_HEALTH_PLAYER_SCALAR = 800
 private const val DUMMY_HEALTH_PERCENT_BERSERK_THRESHOLD = 50
 
 private val dummyHealStrings = CharacterActionStrings(
-    queuedText = "",
     actionText = "The dummy glows softly...",
     successText = "It magically stitches itself up!"
 )
@@ -43,7 +42,6 @@ private val dummyHeal
     )
 
 private val dummyBonkStrings = CharacterActionStrings(
-    queuedText = "",
     actionText = "The dummy wobbles menacingly at {target}...",
     successText = "It gives a solid bonk!",
     missedText = "The dummy falls over harmlessly.",
@@ -62,7 +60,6 @@ private val dummyBonk
     )
 
 private val dummyBerserkStrings = CharacterActionStrings(
-    queuedText = "",
     actionText = "The dummy goes berserk!",
 )
 private val dummyBerserk
@@ -116,7 +113,6 @@ private val dummyBerserk
     )
 
 val dummyBigAttackStrings = CharacterActionStrings(
-    queuedText = "",
     actionText = "{source} rotates toward {target} and starts glowing.",
     successText = "It bonks them extra hard!",
     missedText = "A small pop is heard and it abruptly stops glowing."
@@ -139,7 +135,6 @@ val dummyBigAttack
     )
 
 private val boscoPelletGunStrings = CharacterActionStrings(
-    queuedText = "",
     actionText = "{source} aims its pellet gun at {target} and fires a single shot!",
     successText = "They get pelted in the head. Ow.",
     missedText = "The pellet misses and lands harmlessly on the ground."
@@ -159,7 +154,6 @@ private val boscoPelletGunAttack
 
 private const val boscoHealModifierName = "Bosco Invigoration"
 private val boscoHealStrings = CharacterActionStrings(
-    queuedText = "",
     actionText = "Bosco aims a healing dart at {target} and shoots...",
     successText = "The dart flies true and injects its invigorating goo!",
     missedText = "The dart misses and embeds itself in the ground. Nature is healing.",

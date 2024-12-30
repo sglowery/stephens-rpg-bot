@@ -69,7 +69,6 @@ object CharacterActionAssets {
             targetingType = TargetingType.SELF,
             targetIntent = TargetIntent.FRIENDLY,
             strings = CharacterActionStrings(
-                queuedText = "You brace yourself for attacks.",
                 actionText = "{source} assumes an intimidating defensive stance."
             ),
             cooldown = 3

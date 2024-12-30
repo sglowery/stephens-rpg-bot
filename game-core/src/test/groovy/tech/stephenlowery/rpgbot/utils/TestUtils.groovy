@@ -3,6 +3,7 @@ package tech.stephenlowery.rpgbot.utils
 import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.action.CharacterActionStrings
 import tech.stephenlowery.rpgbot.core.action.CharacterActionType
+import tech.stephenlowery.rpgbot.core.action.TargetIntent
 import tech.stephenlowery.rpgbot.core.action.TargetingType
 import tech.stephenlowery.rpgbot.core.action.action_effect.ActionEffect
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
@@ -48,6 +49,7 @@ final class TestUtils {
                 1,
                 characterActionType,
                 TargetingType.SELF,
+                TargetIntent.HOSTILE,
                 new CharacterActionStrings(
                         '',
                         '',
@@ -56,7 +58,8 @@ final class TestUtils {
                         '',
                         '',
                         '',
-                        ''),
+                        ''
+                ),
                 {}
         )
     }

@@ -12,46 +12,49 @@ class CharacterActionStringsTest extends Specification {
     def "getFormattedEffectResultString returns correctly formatted string based on EffectResult's fields"() {
         given:
         def characterActionStrings = new CharacterActionStrings(
-                "queued",
                 actionText,
                 "success",
                 "missed",
                 "crit",
                 "continued",
                 "effectOver",
-                "chained"
+                "chained",
+                "triggered",
         )
 
         expect:
         text == characterActionStrings.getFormattedEffectResultString(result)
 
         where:
-        result                                                                          | actionText || text
-        effectResult(charOne, charTwo, 1, false, false, false, false, false, false, "") | ""         || "success"
-        effectResult(charOne, charTwo, 1, true, false, false, false, false, false, "")  | ""         || "missed"
-        effectResult(charOne, charTwo, 1, false, true, false, false, false, false, "")  | ""         || "crit"
-        effectResult(charOne, charTwo, 1, false, false, true, false, false, false, "")  | ""         || "continued"
-        effectResult(charOne, charTwo, 1, false, false, true, true, false, false, "")   | ""         || "continued\neffectOver"
-        effectResult(charOne, charTwo, 1, false, false, false, false, true, false, "")  | ""         || "chained"
+        result                                                                                 | actionText || text
+        effectResult(charOne, charTwo, 1, false, false, false, false, false, false, false, "") | ""         || "success"
+        effectResult(charOne, charTwo, 1, true, false, false, false, false, false, false, "")  | ""         || "missed"
+        effectResult(charOne, charTwo, 1, false, true, false, false, false, false, false, "")  | ""         || "crit"
+        effectResult(charOne, charTwo, 1, false, false, true, false, false, false, false, "")  | ""         || "continued"
+        effectResult(charOne, charTwo, 1, false, false, true, true, false, false, false, "")   | ""         || "continued\neffectOver"
+        effectResult(charOne, charTwo, 1, false, false, false, false, true, false, false, "")  | ""         || "chained"
+        effectResult(charOne, charTwo, 1, false, false, false, false, false, false, true, "")  | ""         || "success\ntriggered"
 
-        effectResult(charOne, charTwo, 1, false, false, false, false, false, false, "") | "action"   || "action\nsuccess"
-        effectResult(charOne, charTwo, 1, true, false, false, false, false, false, "")  | "action"   || "action\nmissed"
-        effectResult(charOne, charTwo, 1, false, true, false, false, false, false, "")  | "action"   || "action\ncrit"
-        effectResult(charOne, charTwo, 1, false, false, true, false, false, false, "")  | "action"   || "continued"
-        effectResult(charOne, charTwo, 1, false, false, true, true, false, false, "")   | "action"   || "continued\neffectOver"
-        effectResult(charOne, charTwo, 1, false, false, false, false, true, false, "")  | "action"   || "chained"
-        effectResult(charOne, charTwo, 1, false, false, false, false, false, true, "")  | "action"   || "action"
+        effectResult(charOne, charTwo, 1, false, false, false, false, false, false, false, "") | "action"   || "action\nsuccess"
+        effectResult(charOne, charTwo, 1, true, false, false, false, false, false, false, "")  | "action"   || "action\nmissed"
+        effectResult(charOne, charTwo, 1, false, true, false, false, false, false, false, "")  | "action"   || "action\ncrit"
+        effectResult(charOne, charTwo, 1, false, false, true, false, false, false, false, "")  | "action"   || "continued"
+        effectResult(charOne, charTwo, 1, false, false, true, true, false, false, false, "")   | "action"   || "continued\neffectOver"
+        effectResult(charOne, charTwo, 1, false, false, false, false, true, false, false, "")  | "action"   || "chained"
+        effectResult(charOne, charTwo, 1, false, false, false, false, false, true, false, "")  | "action"   || "action"
+        effectResult(charOne, charTwo, 1, false, false, false, false, false, false, true, "")  | "action"   || "action\nsuccess\ntriggered"
     }
 
     def "formatFromEffectResult replaces text markers with information in EffectResult"() {
         given:
         def characterActionStrings = new CharacterActionStrings(
                 "",
-                "",
                 "{source} {target} {value} {other}",
-                "", "", "",
-                ""
-                ,
+                "",
+                "",
+                "",
+                "",
+                "",
                 "",
         )
 
@@ -61,6 +64,7 @@ class CharacterActionStringsTest extends Specification {
                         charOne,
                         charTwo,
                         1,
+                        false,
                         false,
                         false,
                         false,
@@ -82,6 +86,7 @@ class CharacterActionStringsTest extends Specification {
             boolean expired,
             boolean chained,
             boolean occupied,
+            boolean triggered,
             String other
     ) {
         return new EffectResult(
@@ -95,6 +100,7 @@ class CharacterActionStringsTest extends Specification {
                 expired,
                 chained,
                 occupied,
+                triggered,
                 other
         )
     }

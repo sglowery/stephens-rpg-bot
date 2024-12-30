@@ -44,7 +44,6 @@ object EquipmentAssets {
                     targetIntent = TargetIntent.HOSTILE,
                     effect = DamageHealthEffect(17, 23),
                     strings = CharacterActionStrings(
-                        queuedText = "You grip an empty beer bottle and get ready to crack some heads",
                         actionText = "{source} swings at {target} with an empty beer bottle!",
                         successText = "It nails them in the head and shatters.",
                         missedText = "They dodge out of the way."
@@ -75,7 +74,6 @@ object EquipmentAssets {
                         )
                     ),
                     strings = CharacterActionStrings(
-                        queuedText = "You crack open a cold one",
                         actionText = "{source} takes a hefty swig of their shitty beer."
                     )
                 )
@@ -116,7 +114,6 @@ object EquipmentAssets {
                         HealEffect(25, 30, duration = 6)
                     ),
                     strings = CharacterActionStrings(
-                        queuedText = "You pop open your bottle of painkillers.",
                         actionText = "{source} pops some painkillers in their mouth.",
                         effectContinuedText = "{source} feels healthier from the pills.",
                         effectOverText = "{source}'s painkillers wear off."
@@ -146,7 +143,6 @@ object EquipmentAssets {
                         modifierName = "Steroids"
                     ),
                     strings = CharacterActionStrings(
-                        queuedText = "You pull out a needle and do that stupid flicking thing.",
                         actionText = "{source} injects {target} with steroids and they instantly feel more powerful"
                     )
                 )
@@ -171,7 +167,6 @@ object EquipmentAssets {
                     targetIntent = TargetIntent.FRIENDLY,
                     actionType = CharacterActionType.DEFENSIVE,
                     strings = CharacterActionStrings(
-                        queuedText = "You prepare to shift your stance.",
                         actionText = "{source} shifts into a defensive stance with their trash can lid.",
                     )
                 )
@@ -192,7 +187,6 @@ object EquipmentAssets {
                     targetingType = TargetingType.SINGLE_TARGET,
                     targetIntent = TargetIntent.HOSTILE,
                     strings = CharacterActionStrings(
-                        queuedText = "You get ready to bash {target} with the blunt side of your hammer.",
                         actionText = "{source} raises their hand and swings their hammer at {target}!",
                         successText = "The swing connects with a fleshy thud.",
                         missedText = "{target} steps away just in time and avoids the hammer.",
@@ -212,7 +206,6 @@ object EquipmentAssets {
                     targetingType = TargetingType.SINGLE_TARGET,
                     targetIntent = TargetIntent.HOSTILE,
                     strings = CharacterActionStrings(
-                        queuedText = "You get ready to use the sharp side of the hammer to draw some blood.",
                         actionText = "{source} raises their hand and swings the claw-side of the hammer at {target}!",
                         successText = "The claw embeds itself in {target}. {source} yanks it out with some effort. {target} is bleeding out!",
                         missedText = "They whiff the swing entirely.",
@@ -240,7 +233,6 @@ object EquipmentAssets {
                     targetingType = TargetingType.SINGLE_TARGET_INCLUDING_SELF,
                     targetIntent = TargetIntent.FRIENDLY,
                     strings = CharacterActionStrings(
-                        queuedText = "You grab a bandage from your kit.",
                         actionText = "{source} applies a bandage to {target}'s wounds.",
                         critText = "{source} expertly applies a bandage on one of {target}'s wounds."
                     )
@@ -255,7 +247,6 @@ object EquipmentAssets {
                     targetingType = TargetingType.SINGLE_TARGET,
                     targetIntent = TargetIntent.HOSTILE,
                     strings = CharacterActionStrings(
-                        queuedText = "You grab a used syringe out of your kit. Why is it still in there? Come on.",
                         actionText = "{source} pulls a used syringe out of their first-aid kit and throws it at {target}!",
                         successText = "The needle sinks into {target} and infects them instantly!",
                         missedText = "The needle misses and lands somewhere on the ground. I'm sure someone else will find it later.",
@@ -284,7 +275,6 @@ object EquipmentAssets {
                     targetingType = TargetingType.SINGLE_TARGET,
                     targetIntent = TargetIntent.HOSTILE,
                     strings = CharacterActionStrings(
-                        queuedText = "You grip your knife and get ready to sink it into {target}.",
                         actionText = "{source} thrusts their knife at {target}!",
                         successText = "The knife sinks deep into {target}.",
                         missedText = "{target} deftly dodges the knife."
@@ -311,7 +301,6 @@ object EquipmentAssets {
                     effect = DefendEffect(3, modDuration = 5, modName = "Hoodie drawstrings pulled"),
                     targetIntent = TargetIntent.FRIENDLY,
                     strings = CharacterActionStrings(
-                        queuedText = "You wrap your hands tightly around your hoodie's drawstrings",
                         actionText = "{source} wraps their hands around their hoodie drawstrings and pulls tightly!"
                     )
                 )
@@ -341,7 +330,6 @@ object EquipmentAssets {
                     description = "Eat some cold leftover lasagna",
                     effect = HealEffect(13, 19),
                     strings = CharacterActionStrings(
-                        queuedText = "You're going to eat some cold leftover lasagna.",
                         actionText = "{source} opens a container of cold leftover lasagna and takes a huge bite of it!",
                         effectContinuedText = "{source} feels invigorated by their lasagna leftovers.",
                         effectOverText = "{source} is done digesting their lasagna and might be feeling a bit peckish."
@@ -381,7 +369,6 @@ object EquipmentAssets {
                         compose = Composers.dumbApplyOuterToSelf
                     ),
                     strings = CharacterActionStrings(
-                        queuedText = "You ready yourself to take a fat rip off your bong.",
                         actionText = "{source} puts a lighter to their bong's bowl, inhales strongly, and cough-blows the smoke at {target}'s face!"
                     )
                 ),
@@ -435,7 +422,6 @@ object EquipmentAssets {
                         }
                     ),
                     strings = CharacterActionStrings(
-                        queuedText = "You get ready to try to combo a bunch of punches on {target}.",
                         actionText = "{source} attempts to combo punches against {target}!",
                         successText = "{other} of the punches connect(s)!",
                         missedText = "They somehow whiffs four consecutive punches. SAD!!",
@@ -459,7 +445,6 @@ object EquipmentAssets {
                     targetingType = TargetingType.SINGLE_TARGET,
                     targetIntent = TargetIntent.HOSTILE,
                     strings = CharacterActionStrings(
-                        queuedText = "Debug attack",
                         actionText = "{source} is debug attacking {target}.",
                         successText = "Owie."
                     )

@@ -1,9 +1,6 @@
 package tech.stephenlowery.rpgbot.core.action
 
-import tech.stephenlowery.rpgbot.core.character.RPGCharacter
-
 data class CharacterActionStrings(
-    private val queuedText: String,
     private val actionText: String,
     private val successText: String? = null,
     private val missedText: String? = null,
@@ -40,9 +37,6 @@ data class CharacterActionStrings(
             else                                           -> null
         }
     }
-
-    fun getFormattedQueuedText(from: RPGCharacter, to: RPGCharacter) =
-        queuedText.formatCharacterNames(from.name, to.name)
 
     private fun getActionText(effectResult: EffectResult): String? =
         if (effectResult.continued || effectResult.expired || effectResult.chained)
