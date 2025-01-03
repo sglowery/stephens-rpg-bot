@@ -1,8 +1,6 @@
 package tech.stephenlowery.rpgbot.assets
 
 import tech.stephenlowery.rpgbot.assets.EquipmentAssets.allEquipment
-import tech.stephenlowery.rpgbot.core.Equipment
-import tech.stephenlowery.rpgbot.core.EquipmentRole
 import tech.stephenlowery.rpgbot.core.action.*
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.DamageHealthEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.DefendEffect
@@ -10,25 +8,31 @@ import tech.stephenlowery.rpgbot.core.action.action_effect.impl.HealEffect
 import tech.stephenlowery.rpgbot.core.action.action_effect.meta.*
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import tech.stephenlowery.rpgbot.core.character.attribute.AttributeModifierType
+import tech.stephenlowery.rpgbot.core.equipment.Equipment
+import tech.stephenlowery.rpgbot.core.equipment.EquipmentRole
 
 object EquipmentAssets {
 
-    val allEquipment = listOf(
-        Hammer,
-        BasicFirstAidKit,
-        Knife,
-        Steroids,
-        TrashCanLid,
-        BeerBottle,
-        Painkillers,
-        Hoodie,
-        Glasses,
-        FootballHelmet,
-        LeftoverLasagna,
-        Bong,
-        BoxingGloves,
-        DebugPants,
-    )
+    val allEquipment
+        get() = listOf(
+            Hammer,
+            BasicFirstAidKit,
+            Knife,
+            Steroids,
+            TrashCanLid,
+            BeerBottle,
+            Painkillers,
+            Hoodie,
+            Glasses,
+            FootballHelmet,
+            LeftoverLasagna,
+            Bong,
+            BoxingGloves,
+            DebugPants,
+            PocketSand,
+            JumpKit,
+            Stapler,
+        )
 
     private val BeerBottle: Equipment
         get() = Equipment(

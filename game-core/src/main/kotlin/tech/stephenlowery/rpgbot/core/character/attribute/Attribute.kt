@@ -66,7 +66,7 @@ class Attribute(
     }
 
     private fun cycleModifiers() {
-        listOf(additiveModifiers, multiplyModifiers).flatten().forEach { it.cycle() }
+        (additiveModifiers + multiplyModifiers).forEach { it.cycle() }
     }
 
     private fun consolidateModifierSet(modifierSet: MutableList<AttributeModifier>): MutableList<AttributeModifier> {
