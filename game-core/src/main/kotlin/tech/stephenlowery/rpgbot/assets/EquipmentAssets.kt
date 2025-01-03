@@ -111,7 +111,7 @@ object EquipmentAssets {
                             attributeModifierType = AttributeModifierType.MULTIPLICATIVE,
                             modifierName = "Painkillers"
                         ),
-                        HealEffect(25, 30, duration = 6)
+                        HealEffect(20, 24, duration = 6)
                     ),
                     strings = CharacterActionStrings(
                         actionText = "{source} pops some painkillers in their mouth.",
@@ -224,7 +224,7 @@ object EquipmentAssets {
             equipmentRole = EquipmentRole.HEALING,
             actions = listOf(
                 CharacterAction(
-                    effect = HealEffect(17, 25),
+                    effect = HealEffect(15, 22),
                     displayName = "Bandage",
                     description = "Apply a bandage to a target for some instant healing.",
                     identifier = "action|bandage",
@@ -297,9 +297,9 @@ object EquipmentAssets {
                     identifier = "action|pullhoodie",
                     actionType = CharacterActionType.DEFENSIVE,
                     targetingType = TargetingType.SELF,
-                    cooldown = 5,
-                    effect = DefendEffect(3, modDuration = 5, modName = "Hoodie drawstrings pulled"),
                     targetIntent = TargetIntent.FRIENDLY,
+                    cooldown = 6,
+                    effect = DefendEffect(3, modDuration = 6, modName = "Hoodie drawstrings pulled"),
                     strings = CharacterActionStrings(
                         actionText = "{source} wraps their hands around their hoodie drawstrings and pulls tightly!"
                     )
@@ -328,7 +328,7 @@ object EquipmentAssets {
                     cooldown = 5,
                     duration = 5,
                     description = "Eat some cold leftover lasagna",
-                    effect = HealEffect(13, 19),
+                    effect = HealEffect(10, 13),
                     strings = CharacterActionStrings(
                         actionText = "{source} opens a container of cold leftover lasagna and takes a huge bite of it!",
                         effectContinuedText = "{source} feels invigorated by their lasagna leftovers.",
@@ -393,8 +393,8 @@ object EquipmentAssets {
                     targetIntent = TargetIntent.HOSTILE,
                     cooldown = 3,
                     effect = ComposeEffect(
-                        outer = DamageHealthEffect(10, 15, alwaysCrits = true, canMiss = false),
-                        inner = RepeatEffect(4, DamageHealthEffect(7, 11, canCrit = false)),
+                        outer = DamageHealthEffect(9, 12, alwaysCrits = true, canMiss = false),
+                        inner = RepeatEffect(4, DamageHealthEffect(3, 6, canCrit = false)),
                         compose = {
                             val sumOfPunches = innerResults.sumOf { it.value }
                             when (innerResults.all { it.isSuccessfulNormalHit() }) {

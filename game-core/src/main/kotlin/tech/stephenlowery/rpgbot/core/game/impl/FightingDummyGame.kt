@@ -19,11 +19,11 @@ private const val BOSCO_ID = 2L
 private const val GAME_STARTED_MESSAGE = "You're in a Debug Dummy game. Have fun testing this."
 
 private const val CHANCE_TO_BONK = 80
-private const val CHANCE_TO_HEAVY_BONK = 100
+private const val CHANCE_TO_HEAVY_BONK = 60
 
-private const val DUMMY_HEALTH = 1200
-private const val DUMMY_HEALTH_PLAYER_SCALAR = 800
-private const val DUMMY_HEALTH_PERCENT_BERSERK_THRESHOLD = 50
+private const val DUMMY_HEALTH = 1400
+private const val DUMMY_HEALTH_PLAYER_SCALAR = 1500
+private const val DUMMY_HEALTH_PERCENT_BERSERK_THRESHOLD = 55
 
 private val dummyHealStrings = CharacterActionStrings(
     actionText = "The dummy glows softly...",
@@ -49,7 +49,7 @@ private val dummyBonkStrings = CharacterActionStrings(
 )
 private val dummyBonk
     get() = CharacterAction(
-        effect = DamageHealthEffect(min = 22, max = 36),
+        effect = DamageHealthEffect(min = 29, max = 35),
         displayName = "Debug Dummy Bonk",
         description = "Sometimes the dummy strikes back.",
         identifier = "dummybonk",
@@ -81,12 +81,6 @@ private val dummyBerserk
                 value = 5,
                 statGetter = RPGCharacter::defense,
                 attributeModifierType = AttributeModifierType.ADDITIVE,
-                modifierName = "Dummy Berserk",
-            ),
-            StatModEffect(
-                value = 10,
-                statGetter = RPGCharacter::defense,
-                attributeModifierType = AttributeModifierType.MULTIPLICATIVE,
                 modifierName = "Dummy Berserk",
             ),
             StatModEffect(
@@ -280,6 +274,8 @@ class FightingDummyGame(
 
     override fun startGame(): Collection<Pair<Long, String>> {
         dummy.setHealth(dummyBaseHealthForPlayers(players.size))
+        dummy.defense.base += getHumanPlayers().size - 1
+        dummy.power.base += getHumanPlayers().size * 2
         players[DUMMY_ID] = dummy
         players[BOSCO_ID] = bosco
         return super.startGame()
