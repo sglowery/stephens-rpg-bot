@@ -1,10 +1,10 @@
 package tech.stephenlowery.rpgbot.core.character
 
 import tech.stephenlowery.rpgbot.assets.EquipmentAssets
-import tech.stephenlowery.rpgbot.core.equipment.Equipment
 import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.action.QueuedCharacterAction
 import tech.stephenlowery.rpgbot.core.action.TargetingType
+import tech.stephenlowery.rpgbot.core.equipment.Equipment
 
 class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
 
@@ -45,7 +45,7 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
 
     fun addTargetToAction(newTarget: RPGCharacter) {
         queuedAction?.target = newTarget
-        characterState = UserState.WAITING
+        characterState = CharacterState.WAITING
     }
 
     fun chooseAction(actionIdentifier: String): QueuedCharacterAction {
@@ -55,7 +55,7 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         if (action.targetingType == TargetingType.SELF) {
             newQueuedCharacterAction.target = this
         }
-        characterState = if (action.targetingType.requiresChoosingTarget()) UserState.CHOOSING_TARGETS else UserState.WAITING
+        characterState = if (action.targetingType.requiresChoosingTarget()) CharacterState.CHOOSING_TARGETS else CharacterState.WAITING
         queuedAction = newQueuedCharacterAction
         return newQueuedCharacterAction
     }
@@ -90,15 +90,14 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
     }
 
     private fun getEquipmentListString(): String {
-        val equipmentAndActionsGrantedText = equipment
-            .map {
-                val name = it.name
-                val actionNames = it.actions.map(CharacterAction::displayName)
-                return@map if (actionNames.isEmpty())
-                    name
-                else
-                    "$name\n${actionNames.joinToString("\n") { actionName -> "   - $actionName" }}"
-            }
+        val equipmentAndActionsGrantedText = equipment.map {
+            val name = it.name
+            val actionNames = it.actions.map(CharacterAction::displayName)
+            return@map if (actionNames.isEmpty())
+                name
+            else
+                "$name\n${actionNames.joinToString("\n") { actionName -> "   - $actionName" }}"
+        }
         return "*--- You have been given the following equipment and actions ---*" +
                 equipmentAndActionsGrantedText.joinToString("\n\n", prefix = "\n")
     }

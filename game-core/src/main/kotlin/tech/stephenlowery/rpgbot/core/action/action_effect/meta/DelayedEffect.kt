@@ -4,7 +4,7 @@ import tech.stephenlowery.rpgbot.core.action.CharacterActionType
 import tech.stephenlowery.rpgbot.core.action.EffectResult
 import tech.stephenlowery.rpgbot.core.action.action_effect.ActionEffect
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
-import tech.stephenlowery.rpgbot.core.character.UserState
+import tech.stephenlowery.rpgbot.core.character.CharacterState
 
 class DelayedEffect(
     private val delay: Int = 1,
@@ -34,7 +34,7 @@ class DelayedEffect(
 
     private fun occupyUserIfApplicable(user: RPGCharacter) {
         if (occupySource) {
-            user.characterState = UserState.OCCUPIED
+            user.characterState = CharacterState.OCCUPIED
         }
     }
 
@@ -63,7 +63,7 @@ class DelayedEffect(
 
     private fun unoccupyUserIfApplicable(from: RPGCharacter) {
         if (occupySource) {
-            from.characterState = UserState.WAITING
+            from.characterState = CharacterState.WAITING
         }
     }
 

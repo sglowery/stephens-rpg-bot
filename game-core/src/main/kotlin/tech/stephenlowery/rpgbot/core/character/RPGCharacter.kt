@@ -30,7 +30,7 @@ open class RPGCharacter(val id: Long, val name: String) {
     val criticalEffectScalar = Attribute("Critical Effect", BASE_CRIT_EFFECT_MULTIPLIER * 100, displayValueFn = ::asPercentage)
     val criticalChance = Attribute("Critical Hit Chance", BASE_CRIT_CHANCE, displayValueFn = ::asPercentage)
 
-    var characterState: UserState = UserState.NONE
+    var characterState: CharacterState = CharacterState.NONE
 
     var cooldowns = mutableMapOf<String, Int>()
 
@@ -42,7 +42,7 @@ open class RPGCharacter(val id: Long, val name: String) {
         return getUnfilteredActions().filter { !cooldowns.containsKey(it.identifier) }
     }
 
-    fun isAlive(): Boolean = getActualHealth() > 0 && characterState != UserState.DEAD
+    fun isAlive(): Boolean = getActualHealth() > 0 && characterState != CharacterState.DEAD
 
     fun isDead(): Boolean = !isAlive()
 
@@ -62,14 +62,14 @@ open class RPGCharacter(val id: Long, val name: String) {
 
     open fun resetCharacter() {
         getAllAttributes().forEach(Attribute::reset)
-        characterState = UserState.NONE
+        characterState = CharacterState.NONE
         cooldowns.clear()
         applyTraitsFromStats()
     }
 
     open fun resetForNextTurnAfterAction() {
-        if (characterState == UserState.WAITING) {
-            characterState = UserState.CHOOSING_ACTION
+        if (characterState == CharacterState.WAITING) {
+            characterState = CharacterState.CHOOSING_ACTION
         }
         cycleAttributeModifiers()
         cycleCooldowns()

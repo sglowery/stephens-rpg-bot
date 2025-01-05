@@ -11,7 +11,7 @@ import com.github.kotlintelegrambot.logging.LogLevel
 import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
-import tech.stephenlowery.rpgbot.core.character.UserState
+import tech.stephenlowery.rpgbot.core.character.CharacterState
 import tech.stephenlowery.rpgbot.core.game.ChooseActionResult
 import tech.stephenlowery.rpgbot.core.game.Game
 import tech.stephenlowery.rpgbot.core.game.GameManager
@@ -56,11 +56,11 @@ object TelegramRpgBot {
 
     private fun goBackToChoosingAction(bot: Bot, message: Message) {
         val userCharacter = GameManager.findCharacter(message.chat.id) ?: return
-        if (userCharacter.characterState != UserState.CHOOSING_TARGETS && userCharacter.characterState != UserState.CHOOSING_ACTION) {
+        if (userCharacter.characterState != CharacterState.CHOOSING_TARGETS && userCharacter.characterState != CharacterState.CHOOSING_ACTION) {
             return
         }
         userCharacter.queuedAction = null
-        userCharacter.characterState = UserState.CHOOSING_ACTION
+        userCharacter.characterState = CharacterState.CHOOSING_ACTION
         sendSinglePlayerActions(bot, userCharacter, message.messageId)
     }
 
@@ -187,7 +187,7 @@ object TelegramRpgBot {
     private fun sendPlayersInGameActions(bot: Bot, chatID: Long) {
         val game = GameManager.findGame(chatID)!!
         val livingHumanPlayers = game.getHumanPlayers().values.living()
-        livingHumanPlayers.filter { it.characterState == UserState.CHOOSING_ACTION }.forEach {
+        livingHumanPlayers.filter { it.characterState == CharacterState.CHOOSING_ACTION }.forEach {
             val keyboard = makeKeyboardFromPlayerActions(it.getAvailableActions())
             val replyMarkup = InlineKeyboardMarkup.create(keyboard)
             bot.sendMessage(ChatId.fromId(it.id), it.getPreActionText() + "\n\nPick an action.", replyMarkup = replyMarkup, parseMode = ParseMode.MARKDOWN)
@@ -208,7 +208,7 @@ object TelegramRpgBot {
     }
 
     private fun notifyOccupiedUsers(bot: Bot, game: Game) {
-        game.livingPlayers().filter { it.characterState == UserState.OCCUPIED }
+        game.livingPlayers().filter { it.characterState == CharacterState.OCCUPIED }
             .forEach {
                 bot.sendMessage(ChatId.fromId(it.id), "You are occupied this turn and can't choose an action.")
             }
@@ -263,7 +263,7 @@ object TelegramRpgBot {
             return
         }
         val (newCharacterState, queuedActionText, character) = chooseActionResult
-        if (newCharacterState == UserState.WAITING) {
+        if (newCharacterState == CharacterState.WAITING) {
             val queuedText = character.getPreActionText() + "\n\n" + queuedActionText
             bot.editMessageText(
                 chatId = ChatId.fromId(userID),
@@ -272,7 +272,7 @@ object TelegramRpgBot {
                 text = queuedText,
                 parseMode = ParseMode.MARKDOWN
             )
-        } else if (newCharacterState == UserState.CHOOSING_TARGETS) {
+        } else if (newCharacterState == CharacterState.CHOOSING_TARGETS) {
             sendTargetsToPlayer(bot, userID, callbackQueryMessageId)
         }
         val game = GameManager.findGameContainingCharacter(userID)!!
@@ -305,7 +305,7 @@ object TelegramRpgBot {
         val userId = callbackQuery.from.id
         val game = GameManager.findGameContainingCharacter(userId)
         val fromCharacter = GameManager.findCharacter(userId)
-        if (game != null && fromCharacter != null && fromCharacter.characterState == UserState.CHOOSING_TARGETS) {
+        if (game != null && fromCharacter != null && fromCharacter.characterState == CharacterState.CHOOSING_TARGETS) {
             val target = callbackQuery.data.split("|")[1].toLong()
             game.addTargetToQueuedCharacterAction(userId, target)
             bot.editMessageText(
@@ -325,10 +325,10 @@ object TelegramRpgBot {
     private fun resolveActionsInGame(bot: Bot, game: Game) {
         val resolvedActionsText = game.resolveActionsAndGetResults()
         bot.sendMessage(ChatId.fromId(game.id), resolvedActionsText, replyMarkup = ReplyKeyboardRemove(), parseMode = ParseMode.MARKDOWN)
-        val deadPlayers = game.getHumanPlayers().values.dead().filter { it.characterState != UserState.DEAD }
+        val deadPlayers = game.getHumanPlayers().values.dead().filter { it.characterState != CharacterState.DEAD }
         deadPlayers.forEach { player ->
             bot.sendMessage(ChatId.fromId(player.id), "You died in the previous round and have been removed from the game.")
-            player.characterState = UserState.DEAD
+            player.characterState = CharacterState.DEAD
         }
         if (game.isOver()) {
             bot.sendMessage(ChatId.fromId(game.id), game.getGameEndedText() + "\n\n" + game.getPostGameStatsString())

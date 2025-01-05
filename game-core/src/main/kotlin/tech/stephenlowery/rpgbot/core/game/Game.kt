@@ -4,9 +4,9 @@ import tech.stephenlowery.rpgbot.core.action.*
 import tech.stephenlowery.rpgbot.core.character.NonPlayerCharacter
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
-import tech.stephenlowery.rpgbot.core.character.UserState
+import tech.stephenlowery.rpgbot.core.character.CharacterState
 
-private val PLAYER_NOT_READY_STATES = listOf(UserState.CHOOSING_ACTION, UserState.CHOOSING_TARGETS)
+private val PLAYER_NOT_READY_STATES = listOf(CharacterState.CHOOSING_ACTION, CharacterState.CHOOSING_TARGETS)
 
 open class Game(
     val id: Long,
@@ -34,7 +34,7 @@ open class Game(
 
     fun numberOfPlayers() = players.keys.size
 
-    fun queueActionFromCharacter(callbackData: String, userID: Long): UserState {
+    fun queueActionFromCharacter(callbackData: String, userID: Long): CharacterState {
         return findPlayerCharacterFromID(userID)!!.apply {
             actionQueue.add(this.chooseAction(callbackData))
         }.characterState
@@ -79,7 +79,7 @@ open class Game(
 
     open fun resolveActionsAndGetResults(): String {
         val npcActions = livingPlayers<NonPlayerCharacter>()
-            .filter { it.characterState != UserState.OCCUPIED }
+            .filter { it.characterState != CharacterState.OCCUPIED }
             .mapNotNull { it.queueAction(this) }
         val queuedActions = listOf(actionQueue, npcActions)
             .flatMap(::partitionAndShuffleActionQueue)
@@ -96,7 +96,7 @@ open class Game(
         queuedActions.removeIf { it.isExpired() }
         actionQueue = queuedActions
         players.values.forEach { player ->
-            if (player.getActualHealth() <= 0 && player.characterState != UserState.DEAD) {
+            if (player.getActualHealth() <= 0 && player.characterState != CharacterState.DEAD) {
                 stringResults.add("${player.name} died! They will be removed from the game.")
                 removeEffectsTargetingCharacter(player)
             } else {
@@ -221,7 +221,7 @@ open class Game(
     protected fun startGameStateAndPrepCharacters() {
         hasStarted = true
         players.values.forEach {
-            it.characterState = UserState.CHOOSING_ACTION
+            it.characterState = CharacterState.CHOOSING_ACTION
         }
     }
 

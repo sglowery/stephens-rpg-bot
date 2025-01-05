@@ -15,7 +15,7 @@ class PlayerCharacterTest extends Specification {
 
         where:
         actionCallbackData || expectedCharacterState
-        "action|attack"    || UserState.CHOOSING_TARGETS
-        "action|defend"    || UserState.WAITING
+        "action|attack"    || CharacterState.CHOOSING_TARGETS
+        "action|defend"    || CharacterState.WAITING
     }
 }

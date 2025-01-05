@@ -6,7 +6,7 @@ import tech.stephenlowery.rpgbot.core.action.CharacterActionType
 import tech.stephenlowery.rpgbot.core.action.QueuedCharacterAction
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
-import tech.stephenlowery.rpgbot.core.character.UserState
+import tech.stephenlowery.rpgbot.core.character.CharacterState
 import tech.stephenlowery.rpgbot.utils.TestUtils
 
 class GameTest extends Specification {
@@ -49,14 +49,14 @@ class GameTest extends Specification {
         game.startGame()
 
         then:
-        game.players.values().each { it.characterState == UserState.CHOOSING_ACTION }
+        game.players.values().each { it.characterState == CharacterState.CHOOSING_ACTION }
     }
 
     def "waitingOn() correctly returns players who are still choosing an action or targets"() {
         given:
-        def character = TestUtils.getTestCharacter().tap { it.characterState = UserState.WAITING }
+        def character = TestUtils.getTestCharacter().tap { it.characterState = CharacterState.WAITING }
         def game = new Game(1L, character.id, character.name, '')
-        def userStates = [UserState.WAITING, UserState.WAITING, UserState.CHOOSING_ACTION, UserState.CHOOSING_TARGETS]
+        def userStates = [CharacterState.WAITING, CharacterState.WAITING, CharacterState.CHOOSING_ACTION, CharacterState.CHOOSING_TARGETS]
         def characters = userStates.collect { userState -> TestUtils.getTestCharacter().tap { it.characterState = userState } }
         characters.forEach(game.&addCharacter)
 
