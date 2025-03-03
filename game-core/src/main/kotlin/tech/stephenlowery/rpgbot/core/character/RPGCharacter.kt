@@ -4,6 +4,7 @@ import tech.stephenlowery.rpgbot.assets.EquipmentAssets
 import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.character.attribute.Attribute
 import tech.stephenlowery.rpgbot.core.character.trait.impl.CharacterTraits
+import tech.stephenlowery.rpgbot.core.equipment.EquipmentAction
 import tech.stephenlowery.rpgbot.core.game.GameConstants.BASE_CRIT_CHANCE
 import tech.stephenlowery.rpgbot.core.game.GameConstants.BASE_CRIT_EFFECT_MULTIPLIER
 import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFAULT_BASE_HEALTH
@@ -36,13 +37,13 @@ open class RPGCharacter(val id: Long, val name: String) {
 
     fun getSpecialMessages(): List<String> = CharacterTraits.getQualifiedCharacterTraitsFor(this).map { it.description }
 
-    open fun getUnfilteredActions(): List<CharacterAction> = EquipmentAssets.allEquipment.flatMap { it.actions } //CharacterActionAssets.allActions
+    open fun getUnfilteredActions(): List<EquipmentAction> = EquipmentAssets.allEquipment.flatMap { it.equipmentActions } //CharacterActionAssets.allActions
 
-    fun getAvailableActions(): List<CharacterAction> {
-        return getUnfilteredActions().filter { !cooldowns.containsKey(it.identifier) }
+    fun getAvailableActions(): List<EquipmentAction> {
+        return getUnfilteredActions().filter { !cooldowns.containsKey(it.identifier) && it.isUsable() }
     }
 
-    fun isAlive(): Boolean = getActualHealth() > 0 && characterState != CharacterState.DEAD
+    fun isAlive(): Boolean = getHealthMinusDamage() > 0 && characterState != CharacterState.DEAD
 
     fun isDead(): Boolean = !isAlive()
 
@@ -53,6 +54,7 @@ open class RPGCharacter(val id: Long, val name: String) {
     fun getAbilitiesOnCooldown() = getUnfilteredActions().filter { isActionOnCooldown(it.identifier) }
 
     fun getHealthPercent(): Int = (100.0 * getActualHealth() / health.value()).toInt()
+    fun getUnusableAbilities() = getUnfilteredActions().filter { !it.isUsable() }
 
     fun setCooldownForAction(action: CharacterAction) {
         if (action.cooldown > 0) {

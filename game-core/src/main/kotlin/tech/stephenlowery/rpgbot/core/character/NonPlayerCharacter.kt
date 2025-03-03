@@ -36,7 +36,7 @@ class NonPlayerCharacter(
         if (queuedAction?.target != null) {
             return
         }
-        queuedAction?.target = when(queuedAction?.action?.targetingType) {
+        queuedAction?.target = when(queuedAction?.equipmentAction?.characterAction?.targetingType) {
             null -> null
             TargetingType.SELF -> this
             else -> queuedAction.target

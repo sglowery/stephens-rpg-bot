@@ -3,6 +3,11 @@ package tech.stephenlowery.rpgbot.core.action
 import tech.stephenlowery.rpgbot.core.action.action_effect.ActionEffect
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 
+interface EffectApplier {
+    fun applyEffect(source: RPGCharacter, target: RPGCharacter, cycle: Int): List<EffectResult>
+    fun isExpired(cycle: Int): Boolean
+}
+
 class CharacterAction(
     val effect: ActionEffect,
     val displayName: String,
@@ -15,11 +20,11 @@ class CharacterAction(
     val targetIntent: TargetIntent,
     val strings: CharacterActionStrings,
     triggers: (CharacterActionTriggers.Builder.() -> Unit) = { },
-) {
+): EffectApplier {
 
     private val triggers: CharacterActionTriggers = CharacterActionTriggers.Builder().apply(triggers).build()
 
-    fun applyEffect(source: RPGCharacter, target: RPGCharacter, cycle: Int): List<EffectResult> {
+    override fun applyEffect(source: RPGCharacter, target: RPGCharacter, cycle: Int): List<EffectResult> {
         return effect.applyEffect(source, target, cycle).getTriggeredEffects(source, target, cycle).run {
             if (this.any { it.triggered })
                 listOf(this.first().asTriggeredEffect()) + this.subList(1, this.size)
@@ -28,7 +33,7 @@ class CharacterAction(
         }
     }
 
-    fun isExpired(cycle: Int): Boolean = duration?.let { !isPermanent() && cycle >= it } ?: effect.isExpired(cycle)
+    override fun isExpired(cycle: Int): Boolean = duration?.let { !isPermanent() && cycle >= it } ?: effect.isExpired(cycle)
 
     private fun isPermanent() = duration == -1
 

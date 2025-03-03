@@ -1,9 +1,8 @@
 package tech.stephenlowery.rpgbot.core.game
 
 import tech.stephenlowery.rpgbot.assets.EquipmentAssets
-import tech.stephenlowery.rpgbot.core.equipment.Equipment
-import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
+import tech.stephenlowery.rpgbot.core.equipment.EquipmentAction
 import tech.stephenlowery.rpgbot.core.game.impl.FightingDummyGame
 
 object GameManager {
@@ -70,7 +69,7 @@ object GameManager {
         return game.resolveActionsAndGetResults()
     }
 
-    fun findCharacterAction(identifier: String): CharacterAction? {
-        return EquipmentAssets.allEquipment.flatMap(Equipment::actions).find { it.identifier == identifier }
+    fun findCharacterAction(identifier: String): EquipmentAction? {
+        return EquipmentAssets.allEquipment.flatMap { equipment -> equipment.equipmentActions }.find { it.identifier == identifier }
     }
 }

@@ -1,10 +1,10 @@
 package tech.stephenlowery.rpgbot.core.character
 
 import tech.stephenlowery.rpgbot.assets.EquipmentAssets
-import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.action.QueuedCharacterAction
 import tech.stephenlowery.rpgbot.core.action.TargetingType
 import tech.stephenlowery.rpgbot.core.equipment.Equipment
+import tech.stephenlowery.rpgbot.core.equipment.EquipmentAction
 
 class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
 
@@ -24,6 +24,7 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
     fun getPreActionText(): String = listOfNotNull(
         getAttributeModifiersAsString(),
         if (cooldowns.isNotEmpty()) getUnavailableAbilitiesText() else null,
+        if (getUnusableAbilities().isNotEmpty()) getUnusableAbilitiesText() else null,
         getCharacterSummaryText(),
     ).filter { it.isNotEmpty() }.joinToString("\n\n")
 
@@ -37,7 +38,7 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
 
     fun getCharacterStatusText(): String {
         return "Your current stats:\n" +
-                "Health: ${getActualHealth()} / ${health.displayValue()} (${getHealthPercent()}%)\n" +
+                "Health: ${getHealthMinusDamage()} / ${health.displayValue()} (${getHealthPercent()}%)\n" +
                 "Power: ${power.displayValue()}\n" +
                 "Precision: ${precision.displayValue()}\n" +
                 "Defense: ${defense.displayValue()}"
@@ -52,19 +53,24 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         val action = getAvailableActions().find { it.identifier == actionIdentifier }
             ?: throw RuntimeException("Unable to find action for identifier $actionIdentifier")
         val newQueuedCharacterAction = QueuedCharacterAction(action, source = this)
-        if (action.targetingType == TargetingType.SELF) {
+        if (action.characterAction.targetingType == TargetingType.SELF) {
             newQueuedCharacterAction.target = this
         }
-        characterState = if (action.targetingType.requiresChoosingTarget()) CharacterState.CHOOSING_TARGETS else CharacterState.WAITING
+        characterState = if (action.characterAction.targetingType.requiresChoosingTarget()) CharacterState.CHOOSING_TARGETS else CharacterState.WAITING
         queuedAction = newQueuedCharacterAction
         return newQueuedCharacterAction
     }
 
-    override fun getUnfilteredActions(): List<CharacterAction> = equipment.flatMap { it.actions }
+    override fun getUnfilteredActions(): List<EquipmentAction> = equipment.flatMap { it.equipmentActions }
 
     override fun resetForNextTurnAfterAction() {
         clearQueuedAction()
+        cycleEquipmentWithResources()
         super.resetForNextTurnAfterAction()
+    }
+
+    private fun cycleEquipmentWithResources() {
+        equipment.forEach { it.equipmentActions.forEach(EquipmentAction::cycle) }
     }
 
     override fun resetCharacter() {
@@ -80,9 +86,13 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         }
     }
 
+    private fun getUnusableAbilitiesText(): String {
+        return "*The following abilities are not currently usable:\n*" + getUnusableAbilities().joinToString("\n") { it.getName() }
+    }
+
     private fun getCharacterSummaryText(): String {
         return """
-            Health: ${getActualHealth()} / ${health.value()} (${getHealthPercent()}%)
+            Health: ${getHealthMinusDamage()} / ${health.value()} (${getHealthPercent()}%)
             Power: ${power.value()}
             Precision: ${precision.value()}
             Defense: ${defense.value()}
@@ -90,9 +100,9 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
     }
 
     private fun getEquipmentListString(): String {
-        val equipmentAndActionsGrantedText = equipment.map {
-            val name = it.name
-            val actionNames = it.actions.map(CharacterAction::displayName)
+        val equipmentAndActionsGrantedText = equipment.map { equipment ->
+            val name = equipment.name
+            val actionNames = equipment.equipmentActions.map { it.displayName }
             return@map if (actionNames.isEmpty())
                 name
             else

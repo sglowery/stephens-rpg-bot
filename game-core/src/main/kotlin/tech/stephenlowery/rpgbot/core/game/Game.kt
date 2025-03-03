@@ -84,11 +84,12 @@ open class Game(
         val queuedActions = listOf(actionQueue, npcActions)
             .flatMap(::partitionAndShuffleActionQueue)
             .toMutableList()
-        queuedActions.forEach {
-            val action = it.action
-            if (action.cooldown > 0 && !it.source.isActionOnCooldown(action.identifier) && !it.cooldownApplied) {
-                it.source.setCooldownForAction(action)
-                it.cooldownApplied = true
+        queuedActions.forEach { queuedAction ->
+            val equipmentAction = queuedAction.equipmentAction
+            val action = equipmentAction.characterAction
+            if (action.cooldown > 0 && !queuedAction.source.isActionOnCooldown(equipmentAction.identifier) && !queuedAction.cooldownApplied) {
+                queuedAction.source.setCooldownForAction(action)
+                queuedAction.cooldownApplied = true
             }
         }
         val results: MutableCollection<QueuedCharacterActionResolvedResults> = resolveActions(queuedActions)
@@ -127,7 +128,8 @@ open class Game(
     }
 
     fun getTargetsForCharacter(character: PlayerCharacter): Collection<RPGCharacter> {
-        val action = character.queuedAction!!.action
+        val equipmentAction = character.queuedAction!!.equipmentAction
+        val action = equipmentAction.characterAction
         val targetingType = action.targetingType
         val targetIntent = action.targetIntent
         val selfList = if (targetingType == TargetingType.SINGLE_TARGET_INCLUDING_SELF) listOf(character) else emptyList()
@@ -244,7 +246,7 @@ open class Game(
 
     private fun partitionAndShuffleActionQueue(actionQueue: Collection<QueuedCharacterAction>): Collection<QueuedCharacterAction> {
         return actionQueue
-            .partition { it.action.actionType == CharacterActionType.DEFENSIVE }
+            .partition { it.equipmentAction.characterAction.actionType == CharacterActionType.DEFENSIVE }
             .let { it.first.shuffled() + it.second.shuffled() }
     }
 

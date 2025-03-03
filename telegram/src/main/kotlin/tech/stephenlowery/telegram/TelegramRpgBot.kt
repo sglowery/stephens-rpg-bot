@@ -12,6 +12,7 @@ import tech.stephenlowery.rpgbot.core.action.CharacterAction
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import tech.stephenlowery.rpgbot.core.character.CharacterState
+import tech.stephenlowery.rpgbot.core.equipment.EquipmentAction
 import tech.stephenlowery.rpgbot.core.game.ChooseActionResult
 import tech.stephenlowery.rpgbot.core.game.Game
 import tech.stephenlowery.rpgbot.core.game.GameManager
@@ -217,10 +218,10 @@ object TelegramRpgBot {
     private fun confirmAction(bot: Bot, update: Update, message: Message) {
         val callbackQuery = update.callbackQuery!!
         val action = GameManager.findCharacterAction(callbackQuery.data)!!
-        if (action.targetingType.requiresChoosingTarget()) {
+        if (action.characterAction.targetingType.requiresChoosingTarget()) {
             actionChosen(bot, update, callbackQuery.message!!, action.identifier)
         } else {
-            sendConfirmActionButtons(action, callbackQuery, bot)
+            sendConfirmActionButtons(action.characterAction, callbackQuery, bot)
         }
     }
 
@@ -347,8 +348,8 @@ object TelegramRpgBot {
         return characters.map { InlineKeyboardButton.CallbackData(text = it.getNameAndHealthPercentLabel(), callbackData = "target|${it.id}") }.chunked(2)
     }
 
-    private fun makeKeyboardFromPlayerActions(actions: Collection<CharacterAction>): List<List<InlineKeyboardButton>> {
-        return actions.map { InlineKeyboardButton.CallbackData(text = it.displayName, callbackData = it.identifier) }.chunked(2)
+    private fun makeKeyboardFromPlayerActions(actions: Collection<EquipmentAction>): List<List<InlineKeyboardButton>> {
+        return actions.map { InlineKeyboardButton.CallbackData(text = it.getName(), callbackData = it.characterAction.identifier) }.chunked(2)
     }
 
     private fun <T : RPGCharacter> Collection<T>.living() = this.filter { it.isAlive() }

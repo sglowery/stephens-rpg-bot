@@ -1,12 +1,24 @@
 package tech.stephenlowery.rpgbot.core.action
 
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
+import tech.stephenlowery.rpgbot.core.equipment.EquipmentAction
+import tech.stephenlowery.rpgbot.core.equipment.toBasicEquipmentAction
 
 class QueuedCharacterAction(
-    val action: CharacterAction,
+    val equipmentAction: EquipmentAction,
     val source: RPGCharacter,
     var target: RPGCharacter? = null,
 ) {
+
+    constructor(
+        characterAction: CharacterAction,
+        source: RPGCharacter,
+        target: RPGCharacter? = null,
+    ) : this(
+        toBasicEquipmentAction(characterAction),
+        source,
+        target
+    )
 
     var cooldownApplied = false
 
@@ -15,26 +27,26 @@ class QueuedCharacterAction(
     private var previousPrimaryResult: EffectResult? = null
 
     fun cycleAndResolve(): QueuedCharacterActionResolvedResults {
-        val results = action.applyEffect(source, target!!, cycle++)
+        val results = equipmentAction.applyEffect(source, target!!, cycle++)
         previousPrimaryResult = results.first()
-        return QueuedCharacterActionResolvedResults(action, results)
+        return QueuedCharacterActionResolvedResults(equipmentAction, results)
     }
 
-    fun isExpired(): Boolean = action.isExpired(cycle) || previousPrimaryResult?.miss == true
+    fun isExpired(): Boolean = equipmentAction.isExpired(cycle) || previousPrimaryResult?.miss == true
 
     fun isUnresolved(): Boolean = cycle == 0
 
     fun getQueuedText(): String {
         val targetText = when (target) {
             source -> "yourself"
-            else -> target!!.name
+            else   -> target!!.name
         }
-        return "You will use ${action.displayName} on $targetText when this turn resolves."
+        return "You will use ${equipmentAction.displayName} on $targetText when this turn resolves."
     }
 }
 
 class QueuedCharacterActionResolvedResults(
-    val action: CharacterAction,
+    val action: EquipmentAction,
     val effectResults: List<EffectResult>,
     private val effectResultSeparator: String = "\n\n",
     private val stringResultOverride: String? = null,
@@ -43,5 +55,5 @@ class QueuedCharacterActionResolvedResults(
     var actionResultedInDeath = false
 
     val stringResult: String
-        get() = stringResultOverride ?: action.strings.getFormattedEffectResultString(effectResults.first())
+        get() = stringResultOverride ?: action.characterAction.strings.getFormattedEffectResultString(effectResults.first())
 }
