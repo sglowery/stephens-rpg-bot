@@ -9,6 +9,7 @@ import tech.stephenlowery.rpgbot.core.action.action_effect.meta.*
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import tech.stephenlowery.rpgbot.core.character.attribute.AttributeModifierType
 import tech.stephenlowery.rpgbot.core.equipment.Equipment
+import tech.stephenlowery.rpgbot.core.equipment.EquipmentAction
 import tech.stephenlowery.rpgbot.core.equipment.EquipmentRole
 
 object EquipmentAssets {
@@ -464,10 +465,10 @@ fun main(args: Array<String>) {
             .groupBy { it.equipmentRole }
             .mapValues { (_, equipmentList) -> equipmentList.size }
     )
-    println("equipment action types")
+    println("\nequipment action types")
     println(
         allEquipment
-            .flatMap { it.actions }
+            .flatMap { equipment -> equipment.equipmentActions.map { it.characterAction } }
             .groupBy { it.actionType }
             .mapValues { (_, types) -> types.size }
     )
