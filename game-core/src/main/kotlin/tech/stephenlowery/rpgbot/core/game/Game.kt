@@ -1,10 +1,11 @@
 package tech.stephenlowery.rpgbot.core.game
 
 import tech.stephenlowery.rpgbot.core.action.*
+import tech.stephenlowery.rpgbot.core.character.CharacterState
 import tech.stephenlowery.rpgbot.core.character.NonPlayerCharacter
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
-import tech.stephenlowery.rpgbot.core.character.CharacterState
+import tech.stephenlowery.rpgbot.core.equipment.EquipmentAction
 
 private val PLAYER_NOT_READY_STATES = listOf(CharacterState.CHOOSING_ACTION, CharacterState.CHOOSING_TARGETS)
 
@@ -64,6 +65,9 @@ open class Game(
     @Suppress("UNCHECKED_CAST")
     fun getHumanPlayers(): Map<Long, PlayerCharacter> = players.filterValues { it is PlayerCharacter } as Map<Long, PlayerCharacter>
 
+    @Suppress("UNCHECKED_CAST")
+    fun getLiveHumanPlayers(): Map<Long, PlayerCharacter> = getHumanPlayers().filterValues { it.isAlive() }
+
     fun containsPlayerWithID(userID: Long): Boolean = players.containsKey(userID)
 
     fun allPlayersReadyForTurnToResolve(): Boolean = waitingOn().isEmpty()
@@ -92,14 +96,23 @@ open class Game(
                 queuedAction.cooldownApplied = true
             }
         }
-        val results: MutableCollection<QueuedCharacterActionResolvedResults> = resolveActions(queuedActions)
-        val stringResults: MutableList<String> = results.map { it.stringResult }.toMutableList()
+        val results: MutableList<QueuedCharacterActionResolvedResults> = resolveActions(queuedActions)
+        val stringResults: MutableList<String> = mutableListOf()
+        for (result in results) {
+            if (result.stringResult.trim().isNotEmpty()) {
+                stringResults.add(result.stringResult)
+            }
+            if (result.actionResultedInDeath) {
+                val killedTargetName = result.effectResults.first().target.name
+                stringResults.add("$killedTargetName died! They will be removed from the game.")
+            }
+        }
         queuedActions.removeIf { it.isExpired() }
         actionQueue = queuedActions
         players.values.forEach { player ->
-            if (player.getActualHealth() <= 0 && player.characterState != CharacterState.DEAD) {
-                stringResults.add("${player.name} died! They will be removed from the game.")
+            if (player.getHealthMinusDamage() <= 0 && player.characterState != CharacterState.DEAD) {
                 removeEffectsTargetingCharacter(player)
+                removePendingActionsFromCharacter(player)
             } else {
                 player.resetForNextTurnAfterAction()
             }
@@ -108,8 +121,12 @@ open class Game(
         return listOf("*----Turn ${++turnCounter} results----*", stringResults.joinToString("\n\n")).joinToString("\n\n")
     }
 
-    private fun removeEffectsTargetingCharacter(player: RPGCharacter) {
-        actionQueue.removeIf { it.target == player }
+    private fun removePendingActionsFromCharacter(character: RPGCharacter) {
+        actionQueue.removeIf { it.source == character }
+    }
+
+    private fun removeEffectsTargetingCharacter(character: RPGCharacter) {
+        actionQueue.removeIf { it.target == character }
     }
 
     open fun startGame(): Collection<Pair<Long, String>> {
@@ -133,10 +150,10 @@ open class Game(
         val targetingType = action.targetingType
         val targetIntent = action.targetIntent
         val selfList = if (targetingType == TargetingType.SINGLE_TARGET_INCLUDING_SELF) listOf(character) else emptyList()
-        return selfList + when (targetIntent){
+        return selfList + when (targetIntent) {
             TargetIntent.FRIENDLY -> getFriendliesForCharacter(character, targetingType)
-            TargetIntent.HOSTILE -> getEnemiesForCharacter(character, targetingType)
-            TargetIntent.ANY -> getAllTargetsForCharacter(character, targetingType)
+            TargetIntent.HOSTILE  -> getEnemiesForCharacter(character, targetingType)
+            TargetIntent.ANY      -> getAllTargetsForCharacter(character, targetingType)
         }
     }
 
@@ -152,16 +169,16 @@ open class Game(
         return getAllLivingHumanPlayersBesidesSelf(character)
     }
 
-    protected fun getAllLivingHumanPlayersBesidesSelf(character: PlayerCharacter): Collection<RPGCharacter> {
-        return getHumanPlayers().values.filter { it.isAlive() && it.id != character.id }
+    private fun getAllLivingHumanPlayersBesidesSelf(character: PlayerCharacter): Collection<RPGCharacter> {
+        return getLiveHumanPlayers().values.filter { it.id != character.id }
     }
 
     fun getPostGameStatsString(): String {
         val idToPlayerGameStatsMap: Map<Long, PlayerGameStats> =
-            players.values.associate { it.id to PlayerGameStats(it.name, it is NonPlayerCharacter, it.getActualHealth()) }
+            players.values.associate { it.id to PlayerGameStats(it.name, it is NonPlayerCharacter, it.getHealthMinusDamage()) }
         var totalDamageDone = 0
         var totalHealingDone = 0
-        resultsHistory.forEachIndexed { round, queuedActionResultsForRound ->
+        resultsHistory.forEachIndexed { roundIndex, queuedActionResultsForRound ->
             queuedActionResultsForRound.forEach { queuedResult ->
                 queuedResult.effectResults.forEach { actionEffectResult ->
                     val source = actionEffectResult.source
@@ -169,13 +186,14 @@ open class Game(
                     val value = actionEffectResult.value
                     val fromStats = idToPlayerGameStatsMap[source.id]!!
                     val targetStats = idToPlayerGameStatsMap[target.id]!!
+                    val round = roundIndex + 1
                     when (actionEffectResult.actionType) {
                         CharacterActionType.DAMAGE      -> {
                             fromStats.damageDone += value
                             targetStats.damageTaken += value
                             totalDamageDone += value
                             if (queuedResult.actionResultedInDeath) {
-                                targetStats.diedOnRound = round + 1
+                                targetStats.diedOnRound = round
                                 fromStats.playersKilled.add(target.name)
                             }
                         }
@@ -193,7 +211,7 @@ open class Game(
                             totalDamageDone += value
                             totalHealingDone += healing
                             if (queuedResult.actionResultedInDeath) {
-                                targetStats.diedOnRound = round + 1
+                                targetStats.diedOnRound = round
                                 fromStats.playersKilled.add(target.name)
                             }
                         }
@@ -205,17 +223,21 @@ open class Game(
         return "Post-Game Stats:\n\n" +
                 "Total damage done: $totalDamageDone\n" +
                 "Total healing done: $totalHealingDone\n\n" +
-                idToPlayerGameStatsMap.values.joinToString(separator = "\n\n") { it.toString(turnCounter) }
+                idToPlayerGameStatsMap.values.filter(::characterShouldBeIncludedInPostGameStats).joinToString(separator = "\n\n") { it.toString(turnCounter) }
     }
+
+    open fun characterShouldBeIncludedInPostGameStats(character: PlayerGameStats): Boolean = true
 
     fun cancel() {
         actionQueue.clear()
-        players.clear()
-        turnCounter = 0
         players.values.forEach(RPGCharacter::resetCharacter)
         players.clear()
-        actionQueue.clear()
+        turnCounter = 0
         System.gc()
+    }
+
+    open fun getGameGrantedActions(): Collection<EquipmentAction> {
+        return emptyList()
     }
 
     open fun numberOfPlayersIsValid() = numberOfPlayers() >= 2
@@ -250,7 +272,7 @@ open class Game(
             .let { it.first.shuffled() + it.second.shuffled() }
     }
 
-    private fun resolveActions(sortedActionQueue: MutableCollection<QueuedCharacterAction>): MutableCollection<QueuedCharacterActionResolvedResults> {
+    private fun resolveActions(sortedActionQueue: MutableCollection<QueuedCharacterAction>): MutableList<QueuedCharacterActionResolvedResults> {
         val actionResults = mutableListOf<QueuedCharacterActionResolvedResults>()
         val deadPlayersThisTurn = mutableSetOf<Long>()
         val actionQueueIterator = sortedActionQueue.iterator()
@@ -261,11 +283,10 @@ open class Game(
                 continue
             }
             val currentActionResults = currentAction.cycleAndResolve()
-            currentAction.target?.apply {
-                if (!this.isAlive() && this.id !in deadPlayersThisTurn) {
-                    deadPlayersThisTurn.add(this.id)
-                    currentActionResults.actionResultedInDeath = true
-                }
+            val target = currentAction.target
+            if (target?.isAlive() == false && target.id !in deadPlayersThisTurn) {
+                deadPlayersThisTurn.add(target.id)
+                currentActionResults.actionResultedInDeath = true
             }
             actionResults.add(currentActionResults)
         }

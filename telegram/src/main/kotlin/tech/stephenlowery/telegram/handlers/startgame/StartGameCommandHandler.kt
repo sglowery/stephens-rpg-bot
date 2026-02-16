@@ -23,6 +23,6 @@ object StartGameCommandHandler : TelegramCommandHandler<StartGameResult> {
 
     private fun startGame(game: Game): GameStarting {
         val messages = game.startGame()
-        return GameStarting(game.numberOfPlayers(), messages)
+        return GameStarting(game.getHumanPlayers().size, messages)
     }
 }

@@ -5,6 +5,12 @@ import tech.stephenlowery.rpgbot.core.action.QueuedCharacterAction
 import tech.stephenlowery.rpgbot.core.action.TargetingType
 import tech.stephenlowery.rpgbot.core.equipment.Equipment
 import tech.stephenlowery.rpgbot.core.equipment.EquipmentAction
+import tech.stephenlowery.rpgbot.core.equipment.EquipmentRole
+
+private fun equipmentDistribution(role: EquipmentRole): Int = when (role) {
+    EquipmentRole.OFFENSIVE -> 2
+    else                    -> 1
+}
 
 class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
 
@@ -12,7 +18,7 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
 
     private val equipment: Collection<Equipment> = EquipmentAssets.allEquipment
         .groupBy { it.equipmentRole }
-        .flatMap { (_, equipmentList) -> equipmentList.shuffled().take(2) }
+        .flatMap { (role, equipmentList) -> equipmentList.shuffled().take(equipmentDistribution(role)) }
 
     init {
         giveRandomStats()
@@ -49,8 +55,8 @@ class PlayerCharacter(userID: Long, name: String) : RPGCharacter(userID, name) {
         characterState = CharacterState.WAITING
     }
 
-    fun chooseAction(actionIdentifier: String): QueuedCharacterAction {
-        val action = getAvailableActions().find { it.identifier == actionIdentifier }
+    fun chooseAction(actionIdentifier: String, otherActions: Collection<EquipmentAction> = emptyList()): QueuedCharacterAction {
+        val action = getAvailableActions().plus(otherActions).find { it.identifier == actionIdentifier }
             ?: throw RuntimeException("Unable to find action for identifier $actionIdentifier")
         val newQueuedCharacterAction = QueuedCharacterAction(action, source = this)
         if (action.characterAction.targetingType == TargetingType.SELF) {

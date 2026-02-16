@@ -3,7 +3,7 @@ package tech.stephenlowery.rpgbot.core.game
 import tech.stephenlowery.rpgbot.assets.EquipmentAssets
 import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
 import tech.stephenlowery.rpgbot.core.equipment.EquipmentAction
-import tech.stephenlowery.rpgbot.core.game.impl.FightingDummyGame
+import tech.stephenlowery.rpgbot.assets.game.horde.HordeWavesGame
 
 object GameManager {
 
@@ -18,7 +18,7 @@ object GameManager {
     fun findCharacterInGame(gameId: Long, playerId: Long): PlayerCharacter? = findGame(gameId)?.findPlayerCharacterFromID(playerId)
 
     fun createGame(gameId: Long, initiatorId: Long, initiatorName: String) {
-        games[gameId] = FightingDummyGame(gameId, initiatorId, initiatorName)
+        games[gameId] = HordeWavesGame(gameId, initiatorId, initiatorName)
         userToGameMap[initiatorId] = gameId
     }
 
@@ -50,8 +50,7 @@ object GameManager {
         if (character.queuedAction != null) {
             throw RuntimeException("Player with id $playerId attempted to add an extra action.")
         }
-
-        val queuedAction = character.chooseAction(actionIdentifier)
+        val queuedAction = character.chooseAction(actionIdentifier, game.getGameGrantedActions())
         val newCharacterState = character.characterState
 
         if (queuedAction.target != null) {
@@ -69,7 +68,10 @@ object GameManager {
         return game.resolveActionsAndGetResults()
     }
 
-    fun findCharacterAction(identifier: String): EquipmentAction? {
-        return EquipmentAssets.allEquipment.flatMap { equipment -> equipment.equipmentActions }.find { it.identifier == identifier }
+    fun findCharacterAction(playerId: Long, identifier: String): EquipmentAction? {
+        return EquipmentAssets.allEquipment
+            .flatMap { equipment -> equipment.equipmentActions }
+            .plus(findGameContainingCharacter(playerId)!!.getGameGrantedActions())
+            .find { it.identifier == identifier }
     }
 }
