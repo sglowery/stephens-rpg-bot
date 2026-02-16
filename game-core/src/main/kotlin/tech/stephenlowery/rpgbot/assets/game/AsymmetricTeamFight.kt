@@ -1,7 +1,5 @@
-package tech.stephenlowery.rpgbot.core.game.impl
+package tech.stephenlowery.rpgbot.assets.game
 
-import tech.stephenlowery.rpgbot.core.action.CharacterActionType.*
-import tech.stephenlowery.rpgbot.core.character.PlayerCharacter
 import tech.stephenlowery.rpgbot.core.character.RPGCharacter
 import tech.stephenlowery.rpgbot.core.character.Team
 import tech.stephenlowery.rpgbot.core.game.Game

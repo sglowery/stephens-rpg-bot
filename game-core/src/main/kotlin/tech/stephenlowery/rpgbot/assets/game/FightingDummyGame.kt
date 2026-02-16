@@ -1,4 +1,4 @@
-package tech.stephenlowery.rpgbot.core.game.impl
+package tech.stephenlowery.rpgbot.assets.game
 
 import tech.stephenlowery.rpgbot.core.action.*
 import tech.stephenlowery.rpgbot.core.action.action_effect.impl.DamageHealthEffect
@@ -192,11 +192,11 @@ class FightingDummyGame(
 
     private var hasGoneBerserk = false
 
-    private val dummy = NonPlayerCharacter("Debug Dummy", 1, healthValue = DUMMY_HEALTH, defenseValue = 15) {
+    private val dummy = NonPlayerCharacter(1, "Debug Dummy", healthValue = DUMMY_HEALTH, defenseValue = 15) {
         if (this.getHealthPercent() <= DUMMY_HEALTH_PERCENT_BERSERK_THRESHOLD && !hasGoneBerserk) {
             hasGoneBerserk = true
             QueuedCharacterAction(dummyBerserk, this, this)
-        } else if (shouldBonk(getHumanPlayers().size)) {
+        } else if (shouldBonk()) {
             val target = listOf(chooseTargetFromMostDamageDone(), chooseTargetFromMostHealingDone()).randomOrNull() ?: livingPlayers<PlayerCharacter>().random()
             if (shouldHeavyBonk()) {
                 QueuedCharacterAction(dummyBigAttack, this, target)
@@ -252,7 +252,7 @@ class FightingDummyGame(
             ?.key
     }
 
-    private val bosco = NonPlayerCharacter("Bosco", 2, healthValue = 1, powerValue = 1, defenseValue = 1, precisionValue = 1) {
+    private val bosco = NonPlayerCharacter(2, "Bosco", healthValue = 1, powerValue = 1, defenseValue = 1, precisionValue = 1) {
         val target = livingPlayers<PlayerCharacter>().filter { characterCanBeChosenForHeal(it) }.randomOrNull()
         val isOffCooldown = !this.isActionOnCooldown(boscoHealDartAction.identifier)
         when (target != null && isOffCooldown) {
@@ -273,7 +273,7 @@ class FightingDummyGame(
     }
 
     override fun startGame(): Collection<Pair<Long, String>> {
-        dummy.setHealth(dummyBaseHealthForPlayers(players.size))
+        dummy.setHealth(calculateDummyBaseHealth())
         dummy.defense.base += getHumanPlayers().size - 1
         dummy.power.base += getHumanPlayers().size * 2
         players[DUMMY_ID] = dummy
@@ -289,10 +289,10 @@ class FightingDummyGame(
         return player.damageTakenScalar.hasNamedModifier(boscoHealModifierName)
     }
 
-    private fun dummyBaseHealthForPlayers(players: Int): Int = DUMMY_HEALTH + DUMMY_HEALTH_PLAYER_SCALAR * (getHumanPlayers().size - 1)
+    private fun calculateDummyBaseHealth(): Int = DUMMY_HEALTH + DUMMY_HEALTH_PLAYER_SCALAR * (getHumanPlayers().size - 1)
 
-    private fun shouldBonk(players: Int): Boolean =
-        dummy.getActualHealth() == dummyBaseHealthForPlayers(players) ||
+    private fun shouldBonk(): Boolean =
+        dummy.getHealthMinusDamage() == calculateDummyBaseHealth() ||
                 Random.nextInt(100) < CHANCE_TO_BONK
 
 }

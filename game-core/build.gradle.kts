@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.8.20"
+    kotlin("jvm") version "2.0.0"
     groovy
 }
 
@@ -21,8 +21,4 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     jvmArgs?.add("-javaagent:${classpath.find { it.name.contains("spock-mockable") }?.absolutePath}")
-}
-
-kotlin {
-    jvmToolchain(17)
 }

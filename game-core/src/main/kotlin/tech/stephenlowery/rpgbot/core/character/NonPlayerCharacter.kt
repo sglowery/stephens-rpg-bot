@@ -5,9 +5,9 @@ import tech.stephenlowery.rpgbot.core.action.TargetingType
 import tech.stephenlowery.rpgbot.core.character.attribute.Attribute
 import tech.stephenlowery.rpgbot.core.game.Game
 
-class NonPlayerCharacter(
-    name: String,
+open class NonPlayerCharacter(
     id: Long,
+    name: String,
     healthValue: Int? = null,
     powerValue: Int? = null,
     defenseValue: Int? = null,
@@ -36,8 +36,7 @@ class NonPlayerCharacter(
         if (queuedAction?.target != null) {
             return
         }
-        queuedAction?.target = when(queuedAction?.equipmentAction?.characterAction?.targetingType) {
-            null -> null
+        queuedAction?.target = when(queuedAction.equipmentAction.characterAction.targetingType) {
             TargetingType.SELF -> this
             else -> queuedAction.target
         }

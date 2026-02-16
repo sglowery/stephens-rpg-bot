@@ -122,9 +122,9 @@ class GameTest extends Specification {
         def sortedList = game.partitionAndShuffleActionQueue(game.actionQueue)
 
         then:
-        sortedList.take(2).forEach { assert it.equipmentAction.actionType == CharacterActionType.DEFENSIVE }
+        sortedList.take(2).forEach { assert it.equipmentAction.characterAction.actionType == CharacterActionType.DEFENSIVE }
 
         and:
-        sortedList.takeRight(4).forEach { assert it.equipmentAction.actionType == CharacterActionType.DAMAGE }
+        sortedList.takeRight(4).forEach { assert it.equipmentAction.characterAction.actionType == CharacterActionType.DAMAGE }
     }
 }

@@ -10,7 +10,6 @@ import tech.stephenlowery.rpgbot.core.game.GameConstants.CRIT_CHANCE_PRECISION_S
 import tech.stephenlowery.rpgbot.core.game.GameConstants.CRIT_DAMAGE_POWER_SCALAR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.CRIT_DAMAGE_PRECISION_SCALAR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFENSE_CRIT_CHANCE_REDUCTION_FACTOR
-import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFENSE_DAMAGE_REDUCTION_FACTOR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFENSE_HIT_CHANCE_REDUCTION_FACTOR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.HIT_CHANCE_PRECISION_SCALAR
 import tech.stephenlowery.rpgbot.core.game.GameConstants.POWER_DAMAGE_SCALAR
@@ -30,7 +29,7 @@ class DamageHealthEffect(
     duration = duration,
     statGetter = RPGCharacter::damage,
     attributeModifierType = AttributeModifierType.ADDITIVE,
-    beforeAfterValueComparator = RPGCharacter::getActualHealth
+    beforeAfterValueComparator = RPGCharacter::getHealthMinusDamage
 ) {
 
     init {

@@ -9,6 +9,10 @@ import tech.stephenlowery.rpgbot.core.game.GameConstants.BASE_CRIT_CHANCE
 import tech.stephenlowery.rpgbot.core.game.GameConstants.BASE_CRIT_EFFECT_MULTIPLIER
 import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFAULT_BASE_HEALTH
 import tech.stephenlowery.rpgbot.core.game.GameConstants.DEFAULT_BASE_PRIMARY_ATTRIBUTE
+import tech.stephenlowery.rpgbot.core.game.GameConstants.HEALTH_INCREASE_MAXIMUM
+import tech.stephenlowery.rpgbot.core.game.GameConstants.HEALTH_INCREASE_MINIMUM
+import tech.stephenlowery.rpgbot.core.game.GameConstants.STAT_DISTRIBUTION_LUCKY_CHANCE
+import tech.stephenlowery.rpgbot.core.game.GameConstants.STAT_DISTRIBUTION_LUCKY_INCREASE
 import tech.stephenlowery.rpgbot.core.game.GameConstants.STAT_POINTS_TO_DISTRIBUTE
 import kotlin.random.Random
 
@@ -39,7 +43,7 @@ open class RPGCharacter(val id: Long, val name: String) {
 
     open fun getUnfilteredActions(): List<EquipmentAction> = EquipmentAssets.allEquipment.flatMap { it.equipmentActions } //CharacterActionAssets.allActions
 
-    fun getAvailableActions(): List<EquipmentAction> {
+    fun getAvailableActions(): Collection<EquipmentAction> {
         return getUnfilteredActions().filter { !cooldowns.containsKey(it.identifier) && it.isUsable() }
     }
 
@@ -47,13 +51,14 @@ open class RPGCharacter(val id: Long, val name: String) {
 
     fun isDead(): Boolean = !isAlive()
 
-    fun getActualHealth(): Int = health.value() - damage.value()
+    fun getHealthMinusDamage(): Int = (health.value() - damage.value()).coerceAtLeast(0)
 
     fun getNameAndHealthPercentLabel(): String = "$name (${getHealthPercent()}%)"
 
     fun getAbilitiesOnCooldown() = getUnfilteredActions().filter { isActionOnCooldown(it.identifier) }
 
-    fun getHealthPercent(): Int = (100.0 * getActualHealth() / health.value()).toInt()
+    fun getHealthPercent(): Int = (100.0 * getHealthMinusDamage() / health.value()).toInt()
+
     fun getUnusableAbilities() = getUnfilteredActions().filter { !it.isUsable() }
 
     fun setCooldownForAction(action: CharacterAction) {
@@ -64,6 +69,7 @@ open class RPGCharacter(val id: Long, val name: String) {
 
     open fun resetCharacter() {
         getAllAttributes().forEach(Attribute::reset)
+        damage.reset()
         characterState = CharacterState.NONE
         cooldowns.clear()
         applyTraitsFromStats()
@@ -85,10 +91,10 @@ open class RPGCharacter(val id: Long, val name: String) {
 
     protected fun giveRandomStats() {
         repeat(STAT_POINTS_TO_DISTRIBUTE) {
-            val isLucky = Random.nextInt(100) < 20
-            val luckModifier = if (isLucky) 2 else 0
+            val isLucky = Random.nextInt(100) < STAT_DISTRIBUTION_LUCKY_CHANCE
+            val luckModifier = if (isLucky) STAT_DISTRIBUTION_LUCKY_INCREASE else 0
             when (Random.nextInt(4)) {
-                0 -> health.base += (9..13).random() + luckModifier
+                0 -> health.base += (HEALTH_INCREASE_MINIMUM..HEALTH_INCREASE_MAXIMUM).random() + luckModifier
                 1 -> power.base += 1 + luckModifier
                 2 -> precision.base += 1 + luckModifier
                 3 -> defense.base += 1 + luckModifier

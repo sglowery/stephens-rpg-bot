@@ -25,7 +25,7 @@ class HealEffect(
     duration = duration,
     statGetter = RPGCharacter::damage,
     attributeModifierType = AttributeModifierType.ADDITIVE,
-    beforeAfterValueComparator = RPGCharacter::getActualHealth
+    beforeAfterValueComparator = RPGCharacter::getHealthMinusDamage
 ) {
 
     override fun applyEffect(from: RPGCharacter, to: RPGCharacter, cycle: Int): List<EffectResult> {

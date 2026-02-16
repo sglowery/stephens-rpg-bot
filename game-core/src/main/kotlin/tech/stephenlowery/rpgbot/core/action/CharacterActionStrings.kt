@@ -1,7 +1,7 @@
 package tech.stephenlowery.rpgbot.core.action
 
 data class CharacterActionStrings(
-    private val actionText: String,
+    private val actionText: String? = null,
     private val successText: String? = null,
     private val missedText: String? = null,
     private val critText: String? = null,
@@ -24,7 +24,7 @@ data class CharacterActionStrings(
     private fun getEffectResultText(effectResult: EffectResult): String? = when {
         effectResult.occupied  -> null
         effectResult.miss      -> this.missedText
-        effectResult.continued -> this.effectContinuedText ?: this.successText
+        effectResult.continued -> this.effectContinuedText
         effectResult.chained   -> this.effectChainedText
         effectResult.crit      -> this.critText ?: this.successText
         else                   -> this.successText

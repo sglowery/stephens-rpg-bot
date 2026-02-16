@@ -17,12 +17,12 @@ class AttributeModifier(
 
     fun isPermanent(): Boolean = duration == -1
 
-    fun displayValue(displayValueFn: (Int) -> String): String = operator() + when (modifierType) {
+    fun displayValue(displayValueFn: (Int) -> String): String = sign() + when (modifierType) {
         AttributeModifierType.ADDITIVE       -> displayValueFn(value.toInt())
         AttributeModifierType.MULTIPLICATIVE -> "${value.toInt()}%"
     }
 
-    private fun operator(): String = when (value > 0) {
+    private fun sign(): String = when (value > 0) {
         true  -> "+"
         false -> ""
     }

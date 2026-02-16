@@ -36,6 +36,6 @@ class EquipmentAction(
     }
 
     fun getName(): String {
-        return "${characterAction.displayName}${actionResource?.let { "(${it.unitString()})" } ?: ""}"
+        return "${characterAction.displayName}${actionResource?.let { " (${it.unitString()})" } ?: ""}"
     }
 }

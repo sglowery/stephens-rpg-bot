@@ -25,12 +25,14 @@ class CharacterAction(
     private val triggers: CharacterActionTriggers = CharacterActionTriggers.Builder().apply(triggers).build()
 
     override fun applyEffect(source: RPGCharacter, target: RPGCharacter, cycle: Int): List<EffectResult> {
-        return effect.applyEffect(source, target, cycle).getTriggeredEffects(source, target, cycle).run {
-            if (this.any { it.triggered })
-                listOf(this.first().asTriggeredEffect()) + this.subList(1, this.size)
-            else
-                this
-        }
+        return effect.applyEffect(source, target, cycle)
+            .getTriggeredEffects(source, target, cycle)
+            .run {
+                if (this.any { it.triggered })
+                    listOf(this.first().asTriggeredEffect()) + this.subList(1, this.size)
+                else
+                    this
+            }
     }
 
     override fun isExpired(cycle: Int): Boolean = duration?.let { !isPermanent() && cycle >= it } ?: effect.isExpired(cycle)

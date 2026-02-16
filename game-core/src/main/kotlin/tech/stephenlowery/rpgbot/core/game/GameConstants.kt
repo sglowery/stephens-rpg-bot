@@ -5,8 +5,7 @@ object GameConstants {
     const val BASE_HIT_CHANCE = 70.0
     const val HIT_CHANCE_PRECISION_SCALAR = 2.0
     const val BASE_CRIT_CHANCE = 10.0
-    const val POWER_DAMAGE_SCALAR = 1.2
-    const val DEFENSE_DAMAGE_REDUCTION_FACTOR = .8
+    const val POWER_DAMAGE_SCALAR = .6
     const val BASE_CRIT_EFFECT_MULTIPLIER = 1.5
     const val CRIT_DAMAGE_PRECISION_SCALAR = .4
     const val CRIT_DAMAGE_POWER_SCALAR = .25
@@ -15,6 +14,11 @@ object GameConstants {
     const val DEFENSE_CRIT_CHANCE_REDUCTION_FACTOR = .6
     const val DEFENSE_HIT_CHANCE_REDUCTION_FACTOR = .3
     const val HEALING_BASE_HIT_CHANCE = BASE_HIT_CHANCE + 10.0
+
+    const val STAT_DISTRIBUTION_LUCKY_CHANCE = 10
+    const val STAT_DISTRIBUTION_LUCKY_INCREASE = 2
+    const val HEALTH_INCREASE_MINIMUM = 9
+    const val HEALTH_INCREASE_MAXIMUM = 13
 
     // attribute defaults
     const val STAT_POINTS_TO_DISTRIBUTE = 25
