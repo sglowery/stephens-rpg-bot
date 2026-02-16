@@ -20,6 +20,8 @@ class PlayerGameStats private constructor(
         val damageTakenPerRound = damageTaken / actualEndRound
         val healingDonePerRound = healingDone / actualEndRound
         val healingTakenPerRound = healingTaken / actualEndRound
+        val numKills = playersKilled.size
+        val killsText = "${playersKilled.takeUnless { it.isEmpty() }?.joinToString(", ", prefix = "($numKills) ") ?: "None"}\n"
         val aliveAtEnd = diedOnRound == null
         return name + "${if (isNpc) " (NPC)" else ""}:\n" +
                 (if (aliveAtEnd) "    Ending health: ${endingHealth}\n" else "") +
@@ -27,7 +29,7 @@ class PlayerGameStats private constructor(
                 "    Damage taken: $damageTaken ($damageTakenPerRound DPR)\n" +
                 "    Healing done: $healingDone ($healingDonePerRound HPR)\n" +
                 "    Healing taken: $healingTaken ($healingTakenPerRound HPR)\n" +
-                "    Players killed: ${playersKilled.takeUnless { it.isEmpty() }?.joinToString(", ") ?: "None"}\n" +
+                "    Kills: $killsText" +
                 (diedOnRound?.let { "    Died on round $it\n" } ?: "")
     }
 }
