@@ -29,16 +29,19 @@ object EquipmentAssets {
             LeftoverLasagna,
             Bong,
             BoxingGloves,
-            DebugPants,
+//            DebugPants,
             PocketSand,
             JumpKit,
             Stapler,
+            PepperSpray,
+            Pillow,
+            Sandbags,
         )
 
     private val BeerBottle: Equipment
         get() = Equipment(
             name = "Beer Bottle",
-            equipmentRole = EquipmentRole.UTILITY,
+            equipmentRole = EquipmentRole.OFFENSIVE,
             actions = listOf(
                 CharacterAction(
                     displayName = "Beer bottle bash",
@@ -116,7 +119,7 @@ object EquipmentAssets {
                             attributeModifierType = AttributeModifierType.MULTIPLICATIVE,
                             modifierName = "Painkillers"
                         ),
-                        HealEffect(20, 24, duration = 6)
+                        HealEffect(10, 16, duration = 6, canCrit = false)
                     ),
                     strings = CharacterActionStrings(
                         actionText = "{source} pops some painkillers in their mouth.",
@@ -323,21 +326,28 @@ object EquipmentAssets {
         get() = Equipment(
             name = "Leftover Lasagna",
             equipmentRole = EquipmentRole.HEALING,
-            actions = listOf(
-                CharacterAction(
-                    displayName = "Eat leftover lasagna",
-                    identifier = "action|eatleftovers",
-                    actionType = CharacterActionType.HEALING,
-                    targetingType = TargetingType.SELF,
-                    targetIntent = TargetIntent.FRIENDLY,
-                    cooldown = 5,
-                    duration = 5,
-                    description = "Eat some cold leftover lasagna",
-                    effect = HealEffect(10, 13),
-                    strings = CharacterActionStrings(
-                        actionText = "{source} opens a container of cold leftover lasagna and takes a huge bite of it!",
-                        effectContinuedText = "{source} feels invigorated by their lasagna leftovers.",
-                        effectOverText = "{source} is done digesting their lasagna and might be feeling a bit peckish."
+            equipmentActions = listOf(
+                EquipmentAction(
+                    CharacterAction(
+                        displayName = "Eat leftover lasagna",
+                        identifier = "action|eatleftovers",
+                        actionType = CharacterActionType.HEALING,
+                        targetingType = TargetingType.SELF,
+                        targetIntent = TargetIntent.FRIENDLY,
+                        cooldown = 5,
+                        duration = 5,
+                        description = "Eat some cold leftover lasagna",
+                        effect = HealEffect(10, 13),
+                        strings = CharacterActionStrings(
+                            actionText = "{source} opens a container of cold leftover lasagna and takes a huge bite of it!",
+                            effectContinuedText = "{source} feels invigorated by their lasagna leftovers.",
+                            effectOverText = "{source} is done digesting their lasagna and might be feeling a bit peckish."
+                        )
+                    ),
+                    ActionResource(
+                        maxValue = 4,
+                        unitNameSingular = "Bite",
+                        unitNamePlural = "Bites",
                     )
                 )
             )
@@ -353,7 +363,7 @@ object EquipmentAssets {
                     identifier = "action|fatbongrip",
                     description = "Take a fat rip off your bong boiiiii",
                     cooldown = 5,
-                    actionType = CharacterActionType.DAMAGE,
+                    actionType = CharacterActionType.UTILITY,
                     targetingType = TargetingType.SINGLE_TARGET,
                     targetIntent = TargetIntent.HOSTILE,
                     effect = ComposeEffect(
@@ -398,8 +408,8 @@ object EquipmentAssets {
                     targetIntent = TargetIntent.HOSTILE,
                     cooldown = 3,
                     effect = ComposeEffect(
-                        outer = DamageHealthEffect(9, 12, alwaysCrits = true, canMiss = false),
-                        inner = RepeatEffect(4, DamageHealthEffect(3, 6, canCrit = false)),
+                        outer = DamageHealthEffect(7, 10, alwaysCrits = true, canMiss = false),
+                        inner = RepeatEffect(4, DamageHealthEffect(2, 4, canCrit = false)),
                         compose = {
                             val sumOfPunches = innerResults.sumOf { it.value }
                             when (innerResults.all { it.isSuccessfulNormalHit() }) {
@@ -456,9 +466,220 @@ object EquipmentAssets {
                 )
             )
         )
+
+    private val PocketSand: Equipment
+        get() = Equipment(
+            name = "Pocket Sand",
+            equipmentRole = EquipmentRole.DEFENSIVE,
+            actions = listOf(
+                CharacterAction(
+                    displayName = "Throw Pocket Sand",
+                    identifier = "action|throwpocketsand",
+                    description = "Sh-sh-sha!",
+                    actionType = CharacterActionType.DEFENSIVE,
+                    targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
+                    cooldown = 5,
+                    effect = StatModEffect(
+                        value = -30,
+                        modDuration = 3,
+                        statGetter = RPGCharacter::precision,
+                        attributeModifierType = AttributeModifierType.MULTIPLICATIVE,
+                        modifierName = "Pocket Sand Precision Debuff"
+                    ),
+                    strings = CharacterActionStrings(
+                        actionText = "{source} reaches in their pocket and throws a bunch of sand at {target}! They're blinded!"
+                    )
+                )
+            )
+        )
+
+    private val Stapler: Equipment
+        get() = Equipment(
+            name = "Stapler",
+            equipmentRole = EquipmentRole.OFFENSIVE,
+            actions = listOf(
+                CharacterAction(
+                    displayName = "Stapler Bash",
+                    description = "Stapler bash.",
+                    identifier = "action|stapler_bash",
+                    actionType = CharacterActionType.DAMAGE,
+                    targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
+                    effect = DamageHealthEffect(15, 20),
+                    strings = CharacterActionStrings(
+                        successText = "{source} bashes {target} with their stapler!",
+                        missedText = "{source} grips their stapler and tries to bash {target}, but they nimbly dodge the attack."
+                    )
+                )
+            )
+        )
+
+    private val JumpKit
+        get() = Equipment(
+            name = "Car Battery and Jumper Cables",
+            equipmentRole = EquipmentRole.OFFENSIVE,
+            actions = listOf(
+                CharacterAction(
+                    displayName = "Jumper cable whip",
+                    identifier = "action|cablewhip",
+                    description = "Whip someone with your jumper cables",
+                    actionType = CharacterActionType.DAMAGE,
+                    targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
+                    effect = DamageHealthEffect(19, 25),
+                    strings = CharacterActionStrings(
+                        actionText = "{source} whips their heavy jumper cables at {target}!",
+                        successText = "The clamps brutally connect!",
+                        missedText = "Unfortunately the clamps miss their mark.",
+                    )
+                ),
+                CharacterAction(
+                    displayName = "Shock",
+                    identifier = "action|shock",
+                    description = "Shock someone with your jumper cables",
+                    actionType = CharacterActionType.DAMAGE,
+                    targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
+                    cooldown = 3,
+                    effect = DamageHealthEffect(25, 35),
+                    strings = CharacterActionStrings(
+                        actionText = "{source} tries to clamp their jumper cables onto {target}!",
+                        successText = "They get zapped.",
+                        missedText = "It missed tho.",
+                        critText = "They get hella zapped.",
+                        triggeredText = "Their brains are scrambled!"
+                    ),
+                    triggers = {
+                        onCrit {
+                            StatModEffect(
+                                value = 25,
+                                modDuration = 3,
+                                statGetter = RPGCharacter::damageTakenScalar,
+                                attributeModifierType = AttributeModifierType.ADDITIVE,
+                                modifierName = "Critically shocked",
+                            )
+                        }
+                    }
+                )
+            )
+        )
+
+    private val PepperSpray
+        get() = Equipment(
+            name = "Pepper Spray",
+            equipmentRole = EquipmentRole.DEFENSIVE,
+            equipmentActions = listOf(
+                EquipmentAction(
+                    CharacterAction(
+                        displayName = "Spray pepper spray",
+                        identifier = "action|pepperspray",
+                        description = "Blind someone with your pepper spray",
+                        actionType = CharacterActionType.UTILITY,
+                        targetingType = TargetingType.SINGLE_TARGET,
+                        targetIntent = TargetIntent.HOSTILE,
+                        cooldown = 2,
+                        effect = StatModEffect(
+                            value = -75,
+                            modDuration = 3,
+                            statGetter = RPGCharacter::precision,
+                            attributeModifierType = AttributeModifierType.MULTIPLICATIVE,
+                            modifierName = "Blinded by pepper spray"
+                        ),
+                        strings = CharacterActionStrings(
+                            actionText = "{source} sprays pepper spray into {target}'s eyes and blinds them!",
+                            missedText = "{source} tries to spray pepper spray at {target}, but a breeze carries it away.",
+                            effectOverText = "{target} can see again."
+                        )
+                    ),
+                    actionResource = ActionResource(
+                        maxValue = 3,
+                        unitNameSingular = "spray",
+                        unitNamePlural = "sprays",
+                    )
+                )
+            )
+        )
+
+    val Pillow
+        get() = Equipment(
+            name = "Pillow",
+            equipmentRole = EquipmentRole.DEFENSIVE,
+            actions = listOf(
+                CharacterAction(
+                    displayName = "Pillow Defend",
+                    identifier = "action|pillowdefend",
+                    description = "Defend yourself with your pillow",
+                    actionType = CharacterActionType.DEFENSIVE,
+                    targetingType = TargetingType.SELF,
+                    targetIntent = TargetIntent.FRIENDLY,
+                    cooldown = 3,
+                    effect = DefendEffect(
+                        value = 15,
+                        modDuration = 3,
+                        modName = "Pillow defense",
+                        attributeModifierType = AttributeModifierType.MULTIPLICATIVE
+                    ),
+                    strings = CharacterActionStrings(
+                        actionText = "{source} holds up their pillow in front of them in a defensive pose.",
+                    )
+                ),
+                CharacterAction(
+                    displayName = "Pillow Smash",
+                    identifier = "action|pillowsmash",
+                    description = "Smack someone with your pillow",
+                    actionType = CharacterActionType.DAMAGE,
+                    targetingType = TargetingType.SINGLE_TARGET,
+                    targetIntent = TargetIntent.HOSTILE,
+                    effect = DamageHealthEffect(7, 11),
+                    strings = CharacterActionStrings(
+                        successText = "{source} swings their pillow at {target} and smacks them in the face.",
+                        missedText = "{source} swings their pillow at {target}, but misses pathetically.",
+                        critText = "{source} swings their pillow at {target}, and feathers go flying everywhere, obscuring their vision!"
+                    ),
+                    triggers = {
+                        onCrit {
+                            StatModEffect(
+                                value = -50,
+                                modDuration = 3,
+                                statGetter = RPGCharacter::precision,
+                                attributeModifierType = AttributeModifierType.MULTIPLICATIVE
+                            )
+                        }
+                    }
+
+                )
+            )
+        )
+
+    val Sandbags
+        get() = Equipment(
+            name = "Sandbags",
+            equipmentRole = EquipmentRole.DEFENSIVE,
+            equipmentActions = listOf(
+                EquipmentAction(
+                    CharacterAction(
+                        displayName = "Fortify",
+                        identifier = "action|fortify",
+                        description = "Use your sandbags to make a defensive position",
+                        cooldown = 6,
+                        actionType = CharacterActionType.DEFENSIVE,
+                        targetingType = TargetingType.SINGLE_TARGET_INCLUDING_SELF,
+                        targetIntent = TargetIntent.FRIENDLY,
+                        effect = DefendEffect(35, modDuration = 4, modName = "Sandbag Fortification"),
+                        strings = CharacterActionStrings(
+                            successText = "{source} places sandbags in a defensive position around {target}.",
+                            effectOverText = "{source}'s sandbag fortification falls apart." // TODO allow for this to happen
+                        )
+                    )
+                )
+            )
+        )
+
+
 }
 
-fun main(args: Array<String>) {
+internal fun main(args: Array<String>) {
     println("equipment roles")
     println(
         allEquipment
